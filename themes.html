@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalaayana Studios — Colour Direction Mockups</title>
+<meta name="description" content="Six colour palette directions for the Kalaayana Studios website, each shown on the real page chrome with hex values and type pairing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;600&family=Bodoni+Moda:wght@400;500&family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500&family=Jost:wght@200;300;400;500&family=Lato:wght@300;400&family=Marcellus&family=Outfit:wght@200;300;400&family=Playfair+Display:wght@400;500&family=Spectral:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Arial,sans-serif;
+  font-weight:300;-webkit-font-smoothing:antialiased}
+.page{width:min(1180px,92vw);margin:0 auto;padding:64px 0 90px}
+.page-head{border-bottom:1px solid #2a2a2e;padding-bottom:34px;margin-bottom:56px}
+.page-head h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:300;
+  font-size:clamp(2rem,4.6vw,3.2rem);margin:0 0 12px;letter-spacing:.02em}
+.page-head p{margin:0;color:#8f8a83;max-width:660px;line-height:1.7}
+.page-head .tag{font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:#c8a45c;
+  margin:0 0 16px;display:block}
+
+.mock{margin-bottom:64px;border:1px solid #26262a;background:#121215}
+.mock-head{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:baseline;
+  padding:22px 26px;border-bottom:1px solid #26262a}
+.mock-no{font-family:"Cormorant Garamond",Georgia,serif;font-size:1.6rem;color:#c8a45c;line-height:1}
+.mock-name{font-family:"Cormorant Garamond",Georgia,serif;font-size:1.6rem;line-height:1;margin:0}
+.mock-desc{color:#8f8a83;font-size:.9rem;flex:1 1 320px;line-height:1.6}
+.mock-type{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#6f6a64;
+  border:1px solid #2f2f34;padding:6px 12px;white-space:nowrap}
+
+/* ---- the preview: real site chrome, themed ---- */
+.pv{padding:0;background:var(--bg);color:var(--text);font-family:var(--sans)}
+.pv-nav{display:flex;align-items:center;justify-content:space-between;
+  padding:16px 30px;border-bottom:1px solid var(--line)}
+.pv-brand{display:flex;align-items:center;gap:10px}
+.pv-mark{width:30px;height:30px;display:grid;place-items:center;border:1px solid var(--line);
+  color:var(--accent);font-family:var(--serif);font-size:17px}
+.pv-brandtext{font-family:var(--serif);font-size:15px;letter-spacing:.2em;text-transform:uppercase;
+  line-height:1.1}
+.pv-brandtext em{display:block;font-style:normal;font-family:var(--sans);font-size:7px;
+  letter-spacing:.4em;color:var(--muted);margin-top:2px}
+.pv-links{display:flex;gap:20px}
+.pv-links span{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.pv-links span.on{color:var(--accent);border-bottom:1px solid var(--accent);padding-bottom:3px}
+
+.pv-hero{position:relative;padding:58px 30px 62px;text-align:center;overflow:hidden}
+.pv-hero::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 30%,var(--glow),transparent 68%)}
+.pv-hero > *{position:relative}
+.pv-kicker{font-size:9px;letter-spacing:.42em;text-transform:uppercase;color:var(--accent);margin:0 0 16px}
+.pv-h1{font-family:var(--serif);font-weight:var(--serifw);margin:0;letter-spacing:.1em;
+  font-size:clamp(1.5rem,3.9vw,2.9rem);line-height:1.1;color:var(--head)}
+.pv-sub{max-width:420px;margin:16px auto 0;color:var(--muted);font-size:12.5px;line-height:1.7}
+.pv-btns{display:flex;gap:10px;justify-content:center;margin-top:24px}
+.pv-btn{padding:10px 20px;font-size:9px;letter-spacing:.22em;text-transform:uppercase;
+  border:1px solid var(--accent)}
+.pv-btn.solid{background:var(--accent);color:var(--onaccent)}
+.pv-btn.ghost{color:var(--accent)}
+
+.pv-body{padding:34px 30px 40px;background:var(--surface);border-top:1px solid var(--line)}
+.pv-eyebrow{font-size:9px;letter-spacing:.36em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+.pv-h2{font-family:var(--serif);font-weight:var(--serifw);margin:0 0 22px;
+  font-size:clamp(1.2rem,2.6vw,1.9rem);color:var(--head)}
+.pv-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.pv-card{border:1px solid var(--line);background:var(--bg)}
+.pv-thumb{aspect-ratio:4/3;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,var(--sw1),var(--sw2))}
+.pv-thumb i{position:absolute;left:50%;bottom:14%;transform:translateX(-50%);
+  width:34%;height:62%;border-radius:46% 46% 12% 12%;background:var(--figure);opacity:.5}
+.pv-thumb b{position:absolute;left:50%;bottom:70%;transform:translateX(-50%);
+  width:14%;aspect-ratio:1;border-radius:50%;background:var(--figure);opacity:.55}
+.pv-cardbody{padding:14px 15px 17px}
+.pv-scale{display:inline-block;font-size:8px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--accent);border:1px solid var(--line);padding:3px 9px;margin-bottom:9px}
+.pv-cardbody h4{margin:0 0 5px;font-family:var(--serif);font-weight:var(--serifw);
+  font-size:14.5px;color:var(--head)}
+.pv-cardbody p{margin:0;color:var(--muted);font-size:10.5px;line-height:1.55}
+
+/* ---- swatches ---- */
+.sw-row{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid #26262a}
+.sw{padding:0}
+.sw-chip{height:74px;border-right:1px solid rgba(0,0,0,.25)}
+.sw-meta{padding:11px 12px 15px;border-right:1px solid #26262a;background:#141417}
+.sw-role{font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:#7d7871;
+  display:block;margin-bottom:4px}
+.sw-hex{font-family:"Archivo",monospace;font-size:11.5px;letter-spacing:.05em;color:#ddd8d1}
+.sw:last-child .sw-meta{border-right:0}
+
+@media(max-width:900px){
+  .pv-cards{grid-template-columns:1fr 1fr}
+  .pv-cards .pv-card:last-child{display:none}
+  .sw-row{grid-template-columns:repeat(4,1fr)}
+  .sw-chip{height:56px}
+}
+@media(max-width:560px){
+  .pv-links{display:none}
+  .sw-row{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="page-head">
+    <span class="tag">Kalaayana Studios</span>
+    <h1>Six colour directions</h1>
+    <p>Each mockup below renders the site's real chrome — navigation, hero, section header and
+    project cards — in a complete palette, with the seven tokens and their hex values underneath.
+    Pick a number and I'll apply it across the whole site.</p>
+  </header>
+  <div id="mocks"></div>
+</div>
+
+<script>
+var THEMES = [
+  {
+    name: "Ochre Nightfall",
+    desc: "The palette currently live. Deep roasted brown with a Mysore-gold accent — the sculptures read as lit objects against a dark gallery wall.",
+    serif: "'Cormorant Garamond',Georgia,serif", serifw: 300,
+    sans: "'Jost',Helvetica,sans-serif",
+    type: "Cormorant Garamond + Jost",
+    onaccent: "#1A1208",
+    glow: "rgba(216,162,74,.16)",
+    tokens: [
+      ["Background", "#0C0906"], ["Surface", "#17110B"], ["Line", "#3A2A16"],
+      ["Accent", "#D8A24A"], ["Accent soft", "#E9C88B"], ["Text", "#E8E0D4"], ["Muted", "#A5988A"]
+    ]
+  },
+  {
+    name: "Temple Stone",
+    desc: "Daylight direction. Warm limestone paper with terracotta and burnt gold — reads like a printed monograph and makes photographs of grey concrete pop.",
+    serif: "'Marcellus',Georgia,serif", serifw: 400,
+    sans: "'Inter',Helvetica,sans-serif",
+    type: "Marcellus + Inter",
+    onaccent: "#FFF6F0",
+    glow: "rgba(166,65,42,.10)",
+    tokens: [
+      ["Background", "#F4EFE7"], ["Surface", "#FFFFFF"], ["Line", "#DDD3C3"],
+      ["Accent", "#A6412A"], ["Accent soft", "#C98A45"], ["Text", "#241C14"], ["Muted", "#6E6255"]
+    ]
+  },
+  {
+    name: "Bronze Patina",
+    desc: "Verdigris on near-black, with an aged-bronze secondary. The most museum-like of the six — cool, quiet, and pointed at the cast-metal side of the practice.",
+    serif: "'Spectral',Georgia,serif", serifw: 300,
+    sans: "'Outfit',Helvetica,sans-serif",
+    type: "Spectral + Outfit",
+    onaccent: "#08100D",
+    glow: "rgba(121,174,153,.14)",
+    tokens: [
+      ["Background", "#0A0D0C"], ["Surface", "#121817"], ["Line", "#26332F"],
+      ["Accent", "#79AE99"], ["Accent alt", "#B8834A"], ["Text", "#E3EAE7"], ["Muted", "#8A9993"]
+    ]
+  },
+  {
+    name: "Sandalwood Maroon",
+    desc: "The traditional Mysore register — sandalwood cream, deep temple maroon, leaf gold. Closest to the painting lineage the studio descends from.",
+    serif: "'Playfair Display',Georgia,serif", serifw: 400,
+    sans: "'Lato',Helvetica,sans-serif",
+    type: "Playfair Display + Lato",
+    onaccent: "#FBF6EC",
+    glow: "rgba(110,27,35,.09)",
+    tokens: [
+      ["Background", "#F6F1E6"], ["Surface", "#FDFBF6"], ["Line", "#E0D5C0"],
+      ["Accent", "#6E1B23"], ["Accent alt", "#C9A227"], ["Text", "#2A1F1A"], ["Muted", "#7A6A5C"]
+    ]
+  },
+  {
+    name: "Concrete & Saffron",
+    desc: "Industrial and contemporary — literal concrete greys against a saffron accent. Puts the engineering of a 85-foot reinforced pour in the foreground rather than the devotion.",
+    serif: "'Archivo',Helvetica,sans-serif", serifw: 600,
+    sans: "'Archivo',Helvetica,sans-serif",
+    type: "Archivo 600 + Archivo 300",
+    onaccent: "#1A1B1D",
+    glow: "rgba(232,135,59,.15)",
+    tokens: [
+      ["Background", "#1A1B1D"], ["Surface", "#232528"], ["Line", "#383B3F"],
+      ["Accent", "#E8873B"], ["Accent alt", "#C9CDD2"], ["Text", "#EEF0F2"], ["Muted", "#969CA3"]
+    ]
+  },
+  {
+    name: "Indigo Vermilion",
+    desc: "Night-indigo ground with vermilion and brass — the boldest option. Ritual colour rather than gallery colour; strongest on a phone screen.",
+    serif: "'Bodoni Moda',Georgia,serif", serifw: 400,
+    sans: "'Jost',Helvetica,sans-serif",
+    type: "Bodoni Moda + Jost",
+    onaccent: "#FFF3F0",
+    glow: "rgba(225,72,58,.16)",
+    tokens: [
+      ["Background", "#0E1330"], ["Surface", "#161C42"], ["Line", "#2B3364"],
+      ["Accent", "#E1483A"], ["Accent alt", "#C9A66B"], ["Text", "#E7E9F5"], ["Muted", "#949BC0"]
+    ]
+  }
+];
+
+var CARDS = [
+  ["85 ft", "Hanuman, Hangluru", "Concrete reinforced. Kundapura, Karnataka."],
+  ["61 ft", "Shree Anjaneya", "Temple arch. Chikkanayakanahalli."],
+  ["Life size", "Sri Siddaramaiah", "Silicone life statue."]
+];
+
+function el(tag, cls, html) {
+  var n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (html !== undefined) n.innerHTML = html;
+  return n;
+}
+
+var host = document.getElementById('mocks');
+
+THEMES.forEach(function (t, i) {
+  var tk = {};
+  t.tokens.forEach(function (p) { tk[p[0]] = p[1]; });
+  var bg = tk['Background'], surface = tk['Surface'], line = tk['Line'];
+  var accent = tk['Accent'], alt = tk['Accent soft'] || tk['Accent alt'];
+  var text = tk['Text'], muted = tk['Muted'];
+
+  var mock = el('section', 'mock');
+
+  var head = el('div', 'mock-head');
+  head.appendChild(el('span', 'mock-no', String(i + 1).padStart(2, '0')));
+  head.appendChild(el('h2', 'mock-name', t.name));
+  head.appendChild(el('p', 'mock-desc', t.desc));
+  head.appendChild(el('span', 'mock-type', t.type));
+  mock.appendChild(head);
+
+  var pv = el('div', 'pv');
+  pv.style.cssText =
+    '--bg:' + bg + ';--surface:' + surface + ';--line:' + line + ';--accent:' + accent +
+    ';--alt:' + alt + ';--text:' + text + ';--muted:' + muted + ';--head:' + text +
+    ';--onaccent:' + t.onaccent + ';--glow:' + t.glow +
+    ';--serif:' + t.serif + ';--serifw:' + t.serifw + ';--sans:' + t.sans +
+    ';--sw1:' + alt + ';--sw2:' + bg + ';--figure:' + accent + ';';
+
+  pv.appendChild(el('div', 'pv-nav',
+    '<div class="pv-brand"><span class="pv-mark">K</span>' +
+    '<span class="pv-brandtext">Kalaayana<em>Studios</em></span></div>' +
+    '<div class="pv-links"><span class="on">Our Story</span><span>Landmarks</span>' +
+    '<span>Temple Architecture</span><span>Murals</span><span>Contact</span></div>'));
+
+  pv.appendChild(el('div', 'pv-hero',
+    '<p class="pv-kicker">Since the 19th century &middot; Five generations</p>' +
+    '<h3 class="pv-h1">KALAAYANA STUDIOS</h3>' +
+    '<p class="pv-sub">Monumental sculpture, temple architecture and the living continuity ' +
+    'of a Mysore artistic lineage.</p>' +
+    '<div class="pv-btns"><span class="pv-btn solid">View Major Projects</span>' +
+    '<span class="pv-btn ghost">Commission a Work</span></div>'));
+
+  var cardsHtml = CARDS.map(function (c) {
+    return '<article class="pv-card"><div class="pv-thumb"><b></b><i></i></div>' +
+      '<div class="pv-cardbody"><span class="pv-scale">' + c[0] + '</span>' +
+      '<h4>' + c[1] + '</h4><p>' + c[2] + '</p></div></article>';
+  }).join('');
+
+  pv.appendChild(el('div', 'pv-body',
+    '<p class="pv-eyebrow">Our Major Projects</p>' +
+    '<h3 class="pv-h2">Monumental Landmarks</h3>' +
+    '<div class="pv-cards">' + cardsHtml + '</div>'));
+
+  mock.appendChild(pv);
+
+  var row = el('div', 'sw-row');
+  t.tokens.forEach(function (p) {
+    var sw = el('div', 'sw');
+    var chip = el('div', 'sw-chip');
+    chip.style.background = p[1];
+    sw.appendChild(chip);
+    sw.appendChild(el('div', 'sw-meta',
+      '<span class="sw-role">' + p[0] + '</span><span class="sw-hex">' + p[1] + '</span>'));
+    row.appendChild(sw);
+  });
+  mock.appendChild(row);
+
+  host.appendChild(mock);
+});
+</script>
+</body>
+</html>

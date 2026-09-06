@@ -16,6 +16,17 @@ architecture and portrait work — built from the studio's profile deck.
 | Murals | 9 relief panels |
 | Contact | Address, email, Instagram, phone numbers |
 
+## Colour directions
+
+`themes.html` presents six complete palette directions — Ochre Nightfall (live),
+Temple Stone, Bronze Patina, Sandalwood Maroon, Concrete & Saffron and Indigo
+Vermilion — each rendered on the real page chrome with its seven tokens, hex
+values and type pairing. Live at `/KAlAAYANA/themes.html`.
+
+Applying one means replacing the seven custom properties at the top of
+`assets/css/style.css` (`--ink`, `--ink-2`, `--panel`, `--line`, `--gold`,
+`--gold-soft`, `--text`, `--muted`) plus the font links in `index.html`.
+
 ## Images
 
 Every image in `assets/img/` is a generated SVG **placeholder**. Replace each file
