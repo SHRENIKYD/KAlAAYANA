@@ -25,8 +25,9 @@ muted, set in Cinzel and Jost.
 `themes.html` presents eight complete palette directions — Ochre Nightfall,
 Temple Stone, Bronze Patina, Sandalwood Maroon, Concrete & Saffron,
 Indigo Vermilion, Slate & Bone and Bone on Charcoal (live) — each rendered on the real
-page chrome with its tokens, hex values and type pairing. Live at
-`/KAlAAYANA/themes.html`.
+page chrome with its tokens, hex values and type pairing. Live at `/themes.html`; it is marked `noindex`
+and kept out of the sitemap, being an internal design tool rather than public
+content.
 
 It also carries twelve lettering directions — inscriptional (Cinzel), slanted
 serifs (Cormorant Garamond, Playfair Display, DM Serif Display and EB Garamond
@@ -87,7 +88,36 @@ not accessible by integration`):
 2. **Settings → Actions → General → Workflow permissions: `Read and write permissions`**
 3. Re-run the **Deploy site to GitHub Pages** workflow.
 
-The site then serves from `https://shrenikyd.github.io/KAlAAYANA/`.
+The site serves from `https://kalaayanastudios.com/`.
+
+## Custom domain
+
+The repo root carries a `CNAME` file containing `kalaayanastudios.com`, and
+`index.html` declares that origin in its canonical, Open Graph and Twitter
+tags. Two steps happen outside the repo:
+
+**1. Repository — Settings → Pages → Custom domain:** enter
+`kalaayanastudios.com`, save, and tick *Enforce HTTPS* once the certificate
+has been issued (this can take up to an hour after DNS resolves).
+
+**2. DNS at the registrar for `kalaayanastudios.com`:**
+
+| Type | Name | Value |
+| --- | --- | --- |
+| A | `@` | `185.199.108.153` |
+| A | `@` | `185.199.109.153` |
+| A | `@` | `185.199.110.153` |
+| A | `@` | `185.199.111.153` |
+| AAAA | `@` | `2606:50c0:8000::153` |
+| AAAA | `@` | `2606:50c0:8001::153` |
+| AAAA | `@` | `2606:50c0:8002::153` |
+| AAAA | `@` | `2606:50c0:8003::153` |
+| CNAME | `www` | `shrenikyd.github.io.` |
+
+Once the custom domain is set, GitHub redirects
+`shrenikyd.github.io/KAlAAYANA/` to the apex domain automatically, so existing
+links keep working. Every asset path in the site is relative, so the pages
+serve correctly from both the old project subpath and the new domain root.
 
 ## Stack
 
