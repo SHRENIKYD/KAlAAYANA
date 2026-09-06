@@ -144,7 +144,7 @@ body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Aria
 <div class="page">
   <header class="page-head">
     <span class="tag">Kalaayana Studios</span>
-    <h1>Six colour directions</h1>
+    <h1>Seven colour directions</h1>
     <p>Each mockup below renders the site's real chrome — navigation, hero, section header and
     project cards — in a complete palette, with the seven tokens and their hex values underneath.
     Pick a number and I'll apply it across the whole site.</p>
@@ -156,8 +156,8 @@ body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Aria
     <h2>Twelve lettering directions</h2>
     <p>Slanted serifs, calligraphic scripts, inscriptional capitals and Indic display faces —
     each shown as the wordmark, the header lockup and a section title on the studio's dark
-    ground. Type and palette are independent: any face below can sit on any of the six
-    palettes above. Use the selector to try one on all six mockups.</p>
+    ground. Type and palette are independent: any face below can sit on any of the seven
+    palettes above. Use the selector to try one on all seven mockups.</p>
     <div class="applybar">
       <label for="fontpick">Apply to the mockups above</label>
       <select id="fontpick"></select>
@@ -245,6 +245,19 @@ var THEMES = [
     tokens: [
       ["Background", "#0E1330"], ["Surface", "#161C42"], ["Line", "#2B3364"],
       ["Accent", "#E1483A"], ["Accent alt", "#C9A66B"], ["Text", "#E7E9F5"], ["Muted", "#949BC0"]
+    ]
+  },
+  {
+    name: "Slate & Bone",
+    desc: "Your Coolors palette. Charcoal ground, a slate blue-grey surface that cools the greys in concrete photography, and a khaki accent one shade off the logo's own gold — the closest of the seven to the actual brand mark.",
+    serif: "'Cinzel',Georgia,serif", serifw: 400,
+    sans: "'Jost',Helvetica,sans-serif",
+    type: "Cinzel + Jost",
+    onaccent: "#0A0908",
+    glow: "rgba(198,172,143,.15)",
+    tokens: [
+      ["Background", "#0A0908"], ["Surface", "#22333B"], ["Line", "#5E503F"],
+      ["Accent", "#C6AC8F"], ["Accent alt", "#EAE0D5"], ["Text", "#EAE0D5"], ["Muted", "#AC957B"]
     ]
   }
 ];

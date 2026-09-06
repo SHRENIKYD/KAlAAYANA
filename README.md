@@ -18,17 +18,23 @@ architecture and portrait work — built from the studio's profile deck.
 
 ## Colour directions
 
-`themes.html` presents six complete palette directions — Ochre Nightfall (live),
-Temple Stone, Bronze Patina, Sandalwood Maroon, Concrete & Saffron and Indigo
-Vermilion — each rendered on the real page chrome with its seven tokens, hex
-values and type pairing. Live at `/KAlAAYANA/themes.html`.
+`themes.html` presents seven complete palette directions — Ochre Nightfall
+(live), Temple Stone, Bronze Patina, Sandalwood Maroon, Concrete & Saffron,
+Indigo Vermilion and Slate & Bone — each rendered on the real page chrome with
+its seven tokens, hex values and type pairing. Live at `/KAlAAYANA/themes.html`.
 
 It also carries twelve lettering directions — inscriptional (Cinzel), slanted
 serifs (Cormorant Garamond, Playfair Display, DM Serif Display and EB Garamond
 italics), calligraphic scripts (Tangerine, Great Vibes, Pinyon Script,
 Parisienne), ornamental (Italiana) and Indic display faces (Rozha One, Yatra
 One). Type and palette are independent; a selector on the page applies any face
-to all six palette mockups at once.
+to all seven palette mockups at once.
+
+Slate & Bone comes from a five-colour Coolors palette
+(`0a0908-22333b-eae0d5-c6ac8f-5e503f`). Five colours cover six of the seven
+roles, so `muted` is derived as a 75/25 mix of the khaki and the brown
+(`#AC957B`) — chosen to clear 4.5:1 against both the background and the slate
+surface.
 
 Applying one means replacing the seven custom properties at the top of
 `assets/css/style.css` (`--ink`, `--ink-2`, `--panel`, `--line`, `--gold`,
