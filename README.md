@@ -18,9 +18,13 @@ architecture and portrait work — built from the studio's profile deck.
 
 ## Colour directions
 
-`themes.html` presents eight complete palette directions — Ochre Nightfall
-(live), Temple Stone, Bronze Patina, Sandalwood Maroon, Concrete & Saffron,
-Indigo Vermilion, Slate & Bone and Bone on Charcoal — each rendered on the real
+The site runs **Bone on Charcoal** (theme 08): `#0A0908` on every surface,
+`#22333B` cards, `#5E503F` rules, `#C6AC8F` accent, `#EAE0D5` text, `#AC957B`
+muted, set in Cinzel and Jost.
+
+`themes.html` presents eight complete palette directions — Ochre Nightfall,
+Temple Stone, Bronze Patina, Sandalwood Maroon, Concrete & Saffron,
+Indigo Vermilion, Slate & Bone and Bone on Charcoal (live) — each rendered on the real
 page chrome with its tokens, hex values and type pairing. Live at
 `/KAlAAYANA/themes.html`.
 
@@ -37,9 +41,11 @@ roles, so `muted` is derived as a 75/25 mix of the khaki and the brown
 (`#AC957B`) — chosen to clear 4.5:1 against both the background and the slate
 surface.
 
-Applying one means replacing the seven custom properties at the top of
+Applying one means replacing the custom properties at the top of
 `assets/css/style.css` (`--ink`, `--ink-2`, `--panel`, `--line`, `--gold`,
-`--gold-soft`, `--text`, `--muted`) plus the font links in `index.html`.
+`--gold-soft`, `--text`, `--muted`, `--on-accent`, `--serif`) plus the font
+link in `index.html`, then regenerating the placeholder SVGs in the new
+palette.
 
 ## Images
 
