@@ -7,7 +7,8 @@
 <meta name="description" content="Six colour palette directions for the Kalaayana Studios website, each shown on the real page chrome with hex values and type pairing.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;600&family=Bodoni+Moda:wght@400;500&family=Cormorant+Garamond:wght@300;400;600&family=Inter:wght@300;400;500&family=Jost:wght@200;300;400;500&family=Lato:wght@300;400&family=Marcellus&family=Outfit:wght@200;300;400&family=Playfair+Display:wght@400;500&family=Spectral:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;600&family=Bodoni+Moda:wght@400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,500&family=Inter:wght@300;400;500&family=Jost:wght@200;300;400;500&family=Lato:wght@300;400&family=Marcellus&family=Outfit:wght@200;300;400&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Spectral:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=DM+Serif+Display:ital@0;1&family=EB+Garamond:ital,wght@1,400;1,500&family=Great+Vibes&family=Italiana&family=Parisienne&family=Pinyon+Script&family=Rozha+One&family=Tangerine:wght@400;700&family=Yatra+One&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Arial,sans-serif;
@@ -49,7 +50,7 @@ body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Aria
   background:radial-gradient(ellipse at 50% 30%,var(--glow),transparent 68%)}
 .pv-hero > *{position:relative}
 .pv-kicker{font-size:9px;letter-spacing:.42em;text-transform:uppercase;color:var(--accent);margin:0 0 16px}
-.pv-h1{font-family:var(--serif);font-weight:var(--serifw);margin:0;letter-spacing:.1em;
+.pv-h1{font-family:var(--serif);font-weight:var(--serifw);font-style:var(--serifstyle,normal);margin:0;letter-spacing:.1em;
   font-size:clamp(1.5rem,3.9vw,2.9rem);line-height:1.1;color:var(--head)}
 .pv-sub{max-width:420px;margin:16px auto 0;color:var(--muted);font-size:12.5px;line-height:1.7}
 .pv-btns{display:flex;gap:10px;justify-content:center;margin-top:24px}
@@ -60,7 +61,7 @@ body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Aria
 
 .pv-body{padding:34px 30px 40px;background:var(--surface);border-top:1px solid var(--line)}
 .pv-eyebrow{font-size:9px;letter-spacing:.36em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
-.pv-h2{font-family:var(--serif);font-weight:var(--serifw);margin:0 0 22px;
+.pv-h2{font-family:var(--serif);font-weight:var(--serifw);font-style:var(--serifstyle,normal);margin:0 0 22px;
   font-size:clamp(1.2rem,2.6vw,1.9rem);color:var(--head)}
 .pv-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .pv-card{border:1px solid var(--line);background:var(--bg)}
@@ -73,7 +74,7 @@ body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Aria
 .pv-cardbody{padding:14px 15px 17px}
 .pv-scale{display:inline-block;font-size:8px;letter-spacing:.24em;text-transform:uppercase;
   color:var(--accent);border:1px solid var(--line);padding:3px 9px;margin-bottom:9px}
-.pv-cardbody h4{margin:0 0 5px;font-family:var(--serif);font-weight:var(--serifw);
+.pv-cardbody h4{margin:0 0 5px;font-family:var(--serif);font-weight:var(--serifw);font-style:var(--serifstyle,normal);
   font-size:14.5px;color:var(--head)}
 .pv-cardbody p{margin:0;color:var(--muted);font-size:10.5px;line-height:1.55}
 
@@ -86,6 +87,46 @@ body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Aria
   display:block;margin-bottom:4px}
 .sw-hex{font-family:"Archivo",monospace;font-size:11.5px;letter-spacing:.05em;color:#ddd8d1}
 .sw:last-child .sw-meta{border-right:0}
+
+/* ---- type specimens ---- */
+.sec-head{border-top:1px solid #2a2a2e;padding-top:52px;margin:96px 0 44px}
+.sec-head h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:300;
+  font-size:clamp(1.7rem,3.8vw,2.6rem);margin:0 0 12px}
+.sec-head p{margin:0;color:#8f8a83;max-width:680px;line-height:1.7}
+.sec-head .tag{font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:#c8a45c;
+  margin:0 0 14px;display:block}
+
+.applybar{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:26px 0 0;
+  border:1px solid #26262a;background:#141417;padding:16px 18px}
+.applybar label{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7d7871}
+.applybar select{background:#0d0d0f;color:#e9e6e1;border:1px solid #33333a;padding:9px 12px;
+  font-family:inherit;font-size:13px;min-width:230px}
+.applybar .hint{color:#6f6a64;font-size:12px}
+
+.type-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+.spec{border:1px solid #26262a;background:#121215;display:flex;flex-direction:column}
+.spec-head{padding:16px 20px;border-bottom:1px solid #26262a;display:flex;
+  align-items:baseline;gap:12px;flex-wrap:wrap}
+.spec-cat{font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:#0d0d0f;
+  background:#c8a45c;padding:4px 8px}
+.spec-cat.script{background:#c98a9a}
+.spec-cat.indic{background:#8fb98f}
+.spec-name{font-family:"Cormorant Garamond",Georgia,serif;font-size:1.25rem;margin:0;flex:1}
+.spec-note{color:#8f8a83;font-size:12px;line-height:1.6;padding:0 20px;margin:14px 0 0}
+.spec-stage{background:#0C0906;border-top:1px solid #26262a;margin-top:16px;
+  padding:30px 20px 26px;text-align:center;flex:1}
+.spec-word{color:#E8E0D4;line-height:1.15;margin:0;font-size:clamp(2.2rem,5.4vw,3.4rem)}
+.spec-lock{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:18px}
+.spec-mark{width:26px;height:26px;display:grid;place-items:center;border:1px solid #3A2A16;
+  color:#D8A24A;font-size:15px}
+.spec-lockname{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#A5988A;
+  font-family:"Jost",sans-serif}
+.spec-title{color:#E9C88B;margin:22px 0 0;font-size:clamp(1.1rem,2.4vw,1.5rem);line-height:1.3}
+.spec-body{color:#A5988A;font-size:11.5px;line-height:1.7;margin:12px auto 0;max-width:330px}
+.spec-pair{padding:13px 20px;border-top:1px solid #26262a;font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:#6f6a64;background:#141417}
+
+@media(max-width:760px){ .type-grid{grid-template-columns:1fr} }
 
 @media(max-width:900px){
   .pv-cards{grid-template-columns:1fr 1fr}
@@ -109,6 +150,21 @@ body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Aria
     Pick a number and I'll apply it across the whole site.</p>
   </header>
   <div id="mocks"></div>
+
+  <header class="sec-head">
+    <span class="tag">Type</span>
+    <h2>Twelve lettering directions</h2>
+    <p>Slanted serifs, calligraphic scripts, inscriptional capitals and Indic display faces —
+    each shown as the wordmark, the header lockup and a section title on the studio's dark
+    ground. Type and palette are independent: any face below can sit on any of the six
+    palettes above. Use the selector to try one on all six mockups.</p>
+    <div class="applybar">
+      <label for="fontpick">Apply to the mockups above</label>
+      <select id="fontpick"></select>
+      <span class="hint">Changes the display face only — body text stays as each palette specifies.</span>
+    </div>
+  </header>
+  <div class="type-grid" id="specs"></div>
 </div>
 
 <script>
@@ -272,6 +328,144 @@ THEMES.forEach(function (t, i) {
   mock.appendChild(row);
 
   host.appendChild(mock);
+});
+
+/* ---------- type specimens ---------- */
+var FACES = [
+  {
+    name: "Cinzel", cat: "Inscriptional", css: "'Cinzel',Georgia,serif", weight: 400,
+    caps: true, size: 1.0,
+    note: "Roman capitals cut for stone — the letterforms are literally carved, which no other face here can claim. The most defensible choice for a sculpture studio.",
+    pair: "Pairs with Jost or Inter"
+  },
+  {
+    name: "Cormorant Garamond Italic", cat: "Slanted serif", css: "'Cormorant Garamond',Georgia,serif",
+    weight: 300, italic: true, size: 1.12,
+    note: "A calligraphic slant with very fine strokes. Keeps the restraint of the live site while adding a written, hand-drawn quality.",
+    pair: "Pairs with Jost"
+  },
+  {
+    name: "Playfair Display Italic", cat: "Slanted serif", css: "'Playfair Display',Georgia,serif",
+    weight: 400, italic: true, size: 1.0,
+    note: "High-contrast editorial slant — thick stems against hairlines. Reads as a magazine feature about the studio rather than the studio's own voice.",
+    pair: "Pairs with Lato or Inter"
+  },
+  {
+    name: "DM Serif Display Italic", cat: "Slanted serif", css: "'DM Serif Display',Georgia,serif",
+    weight: 400, italic: true, size: 1.0,
+    note: "Heavier and rounder than Playfair, with a warmer slant. Holds up better at small sizes and on phone screens.",
+    pair: "Pairs with Archivo or Inter"
+  },
+  {
+    name: "EB Garamond Italic", cat: "Slanted serif", css: "'EB Garamond',Georgia,serif",
+    weight: 400, italic: true, size: 1.06,
+    note: "The bookish option — a warm, old-style slant with none of the fashion-magazine sharpness. Quiet and scholarly.",
+    pair: "Pairs with Inter or Lato"
+  },
+  {
+    name: "Italiana", cat: "Ornamental", css: "'Italiana',Georgia,serif",
+    weight: 400, caps: true, size: 1.05,
+    note: "Extremely fine, wide-set capitals. Luxurious and gallery-like, but needs generous letter-spacing and fails below about 16px.",
+    pair: "Pairs with Jost 200"
+  },
+  {
+    name: "Tangerine", cat: "Calligraphic script", css: "'Tangerine',cursive",
+    weight: 700, size: 1.9,
+    note: "A fine pointed-pen calligraphy. Beautiful for the wordmark alone; far too delicate for navigation or any running text.",
+    pair: "Wordmark only — set body in Jost", script: true
+  },
+  {
+    name: "Great Vibes", cat: "Calligraphic script", css: "'Great Vibes',cursive",
+    weight: 400, size: 1.45,
+    note: "Formal flowing script with long connecting strokes. The most conventionally elegant of the cursives, and the most legible.",
+    pair: "Wordmark only — set body in Inter", script: true
+  },
+  {
+    name: "Pinyon Script", cat: "Calligraphic script", css: "'Pinyon Script',cursive",
+    weight: 400, size: 1.4,
+    note: "Copperplate engraving — the lettering of an invitation or a certificate. Suits the Gold Medal, five-generation part of the story.",
+    pair: "Wordmark only — set body in Lato", script: true
+  },
+  {
+    name: "Parisienne", cat: "Calligraphic script", css: "'Parisienne',cursive",
+    weight: 400, size: 1.5,
+    note: "A lighter, less formal hand — closer to signed handwriting than to calligraphy. The friendliest option here.",
+    pair: "Wordmark only — set body in Outfit", script: true
+  },
+  {
+    name: "Rozha One", cat: "Indic display", css: "'Rozha One',Georgia,serif",
+    weight: 400, size: 1.0,
+    note: "High-contrast display drawn for Devanagari alongside Latin, so it carries the letterform logic of Indian signage. Bold and unmistakably local.",
+    pair: "Pairs with Mukta or Inter", indic: true
+  },
+  {
+    name: "Yatra One", cat: "Indic display", css: "'Yatra One',Georgia,serif",
+    weight: 400, size: 1.02,
+    note: "Brush-drawn Devanagari display — the register of hand-painted temple and street lettering. The most distinctive and the least neutral.",
+    pair: "Pairs with Jost", indic: true
+  }
+];
+
+var specHost = document.getElementById('specs');
+
+FACES.forEach(function (f) {
+  var stack = f.css + (f.italic ? '' : '');
+  var fs = 'font-family:' + f.css + ';font-weight:' + f.weight +
+    (f.italic ? ';font-style:italic' : '') + ';';
+
+  var spec = el('article', 'spec');
+
+  var catCls = 'spec-cat' + (f.script ? ' script' : f.indic ? ' indic' : '');
+  var head = el('div', 'spec-head');
+  head.appendChild(el('span', catCls, f.cat));
+  head.appendChild(el('h3', 'spec-name', f.name));
+  spec.appendChild(head);
+
+  spec.appendChild(el('p', 'spec-note', f.note));
+
+  var word = f.caps ? 'KALAAYANA' : 'Kalaayana';
+  var title = f.caps ? 'MONUMENTAL LANDMARKS' : 'Monumental Landmarks';
+  var stage = el('div', 'spec-stage',
+    '<p class="spec-word" style="' + fs + 'font-size:calc(' + f.size + ' * clamp(2.2rem,5.4vw,3.4rem));' +
+      (f.caps ? 'letter-spacing:.08em;' : '') + '">' + word + '</p>' +
+    '<div class="spec-lock"><span class="spec-mark" style="' + fs + '">K</span>' +
+      '<span class="spec-lockname">Kalaayana Studios</span></div>' +
+    '<p class="spec-title" style="' + fs + (f.caps ? 'letter-spacing:.1em;' : '') + '">' + title + '</p>' +
+    '<p class="spec-body">Concrete reinforced Hanuman statue, eighty-five feet, ' +
+      'at Hangluru, Kundapura, Karnataka.</p>');
+  spec.appendChild(stage);
+
+  spec.appendChild(el('div', 'spec-pair', f.pair));
+  specHost.appendChild(spec);
+});
+
+/* ---------- apply a face to all six mockups ---------- */
+var picker = document.getElementById('fontpick');
+var defaultOpt = document.createElement('option');
+defaultOpt.value = '';
+defaultOpt.textContent = "Each palette's own face";
+picker.appendChild(defaultOpt);
+FACES.forEach(function (f, i) {
+  var o = document.createElement('option');
+  o.value = String(i);
+  o.textContent = f.name;
+  picker.appendChild(o);
+});
+
+picker.addEventListener('change', function () {
+  var previews = document.querySelectorAll('.pv');
+  previews.forEach(function (pv, i) {
+    if (picker.value === '') {
+      pv.style.setProperty('--serif', THEMES[i].serif);
+      pv.style.setProperty('--serifw', THEMES[i].serifw);
+      pv.style.setProperty('--serifstyle', 'normal');
+    } else {
+      var f = FACES[+picker.value];
+      pv.style.setProperty('--serif', f.css);
+      pv.style.setProperty('--serifw', f.weight);
+      pv.style.setProperty('--serifstyle', f.italic ? 'italic' : 'normal');
+    }
+  });
 });
 </script>
 </body>

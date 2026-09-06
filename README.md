@@ -23,6 +23,13 @@ Temple Stone, Bronze Patina, Sandalwood Maroon, Concrete & Saffron and Indigo
 Vermilion — each rendered on the real page chrome with its seven tokens, hex
 values and type pairing. Live at `/KAlAAYANA/themes.html`.
 
+It also carries twelve lettering directions — inscriptional (Cinzel), slanted
+serifs (Cormorant Garamond, Playfair Display, DM Serif Display and EB Garamond
+italics), calligraphic scripts (Tangerine, Great Vibes, Pinyon Script,
+Parisienne), ornamental (Italiana) and Indic display faces (Rozha One, Yatra
+One). Type and palette are independent; a selector on the page applies any face
+to all six palette mockups at once.
+
 Applying one means replacing the seven custom properties at the top of
 `assets/css/style.css` (`--ink`, `--ink-2`, `--panel`, `--line`, `--gold`,
 `--gold-soft`, `--text`, `--muted`) plus the font links in `index.html`.
