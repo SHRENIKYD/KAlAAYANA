@@ -30,9 +30,11 @@ jobs:
       - name: Stamp asset URLs with the commit SHA
         run: |
           sha="${GITHUB_SHA::8}"
-          sed -i "s/?v=dev/?v=$sha/g" index.html
+          for f in *.html; do
+            sed -i "s/?v=dev/?v=$sha/g" "$f"
+          done
           echo "Stamped asset URLs with $sha"
-          grep -n '?v=' index.html
+          grep -n '?v=' *.html || echo "(no versioned asset URLs in this build)"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
