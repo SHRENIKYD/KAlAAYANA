@@ -64,7 +64,7 @@ body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Aria
 .pv-h2{font-family:var(--serif);font-weight:var(--serifw);font-style:var(--serifstyle,normal);margin:0 0 22px;
   font-size:clamp(1.2rem,2.6vw,1.9rem);color:var(--head)}
 .pv-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.pv-card{border:1px solid var(--line);background:var(--bg)}
+.pv-card{border:1px solid var(--line);background:var(--card,var(--bg))}
 .pv-thumb{aspect-ratio:4/3;position:relative;overflow:hidden;
   background:linear-gradient(160deg,var(--sw1),var(--sw2))}
 .pv-thumb i{position:absolute;left:50%;bottom:14%;transform:translateX(-50%);
@@ -79,7 +79,8 @@ body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Aria
 .pv-cardbody p{margin:0;color:var(--muted);font-size:10.5px;line-height:1.55}
 
 /* ---- swatches ---- */
-.sw-row{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid #26262a}
+.sw-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));
+  border-top:1px solid #26262a}
 .sw{padding:0}
 .sw-chip{height:74px;border-right:1px solid rgba(0,0,0,.25)}
 .sw-meta{padding:11px 12px 15px;border-right:1px solid #26262a;background:#141417}
@@ -131,12 +132,10 @@ body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Aria
 @media(max-width:900px){
   .pv-cards{grid-template-columns:1fr 1fr}
   .pv-cards .pv-card:last-child{display:none}
-  .sw-row{grid-template-columns:repeat(4,1fr)}
   .sw-chip{height:56px}
 }
 @media(max-width:560px){
   .pv-links{display:none}
-  .sw-row{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -144,7 +143,7 @@ body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Aria
 <div class="page">
   <header class="page-head">
     <span class="tag">Kalaayana Studios</span>
-    <h1>Seven colour directions</h1>
+    <h1>Eight colour directions</h1>
     <p>Each mockup below renders the site's real chrome — navigation, hero, section header and
     project cards — in a complete palette, with the seven tokens and their hex values underneath.
     Pick a number and I'll apply it across the whole site.</p>
@@ -156,8 +155,8 @@ body{margin:0;background:#0d0d0f;color:#e9e6e1;font-family:"Jost",Helvetica,Aria
     <h2>Twelve lettering directions</h2>
     <p>Slanted serifs, calligraphic scripts, inscriptional capitals and Indic display faces —
     each shown as the wordmark, the header lockup and a section title on the studio's dark
-    ground. Type and palette are independent: any face below can sit on any of the seven
-    palettes above. Use the selector to try one on all seven mockups.</p>
+    ground. Type and palette are independent: any face below can sit on any of the eight
+    palettes above. Use the selector to try one on all eight mockups.</p>
     <div class="applybar">
       <label for="fontpick">Apply to the mockups above</label>
       <select id="fontpick"></select>
@@ -259,6 +258,20 @@ var THEMES = [
       ["Background", "#0A0908"], ["Surface", "#22333B"], ["Line", "#5E503F"],
       ["Accent", "#C6AC8F"], ["Accent alt", "#EAE0D5"], ["Text", "#EAE0D5"], ["Muted", "#AC957B"]
     ]
+  },
+  {
+    name: "Bone on Charcoal",
+    desc: "The same palette with #0A0908 carried across the entire page — no alternating band, one uninterrupted ground from the hero to the footer. The slate is demoted to the cards alone, so it lifts each project a step off the black instead of colouring half the page.",
+    serif: "'Cinzel',Georgia,serif", serifw: 400,
+    sans: "'Jost',Helvetica,sans-serif",
+    type: "Cinzel + Jost",
+    onaccent: "#0A0908",
+    glow: "rgba(198,172,143,.13)",
+    tokens: [
+      ["Background", "#0A0908"], ["Surface", "#0A0908"], ["Card", "#22333B"],
+      ["Line", "#5E503F"], ["Accent", "#C6AC8F"], ["Accent alt", "#EAE0D5"],
+      ["Text", "#EAE0D5"], ["Muted", "#AC957B"]
+    ]
   }
 ];
 
@@ -282,7 +295,7 @@ THEMES.forEach(function (t, i) {
   t.tokens.forEach(function (p) { tk[p[0]] = p[1]; });
   var bg = tk['Background'], surface = tk['Surface'], line = tk['Line'];
   var accent = tk['Accent'], alt = tk['Accent soft'] || tk['Accent alt'];
-  var text = tk['Text'], muted = tk['Muted'];
+  var text = tk['Text'], muted = tk['Muted'], card = tk['Card'] || bg;
 
   var mock = el('section', 'mock');
 
@@ -298,8 +311,8 @@ THEMES.forEach(function (t, i) {
     '--bg:' + bg + ';--surface:' + surface + ';--line:' + line + ';--accent:' + accent +
     ';--alt:' + alt + ';--text:' + text + ';--muted:' + muted + ';--head:' + text +
     ';--onaccent:' + t.onaccent + ';--glow:' + t.glow +
-    ';--serif:' + t.serif + ';--serifw:' + t.serifw + ';--sans:' + t.sans +
-    ';--sw1:' + alt + ';--sw2:' + bg + ';--figure:' + accent + ';';
+    ';--card:' + card + ';--serif:' + t.serif + ';--serifw:' + t.serifw + ';--sans:' + t.sans +
+    ';--sw1:' + alt + ';--sw2:' + card + ';--figure:' + accent + ';';
 
   pv.appendChild(el('div', 'pv-nav',
     '<div class="pv-brand"><span class="pv-mark">K</span>' +
