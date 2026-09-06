@@ -32,7 +32,17 @@ python3 -m http.server 8000
 ## Hosting
 
 Pushes to `main` (and the development branch) run `.github/workflows/deploy-pages.yml`,
-which enables GitHub Pages if needed and publishes the repository root.
+which uploads the repository root and deploys it to GitHub Pages.
+
+**One-time setup by a repository admin** — the workflow's `GITHUB_TOKEN` is not
+allowed to create the Pages site itself (`Create Pages site failed. Error: Resource
+not accessible by integration`):
+
+1. **Settings → Pages → Build and deployment → Source: `GitHub Actions`**
+2. **Settings → Actions → General → Workflow permissions: `Read and write permissions`**
+3. Re-run the **Deploy site to GitHub Pages** workflow.
+
+The site then serves from `https://shrenikyd.github.io/KAlAAYANA/`.
 
 ## Stack
 
