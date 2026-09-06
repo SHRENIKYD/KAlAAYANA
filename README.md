@@ -36,9 +36,23 @@ Applying one means replacing the seven custom properties at the top of
 
 ## Images
 
-Every image in `assets/img/` is a generated SVG **placeholder**. Replace each file
-with the real photograph of the same name (any web format) and update the `src`
-attribute in `index.html` if the extension changes.
+Real assets now in place:
+
+| File | Use |
+| --- | --- |
+| `logo.png` | Full lockup — Kannada mark over KALAAYANA STUDIOS. Hero centrepiece. |
+| `logo-mark.png` | Kannada mark alone. Header, beside the wordmark. |
+| `favicon.png` | The mark on the ink ground, 96px. |
+| `hero-hanuman.jpg` | Hanuman under bamboo scaffolding. Full-bleed hero. |
+
+Both logo files were keyed out of a JPEG that had a transparency checkerboard
+baked in: the checkerboard is perfectly neutral (R=G=B) while the artwork is
+warm, so alpha is derived from saturation and the artwork is flattened to its
+own brand gold, `#AC9D7E`.
+
+Every remaining image in `assets/img/` is a generated SVG **placeholder**.
+Replace each file with the real photograph of the same name (any web format)
+and update the `src` attribute in `index.html` if the extension changes.
 
 ## Local preview
 
