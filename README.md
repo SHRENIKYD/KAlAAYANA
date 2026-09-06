@@ -119,6 +119,14 @@ Once the custom domain is set, GitHub redirects
 links keep working. Every asset path in the site is relative, so the pages
 serve correctly from both the old project subpath and the new domain root.
 
+## Cache busting
+
+`index.html` references its CSS and JS as `?v=dev`. The deploy workflow
+rewrites that to the first eight characters of the commit SHA before uploading
+the artifact, so every deploy serves fresh asset URLs and browsers cannot hold
+a stale stylesheet. Keep `?v=dev` in the committed file — it is the marker the
+workflow substitutes, and it means local preview is never cached either.
+
 ## Stack
 
 Plain HTML, CSS and vanilla JavaScript — no build step. Scroll effects use
