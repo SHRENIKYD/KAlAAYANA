@@ -47,6 +47,12 @@ is a holding page. `1.0.0` marks the launch of the full site.
   Latin wordmark — two readings of the same name in a 96px bar. The mark is
   gone; `KALAAYANA / STUDIOS` remains. The Kannada logo still leads the hero
   and the holding page, where it has room to be read.
+- The favicon is a bone circle carrying the leading glyph of the Kannada
+  wordmark in ink, cut from `logo.png` itself rather than redrawn. It was a
+  dark square holding the whole wordmark, which is 2.2x wider than it is tall
+  and rendered as an unreadable smudge at the 16px browsers actually draw.
+  One glyph reads at every size, and a light mark stands out against dark
+  browser chrome.
 - The hero photograph is sharper. It was 876x1558 — the resolution of the file
   originally supplied — stretched across 2880 device pixels on a 1440px screen
   at 2x, a 3.3x upscale, which is what made it look soft. The company profile
