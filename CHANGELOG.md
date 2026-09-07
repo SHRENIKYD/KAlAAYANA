@@ -43,6 +43,15 @@ is a holding page. `1.0.0` marks the launch of the full site.
   columns, which under the 3:4 frame rendered a 1218×1624 image; the flag was a
   leftover from the 4:3 placeholder grid and every photograph is portrait. All
   29 cards now share one frame.
+- The header carries one name. It showed the Kannada logo mark beside the
+  Latin wordmark — two readings of the same name in a 96px bar. The mark is
+  gone; `KALAAYANA / STUDIOS` remains. The Kannada logo still leads the hero
+  and the holding page, where it has room to be read.
+- The native scrollbar is hidden on both mobile and desktop. The 2px progress
+  bar at the top of the page already reports scroll position, so the two were
+  redundant. Scrolling is untouched — wheel, touch, keyboard and anchor links
+  all work, and the progress bar tracks position exactly (verified at 50% and
+  at the foot of the page, at 1440px and 390px).
 - `scripts/check.py` validates project images against `src/images/projects/`
   rather than the build output, since they are build inputs that the pipeline
   emits as hashed variants.
@@ -50,6 +59,7 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ### Removed
 - The 29 placeholder SVGs, now unreferenced.
 - `story-01.svg` and `story-02.svg`, the last two generated illustrations.
+- `logo-mark.png`, the header's Kannada mark, now unreferenced.
 
 ## [1.1.0] — 2026-09-07
 
