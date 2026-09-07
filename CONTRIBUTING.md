@@ -40,7 +40,7 @@ Access, so only allowed accounts can open it. Its settings:
 | Setting | Value |
 | --- | --- |
 | Production branch | `develop` |
-| Build command | `bash scripts/stamp.sh staging` |
+| Build command | `npm run build:staging` |
 | Deploy command | `npx wrangler deploy` |
 | Builds for non-production branches | on — gives every branch its own URL |
 | Protect with Cloudflare Access | on |
@@ -50,14 +50,27 @@ scripts, workflows and docs out of what is served. The build command is what
 makes staging carry a real version — without it staging would serve `?v=dev`
 forever and cache stale assets.
 
+The build command is a single npm script on purpose. It expands to
+`astro build && bash scripts/stamp.sh staging`, and both halves are required:
+Cloudflare installs dependencies itself but never runs the build, so without
+`astro build` there is no `dist/` and `scripts/stamp.sh` aborts. Keeping the
+two steps in `package.json` rather than in the dashboard field means they are
+version-controlled and reviewed, and the dashboard holds one token that cannot
+lose half of itself.
+
+Run `npm run check` against a plain `npm run build`, not after
+`npm run build:staging`. The staging stamp swaps `index.html` and
+`preview.html`, and the checks read the unswapped build — that is the order
+`.github/workflows/ci.yml` uses.
+
 **Staging is where the work happens.**
 
     https://kalaayana.shrenikyd.workers.dev/
 
 Its root serves the site under development — the build swaps `index.html` and
 `preview.html` for the `staging` environment only. The holding page is still
-there at `/coming-soon.html`. Cloudflare Access sits in front, so only you can
-open it.
+there at `/coming-soon.html`. Cloudflare Access sits in front, so only
+permitted accounts and email addresses can open it.
 
 Production is unaffected by that swap: `kalaayanastudios.com` serves the
 holding page at its root until a release deliberately changes which file is
@@ -125,6 +138,26 @@ since a cached stylesheet can make a current page look stale.
 
 Actions → **Rollback production** → Run workflow → enter a tag such as
 `v0.1.0`. That tag's build is redeployed. No revert commit, no force-push.
+
+## Production freeze
+
+**No merge to `main` before 2026-09-13.**
+
+Everything ships to `develop` and is reviewed on the staging URL until that
+date. `kalaayanastudios.com` continues to serve the Coming Soon page for the
+whole freeze.
+
+While the freeze holds:
+
+- Do not merge `develop` into `main`. That merge is the only thing that
+  deploys production.
+- Do not bump `VERSION`. It moves only when work reaches production, so the
+  next release stays in `[Unreleased]` until the freeze lifts.
+- Feature work continues as normal — `feature/*` into `develop`, reviewed on
+  staging.
+
+Lifting the freeze is a decision, not a date passing. Delete this section in
+the release PR that ends it.
 
 ## Releasing
 
