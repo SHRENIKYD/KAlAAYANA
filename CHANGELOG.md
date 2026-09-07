@@ -11,6 +11,17 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Added
+- Cards top-align their photograph instead of centring it. A standing figure
+  taller than the 3:4 frame was losing its head: Field Marshal Kariappa showed
+  52% of his image and General Siddhiah 57%. Only images taller than the frame
+  are affected — wider ones overflow sideways and are untouched.
+- The finished bronze now leads General Siddhiah rather than the grey clay.
+- Portraits and Murals use the photographs the PDF puts on its own divider
+  pages — five bronze figures, and a terracotta relief of village life. Neither
+  was anywhere on the site before.
+- Two photographs that had been left out: the Temple Architecture divider
+  image, a Ganesha niche on the Whitefield facade, which joins that project;
+  and a third Kariappa shot that fell just under the size threshold. 86 now.
 - **Every photograph in the company profile is now on the site — 84, up from 29.**
   Each project carried between one and eleven pictures in the PDF and only the
   first was ever used. Projects now hold a list of images: the card shows the
