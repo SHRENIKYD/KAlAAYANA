@@ -1,0 +1,62 @@
+---
+/**
+ * A section gallery — every project in one group. One route serves all four
+ * sections; adding a group to the data adds its page.
+ */
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import site from '../data/site.json';
+import projects from '../data/projects.json';
+
+export function getStaticPaths() {
+  /* Astro evaluates this in isolation, so the data is read here rather than
+     from a module-scope constant. */
+  const groups = [...new Set(projects.map((p) => p.group))];
+  return groups.map((section) => ({ params: { section } }));
+}
+
+const { section: key } = Astro.params;
+const section = site.sections[key];
+const items = projects.filter((p) => p.group === key);
+const fonts = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Jost:wght@200;300;400;500&display=swap';
+---
+<Base title={`${section.eyebrow} — ${site.name}`} description={section.lede} fonts={fonts}>
+  <link slot="head" rel="stylesheet" href="/assets/css/style.css?v=dev">
+
+  <div class="scroll-progress" id="scrollProgress"></div>
+  <header class="site-header solid" id="siteHeader">
+    <a class="brand" href="/">
+      <span class="brand-text">Kalaayana<em>Studios</em></span>
+    </a>
+    <nav class="nav" id="nav">
+      {site.nav.map((n) => <a href={`/${n.href}`}>{n.label}</a>)}
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main class="section subpage">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a><span aria-hidden="true">/</span><span>{section.eyebrow}</span>
+      </nav>
+      <h1 class="section-title" data-reveal>{section.eyebrow}</h1>
+      <p class="section-lede" data-reveal data-delay="80">{section.lede}</p>
+      <div class="grid four">
+        {items.map((p, i) => (
+          <ProjectCard project={p} href={`/${key}/${p.slug}.html`} delay={(i % 4) * 80} />
+        ))}
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <span>© <span id="year"></span> Kalaayana Studios LLP</span>
+      <span class="footer-note">Photography of the studio's own work.</span>
+    </div>
+  </footer>
+
+  <script is:inline src="/assets/js/main.js?v=dev"></script>
+</Base>

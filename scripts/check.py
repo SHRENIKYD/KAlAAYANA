@@ -56,7 +56,7 @@ for page in sorted(html):
 
 # 5. Content data must be well formed — a malformed project must fail the build,
 #    not reach a visitor. Presentation is not consulted; this checks data alone.
-REQUIRED = ('slug', 'group', 'title', 'scale', 'description', 'image', 'alt')
+REQUIRED = ('slug', 'group', 'title', 'scale', 'description')
 GROUPS = {'landmarks', 'temples', 'portraits', 'murals'}
 try:
     projects = json.load(open('src/data/projects.json', encoding='utf-8'))
@@ -75,11 +75,23 @@ for i, p in enumerate(projects):
     if p.get('slug') in seen:
         bad('duplicate project slug: %s' % p.get('slug'))
     seen.add(p.get('slug'))
-    # Project photographs are build inputs: the pipeline emits hashed variants
-    # into the output, so the invariant is that the source file exists.
-    img = os.path.join('src', 'images', 'projects', str(p.get('image', '')))
-    if p.get('image') and not os.path.exists(img):
-        bad('project %s references a missing source image: %s' % (where, img))
+    # Every project needs at least one photograph, each with alt text. The
+    # photographs are build inputs: the pipeline emits hashed variants into the
+    # output, so the invariant is that the source file exists.
+    images = p.get('images')
+    if not isinstance(images, list) or not images:
+        bad('project %s has no images' % where)
+        continue
+    for n, im in enumerate(images, 1):
+        if not str(im.get('alt', '')).strip():
+            bad('project %s image %d has no alt text' % (where, n))
+        f = str(im.get('file', ''))
+        if not f:
+            bad('project %s image %d has no file' % (where, n))
+            continue
+        path = os.path.join('src', 'images', 'projects', f)
+        if not os.path.exists(path):
+            bad('project %s references a missing source image: %s' % (where, path))
 
 # 5b. A section that opens with a banner must have the banner it names.
 try:
@@ -111,7 +123,8 @@ if os.environ.get('REQUIRE_RELEASE_NOTES') == 'true' and version:
     if base and base == version:
         bad('VERSION is still %s — bump it before merging to main' % version)
 
-print('checked %d page(s) and %d project(s) at version %s' % (len(html), len(projects), version or '?'))
+print('checked %d page(s), %d project(s) and %d photograph(s) at version %s'
+      % (len(html), len(projects), sum(len(p.get('images') or []) for p in projects), version or '?'))
 for f in FAIL:
     print('FAIL: %s' % f)
 sys.exit(1 if FAIL else 0)

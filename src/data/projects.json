@@ -5,9 +5,20 @@
     "title": "Hanuman, Hangluru",
     "scale": "85 ft",
     "description": "Concrete reinforced. Hangluru, Kundapura, Karnataka.",
-    "image": "hanuman-hangluru.jpg",
-    "alt": "The 85-foot reinforced concrete Hanuman at Hangluru, standing among palm trees above a flight of steps",
-    "wide": false
+    "images": [
+      {
+        "file": "hanuman-hangluru-1.jpg",
+        "alt": "The 85-foot reinforced concrete Hanuman at Hangluru, standing among palm trees above a flight of steps"
+      },
+      {
+        "file": "hanuman-hangluru-2.jpg",
+        "alt": "The Hangluru Hanuman in bare concrete before painting, mace raised against a blue sky"
+      },
+      {
+        "file": "hanuman-hangluru-3.jpg",
+        "alt": "The unpainted Hangluru Hanuman seen head-on, clear of the surrounding trees"
+      }
+    ]
   },
   {
     "slug": "hanuman-tumkuru",
@@ -15,9 +26,20 @@
     "title": "Hanuman, Tumkuru",
     "scale": "75 ft",
     "description": "Concrete reinforced. Tumkuru, Karnataka.",
-    "image": "hanuman-tumkuru.jpg",
-    "alt": "The 75-foot Hanuman at Tumkuru, painted and framed by a tall ornamental arch",
-    "wide": false
+    "images": [
+      {
+        "file": "hanuman-tumkuru-1.jpg",
+        "alt": "The 75-foot Hanuman at Tumkuru, painted and framed by a tall ornamental arch"
+      },
+      {
+        "file": "hanuman-tumkuru-2.jpg",
+        "alt": "A pencil working drawing of the Tumkuru Hanuman on gridded paper, set out for scaling up"
+      },
+      {
+        "file": "hanuman-tumkuru-3.jpg",
+        "alt": "A pencil study of the Tumkuru Hanuman standing within its arch"
+      }
+    ]
   },
   {
     "slug": "panchamukhi-hanuman",
@@ -25,9 +47,16 @@
     "title": "Panchamukhi Hanuman",
     "scale": "65 ft",
     "description": "Concrete reinforced. Surendrapuri, Hyderabad.",
-    "image": "panchamukhi-hanuman.jpg",
-    "alt": "The five-faced Panchamukhi Hanuman at Surendrapuri, brightly painted against the sky",
-    "wide": false
+    "images": [
+      {
+        "file": "panchamukhi-hanuman-1.jpg",
+        "alt": "The five-faced Panchamukhi Hanuman at Surendrapuri, brightly painted against the sky"
+      },
+      {
+        "file": "panchamukhi-hanuman-2.jpg",
+        "alt": "The Panchamukhi Hanuman mid-construction, enclosed in a lattice of scaffolding"
+      }
+    ]
   },
   {
     "slug": "samudra-manthana",
@@ -35,9 +64,20 @@
     "title": "Samudra Manthana",
     "scale": "35 ft",
     "description": "Concrete reinforced installation. Udupi, Karnataka.",
-    "image": "samudra-manthana.jpg",
-    "alt": "The Samudra Manthana installation at Udupi, figures ranged along the churning of the ocean",
-    "wide": false
+    "images": [
+      {
+        "file": "samudra-manthana-1.jpg",
+        "alt": "The Samudra Manthana installation at Udupi, figures ranged along the churning of the ocean"
+      },
+      {
+        "file": "samudra-manthana-2.jpg",
+        "alt": "A measured pencil elevation of the Samudra Manthana composition, the figures set out along the serpent"
+      },
+      {
+        "file": "samudra-manthana-3.jpg",
+        "alt": "The Samudra Manthana installation from the side, its ranks of figures receding into the trees"
+      }
+    ]
   },
   {
     "slug": "shiva-hubli",
@@ -45,9 +85,20 @@
     "title": "Shiva, Hubli",
     "scale": "35 ft",
     "description": "Concrete reinforced. Hubli, Karnataka.",
-    "image": "shiva-hubli.jpg",
-    "alt": "The seated Shiva at Hubli, trident raised, on a dark plinth against cloud",
-    "wide": false
+    "images": [
+      {
+        "file": "shiva-hubli-1.jpg",
+        "alt": "The seated Shiva at Hubli, trident raised, on a dark plinth against cloud"
+      },
+      {
+        "file": "shiva-hubli-2.jpg",
+        "alt": "A painted study of Shiva seated on a tiger skin, in the Mysore manner"
+      },
+      {
+        "file": "shiva-hubli-3.jpg",
+        "alt": "A pencil construction drawing of the seated Shiva, with its setting-out geometry"
+      }
+    ]
   },
   {
     "slug": "buddha-bengaluru",
@@ -55,9 +106,24 @@
     "title": "Buddha, Bengaluru",
     "scale": "10 ft",
     "description": "Concrete reinforced. Bengaluru, Karnataka.",
-    "image": "buddha-bengaluru.jpg",
-    "alt": "The white seated Buddha at Bengaluru on a plain plinth, framed by trees",
-    "wide": false
+    "images": [
+      {
+        "file": "buddha-bengaluru-1.jpg",
+        "alt": "The white seated Buddha at Bengaluru on a plain plinth, framed by trees"
+      },
+      {
+        "file": "buddha-bengaluru-2.jpg",
+        "alt": "The Bengaluru Buddha from behind, showing the fall of the robe across the shoulders"
+      },
+      {
+        "file": "buddha-bengaluru-3.jpg",
+        "alt": "Sculptors working on the Bengaluru Buddha from a bamboo scaffold, before its finish was applied"
+      },
+      {
+        "file": "buddha-bengaluru-4.jpg",
+        "alt": "The studio team at the foot of the unfinished Bengaluru Buddha"
+      }
+    ]
   },
   {
     "slug": "hanuman-punjab",
@@ -65,9 +131,16 @@
     "title": "Hanuman, Punjab",
     "scale": "25 ft",
     "description": "Concrete reinforced. Punjab, India.",
-    "image": "hanuman-punjab.jpg",
-    "alt": "The kneeling Hanuman in Punjab, gilded mace over one shoulder",
-    "wide": false
+    "images": [
+      {
+        "file": "hanuman-punjab-1.jpg",
+        "alt": "The kneeling Hanuman in Punjab, gilded mace over one shoulder"
+      },
+      {
+        "file": "hanuman-punjab-2.jpg",
+        "alt": "The Punjab Hanuman on its plinth, seen from the roadside against an evening sky"
+      }
+    ]
   },
   {
     "slug": "shree-varasiddhi-vinayaka",
@@ -75,9 +148,32 @@
     "title": "Shree Varasiddhi Vinayaka",
     "scale": "30 ft",
     "description": "Temple facade. Whitefield, Bengaluru, Karnataka.",
-    "image": "shree-varasiddhi-vinayaka.jpg",
-    "alt": "The carved facade of Shree Varasiddhi Vinayaka temple at Whitefield, Bengaluru",
-    "wide": false
+    "images": [
+      {
+        "file": "shree-varasiddhi-vinayaka-1.jpg",
+        "alt": "The carved facade of Shree Varasiddhi Vinayaka temple at Whitefield, Bengaluru"
+      },
+      {
+        "file": "shree-varasiddhi-vinayaka-2.jpg",
+        "alt": "The Whitefield facade lit at dusk, its carved tiers picked out in gold"
+      },
+      {
+        "file": "shree-varasiddhi-vinayaka-3.jpg",
+        "alt": "A detail of the Whitefield facade: a carved niche flanked by turned columns"
+      },
+      {
+        "file": "shree-varasiddhi-vinayaka-4.jpg",
+        "alt": "The inked elevation drawing for the Whitefield facade, deities set in their niches"
+      },
+      {
+        "file": "shree-varasiddhi-vinayaka-5.jpg",
+        "alt": "The Whitefield temple seen from the street, its name board beneath the facade"
+      },
+      {
+        "file": "shree-varasiddhi-vinayaka-6.jpg",
+        "alt": "A detail of a turned column and pierced stone screen on the Whitefield facade"
+      }
+    ]
   },
   {
     "slug": "shree-anjaneya",
@@ -85,9 +181,16 @@
     "title": "Shree Anjaneya",
     "scale": "61 ft",
     "description": "Temple arch. Chikkanayakanahalli, Karnataka.",
-    "image": "shree-anjaneya.jpg",
-    "alt": "The Shree Anjaneya temple arch at Chikkanayakanahalli, tiered and painted, with Anjaneya at its centre",
-    "wide": false
+    "images": [
+      {
+        "file": "shree-anjaneya-1.jpg",
+        "alt": "The Shree Anjaneya temple arch at Chikkanayakanahalli, tiered and painted, with Anjaneya at its centre"
+      },
+      {
+        "file": "shree-anjaneya-2.jpg",
+        "alt": "Shilpi K. Narayana Rao's measured elevation for the Anjaneya Arch Mantapa, drawn in ink and signed"
+      }
+    ]
   },
   {
     "slug": "shree-manjunatha",
@@ -95,9 +198,12 @@
     "title": "Shree Manjunatha",
     "scale": "25 ft",
     "description": "Temple arch. Shivamogga, Karnataka.",
-    "image": "shree-manjunatha.jpg",
-    "alt": "The Shree Manjunatha temple arch at Shivamogga, gold-finialled above a painted tableau",
-    "wide": false
+    "images": [
+      {
+        "file": "shree-manjunatha-1.jpg",
+        "alt": "The Shree Manjunatha temple arch at Shivamogga, gold-finialled above a painted tableau"
+      }
+    ]
   },
   {
     "slug": "shree-veeranjaneya",
@@ -105,9 +211,12 @@
     "title": "Shree Veeranjaneya",
     "scale": "25 ft",
     "description": "Temple arch. Moodigere, Karnataka.",
-    "image": "shree-veeranjaneya.jpg",
-    "alt": "The dark stone-finished Shree Veeranjaneya temple arch at Moodigere",
-    "wide": false
+    "images": [
+      {
+        "file": "shree-veeranjaneya-1.jpg",
+        "alt": "The dark stone-finished Shree Veeranjaneya temple arch at Moodigere"
+      }
+    ]
   },
   {
     "slug": "sri-siddaramaiah",
@@ -115,9 +224,52 @@
     "title": "Sri Siddaramaiah",
     "scale": "Life size",
     "description": "Silicone life statue. Chief Minister of Karnataka.",
-    "image": "sri-siddaramaiah.jpg",
-    "alt": "The life-sized silicone figure of Sri Siddaramaiah standing on a lit stage",
-    "wide": false
+    "images": [
+      {
+        "file": "sri-siddaramaiah-1.jpg",
+        "alt": "The life-sized silicone figure of Sri Siddaramaiah standing on a lit stage"
+      },
+      {
+        "file": "sri-siddaramaiah-2.jpg",
+        "alt": "The silicone figure on the stage set, seen from the front"
+      },
+      {
+        "file": "sri-siddaramaiah-3.jpg",
+        "alt": "The silicone figure under stage lighting, the drape of the shawl visible"
+      },
+      {
+        "file": "sri-siddaramaiah-4.jpg",
+        "alt": "The silicone figure from the side, showing the stance and the folded dhoti"
+      },
+      {
+        "file": "sri-siddaramaiah-5.jpg",
+        "alt": "The reference photograph of Sri Siddaramaiah used in modelling the likeness"
+      },
+      {
+        "file": "sri-siddaramaiah-6.jpg",
+        "alt": "The digital sculpt of the head in three-quarter view, before casting"
+      },
+      {
+        "file": "sri-siddaramaiah-7.jpg",
+        "alt": "Visitors photographed beside the finished silicone figure on the stage set"
+      },
+      {
+        "file": "sri-siddaramaiah-8.jpg",
+        "alt": "The unfinished silicone head in the workshop, still on its support"
+      },
+      {
+        "file": "sri-siddaramaiah-9.jpg",
+        "alt": "The digital sculpt of the bust seen from behind the shoulder"
+      },
+      {
+        "file": "sri-siddaramaiah-10.jpg",
+        "alt": "A member of the public standing alongside the completed silicone figure"
+      },
+      {
+        "file": "sri-siddaramaiah-11.jpg",
+        "alt": "The digital sculpt of the head in profile, glasses modelled in"
+      }
+    ]
   },
   {
     "slug": "field-marshal-kariappa",
@@ -125,9 +277,16 @@
     "title": "Field Marshal Kariappa",
     "scale": "8 ft",
     "description": "FRP standing figure.",
-    "image": "field-marshal-kariappa.jpg",
-    "alt": "The eight-foot FRP figure of Field Marshal Kariappa in uniform, in the studio",
-    "wide": false
+    "images": [
+      {
+        "file": "field-marshal-kariappa-1.jpg",
+        "alt": "The eight-foot FRP figure of Field Marshal Kariappa in uniform, in the studio"
+      },
+      {
+        "file": "field-marshal-kariappa-2.jpg",
+        "alt": "The Kariappa figure in the workshop, cap in hand, before its finish was applied"
+      }
+    ]
   },
   {
     "slug": "bronze-portrait-i",
@@ -135,9 +294,24 @@
     "title": "Bronze Portrait I",
     "scale": "2 ft",
     "description": "Cast bronze bust.",
-    "image": "bronze-portrait-i.jpg",
-    "alt": "A cast bronze portrait bust of a man in a suit and glasses",
-    "wide": false
+    "images": [
+      {
+        "file": "bronze-portrait-i-1.jpg",
+        "alt": "A cast bronze portrait bust of a man in a suit and glasses"
+      },
+      {
+        "file": "bronze-portrait-i-2.jpg",
+        "alt": "The same bronze bust lit from the side, showing the modelling of the face"
+      },
+      {
+        "file": "bronze-portrait-i-3.jpg",
+        "alt": "The bust in unfinished clay, before casting"
+      },
+      {
+        "file": "bronze-portrait-i-4.jpg",
+        "alt": "The bust in the foundry after casting, still carrying its runners"
+      }
+    ]
   },
   {
     "slug": "bronze-portrait-ii",
@@ -145,9 +319,16 @@
     "title": "Bronze Portrait II",
     "scale": "2 ft",
     "description": "Cast bronze bust.",
-    "image": "bronze-portrait-ii.jpg",
-    "alt": "A clay portrait bust of an elderly woman in a draped sari",
-    "wide": false
+    "images": [
+      {
+        "file": "bronze-portrait-ii-1.jpg",
+        "alt": "A clay portrait bust of an elderly woman in a draped sari"
+      },
+      {
+        "file": "bronze-portrait-ii-2.jpg",
+        "alt": "The same bust finished in clay against a dark ground"
+      }
+    ]
   },
   {
     "slug": "bronze-portrait-iii",
@@ -155,9 +336,20 @@
     "title": "Bronze Portrait III",
     "scale": "2 ft",
     "description": "Cast bronze bust.",
-    "image": "bronze-portrait-iii.jpg",
-    "alt": "A portrait bust of a woman wearing a necklace, in pale clay",
-    "wide": false
+    "images": [
+      {
+        "file": "bronze-portrait-iii-1.jpg",
+        "alt": "A portrait bust of a woman wearing a necklace, in pale clay"
+      },
+      {
+        "file": "bronze-portrait-iii-2.jpg",
+        "alt": "The finished bronze bust of the woman on a polished granite plinth"
+      },
+      {
+        "file": "bronze-portrait-iii-3.jpg",
+        "alt": "The bronze bust from the front, the sari edge falling across one shoulder"
+      }
+    ]
   },
   {
     "slug": "padmapani",
@@ -165,9 +357,20 @@
     "title": "Padmapani",
     "scale": "4 ft",
     "description": "FRP figure.",
-    "image": "padmapani.jpg",
-    "alt": "The four-foot Padmapani in FRP, seated on a lotus within a carved arch",
-    "wide": false
+    "images": [
+      {
+        "file": "padmapani-1.jpg",
+        "alt": "The four-foot Padmapani in FRP, seated on a lotus within a carved arch"
+      },
+      {
+        "file": "padmapani-2.jpg",
+        "alt": "A detail of the Padmapani arch, showing the carving behind the figure"
+      },
+      {
+        "file": "padmapani-3.jpg",
+        "alt": "A close view of the Padmapani's face and jewelled headdress"
+      }
+    ]
   },
   {
     "slug": "saint-kanakadasa",
@@ -175,9 +378,24 @@
     "title": "Saint Kanakadasa",
     "scale": "Series",
     "description": "Installations from the life story of the saint. Bangalore University.",
-    "image": "saint-kanakadasa.jpg",
-    "alt": "Saint Kanakadasa with his tambura, from the sculpture series at Bangalore University",
-    "wide": false
+    "images": [
+      {
+        "file": "saint-kanakadasa-1.jpg",
+        "alt": "Saint Kanakadasa with his tambura, from the sculpture series at Bangalore University"
+      },
+      {
+        "file": "saint-kanakadasa-2.jpg",
+        "alt": "Two figures from the Kanakadasa series set out on the lawn at Bangalore University"
+      },
+      {
+        "file": "saint-kanakadasa-3.jpg",
+        "alt": "The seated Kanakadasa figure among trees at Bangalore University"
+      },
+      {
+        "file": "saint-kanakadasa-4.jpg",
+        "alt": "The standing Kanakadasa figure in white, arm outstretched, on the university grounds"
+      }
+    ]
   },
   {
     "slug": "shekon",
@@ -185,9 +403,24 @@
     "title": "Shekon",
     "scale": "7 ft",
     "description": "Installed at Air Force camp, Hyderabad.",
-    "image": "shekon.jpg",
-    "alt": "The seven-foot figure of Shekon in bronze finish, cap in hand",
-    "wide": false
+    "images": [
+      {
+        "file": "shekon-1.jpg",
+        "alt": "The seven-foot figure of Shekon in bronze finish, cap in hand"
+      },
+      {
+        "file": "shekon-2.jpg",
+        "alt": "The Shekon figure from behind, showing the turban and the fall of the uniform"
+      },
+      {
+        "file": "shekon-3.jpg",
+        "alt": "The Shekon figure from the front, standing on a rocky base"
+      },
+      {
+        "file": "shekon-4.jpg",
+        "alt": "The bronze portrait bust of Shekon in uniform and turban, on a dark plinth"
+      }
+    ]
   },
   {
     "slug": "general-siddhiah",
@@ -195,9 +428,20 @@
     "title": "General Siddhiah",
     "scale": "7 ft",
     "description": "FRP standing figure.",
-    "image": "general-siddhiah.jpg",
-    "alt": "The seven-foot FRP figure of General Siddhiah, saluting, photographed in the workshop",
-    "wide": false
+    "images": [
+      {
+        "file": "general-siddhiah-1.jpg",
+        "alt": "The seven-foot FRP figure of General Siddhiah, saluting, photographed in the workshop"
+      },
+      {
+        "file": "general-siddhiah-2.jpg",
+        "alt": "The Siddhiah figure in grey clay in the studio, before casting"
+      },
+      {
+        "file": "general-siddhiah-3.jpg",
+        "alt": "The finished bronze Siddhiah figure saluting, in the workshop"
+      }
+    ]
   },
   {
     "slug": "surya-mural",
@@ -205,9 +449,16 @@
     "title": "Surya Mural",
     "scale": "10 ft dia",
     "description": "Circular relief.",
-    "image": "surya-mural.jpg",
-    "alt": "The ten-foot circular Surya mural, a dancing figure ringed by flame-like rays",
-    "wide": false
+    "images": [
+      {
+        "file": "surya-mural-1.jpg",
+        "alt": "The ten-foot circular Surya mural, a dancing figure ringed by flame-like rays"
+      },
+      {
+        "file": "surya-mural-2.jpg",
+        "alt": "The Surya mural in unfinished clay, its rays still being modelled"
+      }
+    ]
   },
   {
     "slug": "krishna",
@@ -215,9 +466,16 @@
     "title": "Krishna",
     "scale": "6 × 4 ft",
     "description": "FRP relief.",
-    "image": "krishna.jpg",
-    "alt": "A framed FRP relief of Krishna playing the flute beside cattle",
-    "wide": false
+    "images": [
+      {
+        "file": "krishna-1.jpg",
+        "alt": "A framed FRP relief of Krishna playing the flute beside cattle"
+      },
+      {
+        "file": "krishna-2.jpg",
+        "alt": "The Krishna relief unframed, the figure standing beneath a tree with a cow"
+      }
+    ]
   },
   {
     "slug": "village-scenes",
@@ -225,9 +483,20 @@
     "title": "Village Scenes",
     "scale": "Panel",
     "description": "Scenic views of a village, made in FRP.",
-    "image": "village-scenes.jpg",
-    "alt": "An FRP relief panel of village life — figures at work beneath palms and thatched roofs",
-    "wide": false
+    "images": [
+      {
+        "file": "village-scenes-1.jpg",
+        "alt": "An FRP relief panel of village life — figures at work beneath palms and thatched roofs"
+      },
+      {
+        "file": "village-scenes-2.jpg",
+        "alt": "A second village panel showing a bullock cart and figures at a well"
+      },
+      {
+        "file": "village-scenes-3.jpg",
+        "alt": "A village panel with a herdsman and seated figures beneath a spreading tree"
+      }
+    ]
   },
   {
     "slug": "mr-ananth-kumar",
@@ -235,9 +504,16 @@
     "title": "Mr. Ananth Kumar",
     "scale": "Relief",
     "description": "Former minister from Karnataka.",
-    "image": "mr-ananth-kumar.jpg",
-    "alt": "A relief portrait of Mr. Ananth Kumar, former minister from Karnataka",
-    "wide": false
+    "images": [
+      {
+        "file": "mr-ananth-kumar-1.jpg",
+        "alt": "A relief portrait of Mr. Ananth Kumar, former minister from Karnataka"
+      },
+      {
+        "file": "mr-ananth-kumar-2.jpg",
+        "alt": "The full-length relief of Mr. Ananth Kumar in a long coat"
+      }
+    ]
   },
   {
     "slug": "yakshagana",
@@ -245,9 +521,12 @@
     "title": "Yakshagana",
     "scale": "8 × 4 ft",
     "description": "FRP panel.",
-    "image": "yakshagana.jpg",
-    "alt": "An FRP relief of a Yakshagana performer in full headdress, staff in hand",
-    "wide": false
+    "images": [
+      {
+        "file": "yakshagana-1.jpg",
+        "alt": "An FRP relief of a Yakshagana performer in full headdress, staff in hand"
+      }
+    ]
   },
   {
     "slug": "radha-krishna",
@@ -255,9 +534,16 @@
     "title": "Radha Krishna",
     "scale": "8 × 6 ft",
     "description": "FRP panel.",
-    "image": "radha-krishna.jpg",
-    "alt": "An FRP relief of Radha and Krishna beneath a tree, with a peacock at their feet",
-    "wide": false
+    "images": [
+      {
+        "file": "radha-krishna-1.jpg",
+        "alt": "An FRP relief of Radha and Krishna beneath a tree, with a peacock at their feet"
+      },
+      {
+        "file": "radha-krishna-2.jpg",
+        "alt": "The Radha Krishna relief in pale finish, the pair beneath the branches"
+      }
+    ]
   },
   {
     "slug": "goddess-saraswathi",
@@ -265,9 +551,16 @@
     "title": "Goddess Saraswathi",
     "scale": "8 × 8 ft",
     "description": "FRP panel.",
-    "image": "goddess-saraswathi.jpg",
-    "alt": "An FRP relief of Goddess Saraswathi seated with the veena",
-    "wide": false
+    "images": [
+      {
+        "file": "goddess-saraswathi-1.jpg",
+        "alt": "An FRP relief of Goddess Saraswathi seated with the veena"
+      },
+      {
+        "file": "goddess-saraswathi-2.jpg",
+        "alt": "The Saraswathi panel finished in gold within a columned surround"
+      }
+    ]
   },
   {
     "slug": "relief-panel",
@@ -275,9 +568,16 @@
     "title": "Relief Panel",
     "scale": "8 × 4 ft",
     "description": "FRP panel.",
-    "image": "relief-panel.jpg",
-    "alt": "An FRP relief panel of a seated figure attended by others",
-    "wide": false
+    "images": [
+      {
+        "file": "relief-panel-1.jpg",
+        "alt": "An FRP relief panel of a seated figure attended by others"
+      },
+      {
+        "file": "relief-panel-2.jpg",
+        "alt": "The same panel in terracotta finish, the group set within an arched frame"
+      }
+    ]
   },
   {
     "slug": "sri-siddaramaiah-2",
@@ -285,8 +585,15 @@
     "title": "Sri Siddaramaiah",
     "scale": "6 × 4 ft",
     "description": "Chief Minister of Karnataka. FRP relief.",
-    "image": "sri-siddaramaiah-2.jpg",
-    "alt": "A painted FRP relief portrait of Sri Siddaramaiah, arms folded",
-    "wide": false
+    "images": [
+      {
+        "file": "sri-siddaramaiah-2-2.jpg",
+        "alt": "The reference photograph of Sri Siddaramaiah used for the relief"
+      },
+      {
+        "file": "sri-siddaramaiah-2-1.jpg",
+        "alt": "A clay relief portrait of Sri Siddaramaiah, arms folded"
+      }
+    ]
   }
 ]

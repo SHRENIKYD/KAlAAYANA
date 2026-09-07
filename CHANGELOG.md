@@ -11,6 +11,17 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Added
+- **Every photograph in the company profile is now on the site — 84, up from 29.**
+  Each project carried between one and eleven pictures in the PDF and only the
+  first was ever used. Projects now hold a list of images: the card shows the
+  lead, the project page shows all of them with captions. Working drawings,
+  scaffolding and workshop stages are included, so a project reads as a process
+  rather than a single finished shot.
+- All four sections now open with a banner: Landmarks, Temple Architecture,
+  Portraits and Life Sculptures, and Murals. The home page carries no grids.
+- `/landmarks.html`, `/temples.html`, `/portraits.html`, `/murals.html` and a
+  page for all 29 projects beneath them, from two dynamic routes rather than
+  eight hand-written files.
 - **Sections can open with a banner instead of a grid.** Temple Architecture is
   the first: the home page now shows the section name over a photograph of the
   Whitefield facade at dusk, with a single **View All** button. It follows the
@@ -59,6 +70,13 @@ is a holding page. `1.0.0` marks the launch of the full site.
   Latin wordmark — two readings of the same name in a 96px bar. The mark is
   gone; `KALAAYANA / STUDIOS` remains. The Kannada logo still leads the hero
   and the holding page, where it has room to be read.
+- Reloading a page no longer leaves you halfway down it. With no fragment in
+  the URL the browser's own scroll restoration put a reload somewhere the
+  address did not describe, so the site takes that over: a reload starts where
+  the URL says. Back and forward still restore position.
+- `scripts/check.py` validates the image list — every project needs at least one
+  photograph, and every photograph needs alt text and a file that exists.
+  Negative-tested by blanking one alt string.
 - `scripts/check.py` walks `dist/` rather than listing its top level, so pages
   in subdirectories are checked too — the four new project pages were invisible
   to it otherwise. Staged pages are now identified by exclusion: everything

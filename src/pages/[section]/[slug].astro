@@ -1,0 +1,113 @@
+---
+/**
+ * One project, with every photograph the studio has of it. One route serves
+ * all four sections; adding a project to the data adds its page.
+ */
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import { photo } from '../../lib/photos';
+import site from '../../data/site.json';
+import projects from '../../data/projects.json';
+
+export function getStaticPaths() {
+  /* Evaluated in isolation by Astro, so the data is read here. */
+  return projects.map((p) => ({
+    params: { section: p.group, slug: p.slug },
+    props: { project: p },
+  }));
+}
+
+const { project } = Astro.props;
+const key = project.group;
+const section = site.sections[key];
+const siblings = projects.filter((p) => p.group === key && p.slug !== project.slug);
+const [lead, ...rest] = project.images;
+const fonts = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Jost:wght@200;300;400;500&display=swap';
+---
+<Base title={`${project.title} — ${site.name}`} description={project.description} fonts={fonts}>
+  <link slot="head" rel="stylesheet" href="/assets/css/style.css?v=dev">
+
+  <div class="scroll-progress" id="scrollProgress"></div>
+  <header class="site-header solid" id="siteHeader">
+    <a class="brand" href="/"><span class="brand-text">Kalaayana<em>Studios</em></span></a>
+    <nav class="nav" id="nav">
+      {site.nav.map((n) => <a href={`/${n.href}`}>{n.label}</a>)}
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main class="section subpage">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a><span aria-hidden="true">/</span>
+        <a href={`/${key}.html`}>{section.eyebrow}</a><span aria-hidden="true">/</span>
+        <span>{project.title}</span>
+      </nav>
+
+      <div class="project">
+        <figure class="project-media" data-reveal>
+          <Image src={photo(lead.file)} alt={lead.alt}
+                 widths={[640, 960, 1400]} formats={['avif', 'webp']} loading="eager"
+                 sizes="(max-width: 900px) 92vw, 60vw" />
+        </figure>
+        <div class="project-body" data-reveal data-delay="120">
+          <h1 class="section-title">{project.title}</h1>
+          <dl class="project-facts">
+            <div><dt>Scale</dt><dd>{project.scale}</dd></div>
+            <div><dt>Section</dt><dd>{section.eyebrow}</dd></div>
+          </dl>
+          <p class="project-note">{project.description}</p>
+          <a class="btn btn-ghost" href={`/${key}.html`}>Back to {section.eyebrow}</a>
+        </div>
+      </div>
+
+      {rest.length > 0 && (
+        <section class="shots">
+          <h2 class="more-title">{rest.length === 1 ? 'One more photograph' : `${rest.length} more photographs`}</h2>
+          <div class="shot-grid">
+            {rest.map((img, i) => (
+              <figure class="shot" data-reveal data-delay={(i % 3) * 80}>
+                <Image src={photo(img.file)} alt={img.alt}
+                       widths={[400, 800, 1200]} formats={['avif', 'webp']} loading="lazy"
+                       sizes="(max-width: 620px) 92vw, (max-width: 1024px) 46vw, 31vw" />
+                <figcaption>{img.alt}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {siblings.length > 0 && (
+        <section class="more">
+          <h2 class="more-title">More in {section.eyebrow}</h2>
+          <div class="grid four">
+            {siblings.map((p, i) => (
+              <a class="card" href={`/${key}/${p.slug}.html`} data-reveal data-delay={(i % 4) * 80} data-tilt>
+                <div class="card-media">
+                  <Image src={photo(p.images[0].file)} alt={p.images[0].alt}
+                         widths={[400, 800]} formats={['avif', 'webp']} loading="lazy"
+                         sizes="(max-width: 620px) 92vw, 30vw" />
+                </div>
+                <div class="card-body">
+                  <span class="card-scale">{p.scale}</span>
+                  <h3>{p.title}</h3>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <span>© <span id="year"></span> Kalaayana Studios LLP</span>
+      <span class="footer-note">Photography of the studio's own work.</span>
+    </div>
+  </footer>
+
+  <script is:inline src="/assets/js/main.js?v=dev"></script>
+</Base>
