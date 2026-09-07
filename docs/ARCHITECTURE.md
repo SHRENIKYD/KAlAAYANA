@@ -106,6 +106,12 @@ staging before the next begins.
 that differs from the hand-written HTML, that is visible immediately rather than
 entangled with new photography.
 
+The bar is *rendered* equivalence, not byte equivalence. A generator will differ
+in whitespace and attribute order no matter what, so chasing identical bytes
+would waste effort on a property nobody can observe. It is verified by rendering
+both in a browser and comparing the resulting DOM, computed styles and
+screenshots.
+
 Issues 3 and 4 are small and get fixed inside `1.1.0`.
 
 ## Known risks

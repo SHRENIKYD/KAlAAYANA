@@ -10,6 +10,43 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-09-07
+
+Phase one of the architecture work. The site is now generated from data rather
+than hand-maintained as markup. **No visible change** — the rendered page is
+identical to the hand-written one.
+
+### Added
+- Astro build. `src/pages` holds the two pages, `src/layouts/Base.astro` owns
+  the document head, and `dist/` is the deployed output.
+- `src/data/projects.json` — all 29 projects as data. Adding a project means
+  adding an object; no template is touched.
+- `src/data/site.json` — navigation, expertise, statistics, materials, section
+  headings, story and contact details, each defined once.
+- Build-time image processing. The hero photograph is emitted as AVIF and WebP
+  at four widths with `srcset`; it drops from 142 kB to 69 kB with no visible
+  change. This is the pipeline the real photographs will use.
+- Data validation in `scripts/check.py`: a project missing a required field,
+  carrying an unknown group, duplicating a slug or pointing at an image that is
+  not in the build now fails the build. It caught a real regression during this
+  work — a hero reference left behind when the file moved.
+
+### Changed
+- `scripts/check.py` and `scripts/stamp.sh` operate on the build output rather
+  than the repository root, since the output is what ships.
+- Workflows install Node, run `npm ci` and build before checking; the Pages
+  artifact is `./dist`.
+- `wrangler.jsonc` serves `./dist`. `.assetsignore` is removed — the build
+  output contains only the site, so there is nothing to exclude.
+
+### Verified
+Old and new rendered side by side in a browser and compared on twenty-one
+properties: title, section ids, navigation labels, all 29 card titles and
+scales, statistics, expertise, materials, section titles, contact links,
+address, story text, background, card and accent colours, heading font, page
+height, console errors and failed requests. **Every one identical**, and the
+landmarks screenshots are pixel-identical.
+
 ## [1.0.2] — 2026-09-07
 
 ### Changed
@@ -102,7 +139,8 @@ site staged behind it.
   `#22333B` cards, `#5E503F` rules, `#C6AC8F` accent, `#EAE0D5` text — with
   headings in Cinzel and body in Jost.
 
-[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.1.0
 [1.0.2]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.0.2
 [1.0.1]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.0.1
 [1.0.0]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.0.0
