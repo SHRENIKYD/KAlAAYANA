@@ -126,6 +126,26 @@ since a cached stylesheet can make a current page look stale.
 Actions → **Rollback production** → Run workflow → enter a tag such as
 `v0.1.0`. That tag's build is redeployed. No revert commit, no force-push.
 
+## Production freeze
+
+**No merge to `main` before 2026-09-13.**
+
+Everything ships to `develop` and is reviewed on the staging URL until that
+date. `kalaayanastudios.com` continues to serve the Coming Soon page for the
+whole freeze.
+
+While the freeze holds:
+
+- Do not merge `develop` into `main`. That merge is the only thing that
+  deploys production.
+- Do not bump `VERSION`. It moves only when work reaches production, so the
+  next release stays in `[Unreleased]` until the freeze lifts.
+- Feature work continues as normal — `feature/*` into `develop`, reviewed on
+  staging.
+
+Lifting the freeze is a decision, not a date passing. Delete this section in
+the release PR that ends it.
+
 ## Releasing
 
 Handled by CI. On merge to `main` it tags `v$(cat VERSION)` and creates a
