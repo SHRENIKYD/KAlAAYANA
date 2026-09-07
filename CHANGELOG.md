@@ -10,6 +10,22 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-09-07
+
+### Fixed
+- The release job could not tag a version. `git tag -a` needs a committer
+  identity and the runner has none, so the job failed at its first git command
+  and `v0.1.0` was never created. The deploy itself had already succeeded.
+- Release notes were extracted with an awk regex containing `\[0.1.1\]`. YAML
+  collapsed the escaping, so awk read `[0.1.1]` as a character class and
+  matched the wrong lines — 103 characters of the changelog instead of 1,614.
+  Now matched literally with `index()`, which has no escaping to get wrong.
+
+### Added
+- `wrangler.jsonc` and `.assetsignore` for the Cloudflare staging environment,
+  and `scripts/stamp.sh` resolves the commit and ref from the checkout when
+  they are not passed, so a Cloudflare build can stamp itself.
+
 ## [0.1.0] — 2026-09-06
 
 The site is live at `kalaayanastudios.com` as a holding page, with the complete
@@ -39,5 +55,6 @@ site staged behind it.
   `#22333B` cards, `#5E503F` rules, `#C6AC8F` accent, `#EAE0D5` text — with
   headings in Cinzel and body in Jost.
 
-[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v0.1.1
 [0.1.0]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v0.1.0
