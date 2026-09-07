@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read the base branch VERSION
+        id: base
+        if: github.event_name == 'pull_request'
+        run: |
+          base="$(git show origin/${{ github.base_ref }}:VERSION 2>/dev/null | tr -d '[:space:]' || true)"
+          echo "version=$base" >> "$GITHUB_OUTPUT"
+          echo "Base (${{ github.base_ref }}) is at version: ${base:-none}"
+
+      - name: Run checks
+        env:
+          # Only a merge into main is a release, so only that requires notes.
+          REQUIRE_RELEASE_NOTES: ${{ github.base_ref == 'main' }}
+          BASE_VERSION: ${{ steps.base.outputs.version }}
+        run: python3 scripts/check.py
+
+      - name: Verify the stamp script produces a deployable tree
+        run: |
+          ./scripts/stamp.sh ci "${{ github.sha }}" "${{ github.ref_name }}"
+          test -f version.json
+          grep -q 'name="version"' index.html

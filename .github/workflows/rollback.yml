@@ -1,0 +1,45 @@
+name: Rollback production
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to redeploy, e.g. v0.1.0"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  rollback:
+    name: Redeploy ${{ inputs.tag }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Confirm the tag resolved
+        run: |
+          echo "Rolling production back to ${{ inputs.tag }} ($GITHUB_SHA)"
+          test -f index.html
+
+      - name: Stamp the build
+        run: ./scripts/stamp.sh production "$GITHUB_SHA" "${{ inputs.tag }}"
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
