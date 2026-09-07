@@ -50,9 +50,18 @@ scripts, workflows and docs out of what is served. The build command is what
 makes staging carry a real version — without it staging would serve `?v=dev`
 forever and cache stale assets.
 
-Production serves the holding page, and so does staging at `/`. Review the
-full site at `<staging-url>/preview.html` — behind Cloudflare Access, so only
-you can open it.
+**Staging is where the work happens.**
+
+    https://kalaayana.shrenikyd.workers.dev/
+
+Its root serves the site under development — the build swaps `index.html` and
+`preview.html` for the `staging` environment only. The holding page is still
+there at `/coming-soon.html`. Cloudflare Access sits in front, so only you can
+open it.
+
+Production is unaffected by that swap: `kalaayanastudios.com` serves the
+holding page at its root until a release deliberately changes which file is
+`index.html`.
 
 ## Versioning
 
