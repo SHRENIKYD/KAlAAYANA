@@ -18,26 +18,11 @@ feature/*  ──PR──▶  develop  ──PR──▶  main
 releases, and every deployment publishes `/version.json` so you can always tell
 exactly what is live.
 
-## Current state: holding page
+## Current state: live
 
-`index.html` is a self-contained **Coming Soon** page — hero photograph, the
-lockup, the tagline, and a contact line. No navigation, no buttons, no
-JavaScript, no scroll.
-
-The finished site is intact at **`preview.html`**. It is marked
-`noindex, nofollow`, carries no canonical tag and is not linked from anywhere
-or listed in the sitemap, but it *is* deployed, so it can be previewed and
-shared at `kalaayanastudios.com/preview.html`.
-
-**To go live:** swap the two files —
-
-```bash
-git mv index.html coming-soon.html
-git mv preview.html index.html
-```
-
-then restore in the new `index.html`: delete the `noindex, nofollow` meta and
-re-add `<link rel="canonical" href="https://kalaayanastudios.com/">`.
+`index.html` is the full site. The holding page it replaced is kept at
+`coming-soon.html`, marked `noindex, nofollow` — swapping the two filenames
+back would take the site down again if that were ever needed.
 
 ## Sections
 
