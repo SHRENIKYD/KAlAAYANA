@@ -1,0 +1,132 @@
+{
+  "name": "Kalaayana Studios",
+  "legalName": "Kalaayana Studios LLP",
+  "kicker": "Since the 19th century · Five generations",
+  "tagline": "Monumental sculpture, temple architecture and the living continuity of a Mysore artistic lineage.",
+  "description": "Kalaayana Studios LLP, Bangalore. Monumental landmarks, public sculptures, temple architecture, architectural installations, portrait and life sculptures in FRP, metal, concrete and GFRC.",
+  "nav": [
+    {
+      "href": "#story",
+      "label": "Our Story"
+    },
+    {
+      "href": "#expertise",
+      "label": "Expertise"
+    },
+    {
+      "href": "#landmarks",
+      "label": "Landmarks"
+    },
+    {
+      "href": "#temples",
+      "label": "Temple Architecture"
+    },
+    {
+      "href": "#portraits",
+      "label": "Portraits"
+    },
+    {
+      "href": "#murals",
+      "label": "Murals"
+    },
+    {
+      "href": "#contact",
+      "label": "Contact"
+    }
+  ],
+  "expertise": [
+    {
+      "no": "01",
+      "title": "Monumental Landmarks",
+      "body": "Reinforced concrete icons that define a skyline, engineered from armature to finish."
+    },
+    {
+      "no": "02",
+      "title": "Public Sculptures",
+      "body": "Civic and commemorative works sited across India, built to weather decades."
+    },
+    {
+      "no": "03",
+      "title": "Temple Architecture",
+      "body": "Facades, arches and gopura elements drawn from traditional canon."
+    },
+    {
+      "no": "04",
+      "title": "Architectural Installations",
+      "body": "Narrative installations and site-scaled compositions for campuses and precincts."
+    },
+    {
+      "no": "05",
+      "title": "Portrait & Life Sculptures",
+      "body": "Silicone, bronze and FRP likenesses rendered to life scale and beyond."
+    }
+  ],
+  "stats": [
+    {
+      "value": "5",
+      "suffix": "",
+      "label": "Generations"
+    },
+    {
+      "value": "85",
+      "suffix": " ft",
+      "label": "Tallest sculpture"
+    },
+    {
+      "value": "30",
+      "suffix": "+",
+      "label": "Landmark works"
+    },
+    {
+      "value": "4",
+      "suffix": "",
+      "label": "Core materials"
+    }
+  ],
+  "materials": [
+    "FRP",
+    "Metal",
+    "Concrete",
+    "GFRC"
+  ],
+  "sections": {
+    "landmarks": {
+      "eyebrow": "Our Major Projects",
+      "title": "Monumental Landmarks",
+      "lede": "Concrete reinforced icons raised across Karnataka, Telangana and Punjab."
+    },
+    "temples": {
+      "eyebrow": "Temple Architecture",
+      "title": "Facades & arches",
+      "lede": "Traditional temple form executed in reinforced concrete at architectural scale."
+    },
+    "portraits": {
+      "eyebrow": "Portraits and Life Sculptures",
+      "title": "Likeness at every scale",
+      "lede": "Silicone, bronze and FRP portraiture — from two-foot busts to eight-foot standing figures."
+    },
+    "murals": {
+      "eyebrow": "Murals",
+      "title": "Relief & panel work",
+      "lede": "Wall-mounted narrative panels and reliefs, principally in FRP."
+    }
+  },
+  "story": [
+    "Embarking upon a legacy spanning five generations, our family lineage is steeped in artistic brilliance. Commencing in the 19th century, our esteemed ancestor, <strong>Sri Tippaji</strong>, emerged as a luminary in the realm of Mysore style painting. His magnum opus, <em>“Vishwaroopa Darshana,”</em> stands as an epitome of excellence within the traditional Mysore painting genre, earning him the distinction of a Gold Medal recipient from the British government.",
+    "Continuing this rich heritage, great grandson of Sri Tippaji, <strong>Shilpi K. Narayana Rao</strong>, distinguished himself through exceptional contributions to traditional temple architecture and the crafting of monumental cement sculptures, gracing diverse landscapes across India.",
+    "Carrying the torch of inspiration ignited by these revered masters, <strong>Vishal Kavatekar</strong>, alongside a devoted team of artists, founded Kalaayana Studios. Here, the confluence of tradition and innovation unfolds, embodying a commitment to artistic excellence and a profound connection with our storied artistic legacy."
+  ],
+  "contact": {
+    "email": "kalaayanastudios@gmail.com",
+    "phones": [
+      "+918886870796",
+      "+918310660720"
+    ],
+    "instagram": "kalaayana_studios",
+    "address": [
+      "No. 46, 47, BM Kaval,",
+      "Kengeri, Bangalore South,",
+      "Karnataka — 560060"
+    ]
+  }
+}

@@ -8,6 +8,6 @@
 
   // No `main` script: assets-only Worker, serving the repo root as a static site.
   "assets": {
-    "directory": "./"
+    "directory": "./dist"
   }
 }

@@ -63,6 +63,17 @@ Production is unaffected by that swap: `kalaayanastudios.com` serves the
 holding page at its root until a release deliberately changes which file is
 `index.html`.
 
+## Building locally
+
+```bash
+npm ci
+npm run dev      # http://localhost:4321
+npm run build    # writes dist/
+npm run check    # validates the build output and the project data
+```
+
+Content lives in `src/data`. Adding a project is one object in `projects.json`.
+
 ## Versioning
 
 [Semantic Versioning](https://semver.org). `VERSION` at the repo root is the

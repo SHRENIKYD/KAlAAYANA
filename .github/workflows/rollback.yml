@@ -30,9 +30,16 @@ jobs:
           ref: ${{ inputs.tag }}
 
       - name: Confirm the tag resolved
-        run: |
-          echo "Rolling production back to ${{ inputs.tag }} ($GITHUB_SHA)"
-          test -f index.html
+        run: echo "Rolling production back to ${{ inputs.tag }} ($GITHUB_SHA)"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+
 
       - name: Stamp the build
         run: ./scripts/stamp.sh production "$GITHUB_SHA" "${{ inputs.tag }}"
@@ -40,6 +47,6 @@ jobs:
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: ./dist
       - id: deployment
         uses: actions/deploy-pages@v4

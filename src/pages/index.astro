@@ -1,0 +1,41 @@
+---
+/**
+ * The public holding page. Production serves this at /; the staging build
+ * swaps it with the site under development.
+ */
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import site from '../data/site.json';
+import hero from '../images/hero-hanuman.jpg';
+import holdingCss from '../styles/holding.css?raw';
+
+const fonts = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Jost:wght@200;300;400&display=swap';
+const title = 'Kalaayana Studios — Monumental Sculpture & Temple Architecture';
+const description = `${site.description.replace(/\.$/, '')}. Website coming soon.`;
+---
+<Base {title} {description} indexable fonts={fonts}>
+  <style slot="head" is:inline set:html={holdingCss} />
+
+  <main class="stage">
+    <div class="bg">
+      <Image src={hero} alt="" widths={[640, 960, 1400, 1920]} formats={['avif', 'webp']} />
+    </div>
+    <div class="veil"></div>
+
+    <div class="inner">
+      <p class="kicker">{site.kicker}</p>
+      <h1 class="logo-wrap" style="margin:0">
+        <img class="logo" src="/assets/img/logo.png" alt={site.name} width="736" height="391">
+      </h1>
+      <p class="tagline">{site.tagline}</p>
+      <div class="soon"><i></i><span>Coming Soon</span><i></i></div>
+    </div>
+
+    <footer class="foot">
+      <a href={`mailto:${site.contact.email}`}>{site.contact.email}</a>
+      <a href={`tel:${site.contact.phones[0]}`}>+91 88868 70796</a>
+      <a href={`https://instagram.com/${site.contact.instagram}`} target="_blank" rel="noopener">Instagram</a>
+      <span>Bangalore, Karnataka</span>
+    </footer>
+  </main>
+</Base>

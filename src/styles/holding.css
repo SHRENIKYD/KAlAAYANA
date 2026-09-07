@@ -1,28 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kalaayana Studios — Monumental Sculpture &amp; Temple Architecture</title>
-<link rel="canonical" href="https://kalaayanastudios.com/">
-<meta name="description" content="Kalaayana Studios LLP, Bangalore. Monumental landmarks, public sculptures, temple architecture and portrait work in FRP, metal, concrete and GFRC. Website coming soon.">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Kalaayana Studios">
-<meta property="og:url" content="https://kalaayanastudios.com/">
-<meta property="og:title" content="Kalaayana Studios — Monumental Sculpture &amp; Temple Architecture">
-<meta property="og:description" content="Monumental landmarks, public sculptures, temple architecture and portrait work in FRP, metal, concrete and GFRC. Bangalore, Karnataka. Website coming soon.">
-<meta property="og:image" content="https://kalaayanastudios.com/assets/img/social-card.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Kalaayana Studios — Monumental Sculpture &amp; Temple Architecture">
-<meta name="twitter:description" content="Monumental landmarks, public sculptures, temple architecture and portrait work in FRP, metal, concrete and GFRC. Bangalore, Karnataka. Website coming soon.">
-<meta name="twitter:image" content="https://kalaayanastudios.com/assets/img/social-card.jpg">
-<link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
-<style>
 :root{
   --ink:#0A0908;
   --line:#5E503F;
@@ -86,28 +61,3 @@ body{
   *{animation:none!important;transition-duration:.01ms!important}
   .kicker,.logo,.tagline,.soon,.foot{opacity:1!important;transform:none!important}
 }
-</style>
-</head>
-<body>
-<main class="stage">
-  <div class="bg"><img src="assets/img/hero-hanuman.jpg" alt="" width="876" height="1558" fetchpriority="high"></div>
-  <div class="veil"></div>
-
-  <div class="inner">
-    <p class="kicker">Since the 19th century · Five generations</p>
-    <h1 class="logo-wrap" style="margin:0">
-      <img class="logo" src="assets/img/logo.png" alt="Kalaayana Studios" width="736" height="391">
-    </h1>
-    <p class="tagline">Monumental sculpture, temple architecture and the living continuity of a Mysore artistic lineage.</p>
-    <div class="soon"><i></i><span>Coming Soon</span><i></i></div>
-  </div>
-
-  <footer class="foot">
-    <a href="mailto:kalaayanastudios@gmail.com">kalaayanastudios@gmail.com</a>
-    <a href="tel:+918886870796">+91 88868 70796</a>
-    <a href="https://instagram.com/kalaayana_studios" target="_blank" rel="noopener">Instagram</a>
-    <span>Bangalore, Karnataka</span>
-  </footer>
-</main>
-</body>
-</html>
