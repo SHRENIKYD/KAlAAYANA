@@ -97,10 +97,13 @@ are separate and stay separate. `src/data` knows nothing about how it is
 rendered; templates know nothing about where data came from.
 
 **Single source of truth.** Every fact is defined once. Design tokens live in
-CSS custom properties only — the duplicate palette in `themes.html` is removed,
-because two definitions of one thing is a defect waiting to happen. Each project
-is one object in `projects.json`, feeding its card, its detail page, its
-translation and its images.
+CSS custom properties only, and each project is one object in `projects.json`,
+feeding its card, its detail page, its translation and its images.
+
+`themes.html` is the exception, deliberately: it is a comparison tool that
+exists to show eight palettes side by side, so holding all eight is its purpose
+rather than a second definition of the live one. It sits outside the site's
+dependency graph and ships as a static file.
 
 **Dependency direction points inward.** Presentation depends on the content
 schema. The schema does not know presentation exists. Renaming a CSS class must
@@ -167,7 +170,7 @@ staging before the next begins.
 
 | Version | Delivers | Visible change |
 | --- | --- | --- |
-| `1.1.0` | Astro build, `projects.json`, image pipeline | **None** — output byte-identical |
+| `1.1.0` | Astro build, `projects.json`, image pipeline | **None** — rendered output identical |
 | `1.2.0` | Real photographs, responsive variants | The site as intended |
 | `1.3.0` | Individual project pages | New URLs, internal links, sitemap |
 | `2.0.0` | Kannada alongside English | `/kn/` routes, hreflang, language switch |
@@ -175,6 +178,12 @@ staging before the next begins.
 `1.1.0` deliberately changes nothing visible. If the generator produces output
 that differs from the hand-written HTML, that is visible immediately rather than
 entangled with new photography.
+
+The bar is *rendered* equivalence, not byte equivalence. A generator will differ
+in whitespace and attribute order no matter what, so chasing identical bytes
+would waste effort on a property nobody can observe. It is verified by rendering
+both in a browser and comparing the resulting DOM, computed styles and
+screenshots.
 
 The bar is *rendered* equivalence, not byte equivalence. A generator will differ
 in whitespace and attribute order no matter what, so chasing identical bytes
