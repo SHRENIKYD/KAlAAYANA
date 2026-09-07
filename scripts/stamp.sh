@@ -12,6 +12,16 @@ ref="${3:-}"
 [[ -n "$commit" ]] || commit="$(git rev-parse HEAD 2>/dev/null || echo unknown)"
 [[ -n "$ref" ]] || ref="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
 
+# Staging is where the site is built and reviewed, so it serves the site under
+# development at its root. Production keeps the holding page at the root until
+# a release deliberately swaps them. Guarded on the environment name: only
+# "staging" swaps, so production and rollback builds are untouched.
+if [[ "$environment" == "staging" && -f preview.html && -f index.html ]]; then
+  mv index.html coming-soon.html
+  mv preview.html index.html
+  echo "staging: serving the site under development at / (holding page at /coming-soon.html)"
+fi
+
 version="$(tr -d '[:space:]' < VERSION)"
 short="${commit:0:8}"
 built="$(date -u +%Y-%m-%dT%H:%M:%SZ)"

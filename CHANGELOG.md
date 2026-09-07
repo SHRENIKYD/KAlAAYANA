@@ -10,6 +10,19 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.0.2] — 2026-09-07
+
+### Changed
+- Staging now serves the site under development at its root. `stamp.sh` swaps
+  `index.html` and `preview.html` when the environment is `staging`, so
+  `https://kalaayana.shrenikyd.workers.dev/` is the site being worked on, with
+  the holding page still reachable at `/coming-soon.html`.
+
+  Production is untouched: the swap is guarded on the environment name, and
+  only `staging` matches. Production and rollback builds pass `production`, CI
+  passes `ci`, so `kalaayanastudios.com` keeps serving the holding page from
+  the root exactly as before.
+
 ## [1.0.1] — 2026-09-07
 
 Holds the launch. The site is not ready to be public yet, so production goes
@@ -89,7 +102,8 @@ site staged behind it.
   `#22333B` cards, `#5E503F` rules, `#C6AC8F` accent, `#EAE0D5` text — with
   headings in Cinzel and body in Jost.
 
-[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v1.0.2...HEAD
+[1.0.2]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.0.2
 [1.0.1]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.0.1
 [1.0.0]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.0.0
 [0.1.1]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v0.1.1

@@ -25,6 +25,10 @@ exactly what is live.
 marked `noindex, nofollow`, and is reviewed on the private staging
 environment until it is signed off.
 
+Work happens on **https://kalaayana.shrenikyd.workers.dev/**, which serves the
+site under development at its root and is private behind Cloudflare Access.
+Only a `develop` → `main` release changes what the public domain shows.
+
 `1.0.0` launched the full site and `1.0.1` pulled it back pending
 verification. Relaunching is the same swap in reverse:
 
