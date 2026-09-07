@@ -7,7 +7,10 @@ import { Image } from 'astro:assets';
 import { photo } from '../lib/photos';
 
 interface Props {
-  project: { slug: string; title: string; scale: string; description: string; image: string; alt: string };
+  project: {
+    slug: string; title: string; scale: string; description: string;
+    images: { file: string; alt: string }[];
+  };
   /** Section route this card links into. Omit for a card that does not link. */
   href?: string;
   delay?: number;
@@ -18,12 +21,13 @@ const Tag = href ? 'a' : 'article';
 ---
 <Tag class="card" href={href} data-reveal data-delay={delay} data-tilt>
   <div class="card-media">
-    <Image src={photo(p.image)} alt={p.alt}
+    <Image src={photo(p.images[0].file)} alt={p.images[0].alt}
            widths={[400, 800, 1200]} formats={['avif', 'webp']} loading="lazy"
            sizes="(max-width: 620px) 92vw, (max-width: 1024px) 46vw, 30vw" />
   </div>
   <div class="card-body">
     <span class="card-scale">{p.scale}</span>
+    {p.images.length > 1 && <span class="card-count">{p.images.length} photographs</span>}
     <h3>{p.title}</h3>
     <p>{p.description}</p>
   </div>

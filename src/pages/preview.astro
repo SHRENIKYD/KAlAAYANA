@@ -33,12 +33,8 @@ const title = 'Kalaayana Studios — Monumental Sculpture & Temple Architecture'
  * shows its grid inline. Temple Architecture is the first converted; the rest
  * follow once the pattern is settled.
  */
-const galleries = [
-  { id: 'landmarks', alt: false, columns: 3, banner: false },
-  { id: 'temples',   alt: true,  columns: 4, banner: true  },
-  { id: 'portraits', alt: false, columns: 4, banner: false },
-  { id: 'murals',    alt: true,  columns: 4, banner: false },
-];
+/** Every section opens with a banner that leads to its own pages. */
+const galleries = ['landmarks', 'temples', 'portraits', 'murals'];
 
 const byGroup = (id: string) => projects.filter((p) => p.group === id);
 /** Reveal delays stagger across a row, then restart. */
@@ -128,40 +124,16 @@ const delay = (i: number, columns: number) => (i % columns) * 80;
     </div>
   </section>
 
-  {galleries.map((g) => (g.banner ? (
-    <SectionBanner id={g.id}
-                   eyebrow={site.sections[g.id].eyebrow}
-                   title={site.sections[g.id].title}
-                   lede={site.sections[g.id].lede}
-                   image={site.sections[g.id].banner}
-                   imageAlt={site.sections[g.id].bannerAlt}
-                   href={site.sections[g.id].href}
-                   count={byGroup(g.id).length} />
-  ) : (
-    <section class={`section gallery-section${g.alt ? ' alt' : ''}`} id={g.id}>
-      <div class="wrap">
-        <p class="eyebrow" data-reveal>{site.sections[g.id].eyebrow}</p>
-        <h2 class="section-title" data-reveal data-delay="80">{site.sections[g.id].title}</h2>
-        <p class="section-lede" data-reveal data-delay="160">{site.sections[g.id].lede}</p>
-        <div class={g.columns === 4 ? 'grid four' : 'grid'}>
-          {byGroup(g.id).map((p, i) => (
-            <article class={`card${p.wide ? ' wide' : ''}`} data-reveal data-delay={delay(i, g.columns)} data-tilt>
-              <div class="card-media">
-                <Image src={photo(p.image)} alt={p.alt}
-                       widths={[400, 800, 1200]} formats={['avif', 'webp']} loading="lazy"
-                       sizes="(max-width: 620px) 92vw, (max-width: 1024px) 46vw, 30vw" />
-              </div>
-              <div class="card-body">
-                <span class="card-scale">{p.scale}</span>
-                <h3>{p.title}</h3>
-                <p>{p.description}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  )))}
+  {galleries.map((id) => (
+    <SectionBanner id={id}
+                   eyebrow={site.sections[id].eyebrow}
+                   title={site.sections[id].title}
+                   lede={site.sections[id].lede}
+                   image={site.sections[id].banner}
+                   imageAlt={site.sections[id].bannerAlt}
+                   href={site.sections[id].href}
+                   count={byGroup(id).length} />
+  ))}
 
   <section class="section contact" id="contact">
     <div class="wrap contact-grid">

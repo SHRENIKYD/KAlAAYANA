@@ -134,6 +134,14 @@
       target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
     });
   });
+  /* The URL carries no fragment, so the browser's own scroll restoration would
+     drop a reload halfway down a page whose address says the top. Take it over:
+     a reload starts where the URL says it does. Back and forward still restore
+     position, because those are popstate rather than a reload. */
+  if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
+  var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+  if (!location.hash && nav && nav.type === 'reload') { window.scrollTo(0, 0); }
+
   /* A deep link still works: it scrolls, then the hash is dropped from the URL.
      Covers a fresh load and any later fragment navigation, such as back/forward. */
   function dropHash() {

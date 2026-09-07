@@ -93,7 +93,10 @@
     "landmarks": {
       "eyebrow": "Our Major Projects",
       "title": "Monumental Landmarks",
-      "lede": "Concrete reinforced icons raised across Karnataka, Telangana and Punjab."
+      "lede": "Concrete reinforced icons raised across Karnataka, Telangana and Punjab.",
+      "banner": "landmarks.jpg",
+      "bannerAlt": "The Samudra Manthana installation at Udupi, its ranks of figures ranged along the churning of the ocean",
+      "href": "/landmarks.html"
     },
     "temples": {
       "eyebrow": "Temple Architecture",
@@ -106,12 +109,18 @@
     "portraits": {
       "eyebrow": "Portraits and Life Sculptures",
       "title": "Likeness at every scale",
-      "lede": "Silicone, bronze and FRP portraiture — from two-foot busts to eight-foot standing figures."
+      "lede": "Silicone, bronze and FRP portraiture — from two-foot busts to eight-foot standing figures.",
+      "banner": "portraits.jpg",
+      "bannerAlt": "A cast bronze portrait bust lit from the side, the modelling of the face in low relief",
+      "href": "/portraits.html"
     },
     "murals": {
       "eyebrow": "Murals",
       "title": "Relief & panel work",
-      "lede": "Wall-mounted narrative panels and reliefs, principally in FRP."
+      "lede": "Wall-mounted narrative panels and reliefs, principally in FRP.",
+      "banner": "murals.jpg",
+      "bannerAlt": "A detail of the village-scenes relief, figures at work beneath palms and thatched roofs",
+      "href": "/murals.html"
     }
   },
   "story": [
