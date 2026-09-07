@@ -172,6 +172,10 @@
       {
         "file": "shree-varasiddhi-vinayaka-6.jpg",
         "alt": "A detail of a turned column and pierced stone screen on the Whitefield facade"
+      },
+      {
+        "file": "shree-varasiddhi-vinayaka-7.jpg",
+        "alt": "A carved niche on the Whitefield facade, Ganesha seated within a foliate arch"
       }
     ]
   },
@@ -285,6 +289,10 @@
       {
         "file": "field-marshal-kariappa-2.jpg",
         "alt": "The Kariappa figure in the workshop, cap in hand, before its finish was applied"
+      },
+      {
+        "file": "field-marshal-kariappa-3.jpg",
+        "alt": "A detail of the Kariappa figure's uniform, the belt and tunic pockets modelled in FRP"
       }
     ]
   },
@@ -430,16 +438,16 @@
     "description": "FRP standing figure.",
     "images": [
       {
+        "file": "general-siddhiah-3.jpg",
+        "alt": "The finished bronze Siddhiah figure saluting, in the workshop"
+      },
+      {
         "file": "general-siddhiah-1.jpg",
         "alt": "The seven-foot FRP figure of General Siddhiah, saluting, photographed in the workshop"
       },
       {
         "file": "general-siddhiah-2.jpg",
         "alt": "The Siddhiah figure in grey clay in the studio, before casting"
-      },
-      {
-        "file": "general-siddhiah-3.jpg",
-        "alt": "The finished bronze Siddhiah figure saluting, in the workshop"
       }
     ]
   },
