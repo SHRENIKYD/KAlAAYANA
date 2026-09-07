@@ -4,110 +4,289 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Kalaayana Studios — Monumental Sculpture &amp; Temple Architecture</title>
-<meta name="description" content="Kalaayana Studios LLP, Bangalore. Monumental landmarks, public sculptures, temple architecture and portrait work in FRP, metal, concrete and GFRC. Website coming soon.">
 <link rel="canonical" href="https://kalaayanastudios.com/">
+<meta name="description" content="Kalaayana Studios LLP, Bangalore. Monumental landmarks, public sculptures, temple architecture, architectural installations, portrait and life sculptures in FRP, metal, concrete and GFRC.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Kalaayana Studios">
 <meta property="og:url" content="https://kalaayanastudios.com/">
 <meta property="og:title" content="Kalaayana Studios — Monumental Sculpture &amp; Temple Architecture">
-<meta property="og:description" content="Monumental landmarks, public sculptures, temple architecture and portrait work in FRP, metal, concrete and GFRC. Bangalore, Karnataka. Website coming soon.">
+<meta property="og:description" content="Monumental landmarks, public sculptures, temple architecture and portrait work in FRP, metal, concrete and GFRC. Bangalore, Karnataka.">
 <meta property="og:image" content="https://kalaayanastudios.com/assets/img/social-card.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Kalaayana Studios — Monumental Sculpture &amp; Temple Architecture">
-<meta name="twitter:description" content="Monumental landmarks, public sculptures, temple architecture and portrait work in FRP, metal, concrete and GFRC. Bangalore, Karnataka. Website coming soon.">
+<meta name="twitter:description" content="Monumental landmarks, public sculptures, temple architecture and portrait work in FRP, metal, concrete and GFRC. Bangalore, Karnataka.">
 <meta name="twitter:image" content="https://kalaayanastudios.com/assets/img/social-card.jpg">
-<link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
-<style>
-:root{
-  --ink:#0A0908;
-  --line:#5E503F;
-  --gold:#C6AC8F;
-  --bone:#EAE0D5;
-  --muted:#AC957B;
-  --sans:"Jost","Helvetica Neue",Arial,sans-serif;
-  --serif:"Cinzel",Georgia,serif;
-  --ease:cubic-bezier(.22,.68,.28,1);
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;background:var(--ink);color:var(--bone);
-  font-family:var(--sans);font-weight:300;
-  -webkit-font-smoothing:antialiased;overflow:hidden;
-}
-.stage{position:relative;min-height:100svh;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;padding:56px 6vw 0;text-align:center;overflow:hidden}
-.bg{position:absolute;inset:0;z-index:0}
-.bg img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;
-  filter:saturate(.78) contrast(1.1) brightness(1.04);
-  animation:drift 26s var(--ease) infinite alternate}
-@keyframes drift{from{transform:scale(1)}to{transform:scale(1.07)}}
-.veil{position:absolute;inset:0;z-index:1;
-  background:radial-gradient(ellipse at 50% 40%,rgba(10,9,8,.06),rgba(10,9,8,.66) 78%),
-             linear-gradient(180deg,rgba(10,9,8,.60),rgba(10,9,8,.14) 34%,rgba(10,9,8,.72) 82%,var(--ink))}
-.inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;
-  margin:auto 0}
-.kicker{font-size:clamp(9px,1.5vw,11px);letter-spacing:.42em;text-transform:uppercase;
-  color:var(--gold);margin:0 0 26px;
-  opacity:0;animation:rise 1.1s var(--ease) .1s forwards}
-.logo{width:min(540px,76vw);height:auto;
-  filter:drop-shadow(0 6px 20px rgba(0,0,0,.95)) drop-shadow(0 22px 60px rgba(0,0,0,.75));
-  opacity:0;animation:rise 1.4s var(--ease) .25s forwards}
-.tagline{max-width:560px;margin:26px 0 0;color:var(--bone);opacity:0;
-  font-size:clamp(.92rem,1.7vw,1.08rem);line-height:1.75;
-  text-shadow:0 2px 14px rgba(0,0,0,.8);
-  animation:rise 1.2s var(--ease) .55s forwards}
-.soon{display:flex;align-items:center;gap:18px;margin-top:44px;
-  opacity:0;animation:rise 1.2s var(--ease) .8s forwards}
-.soon span{font-family:var(--serif);font-size:clamp(.82rem,1.7vw,1.05rem);
-  letter-spacing:.34em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
-.soon i{display:block;width:clamp(28px,9vw,88px);height:1px;
-  background:linear-gradient(90deg,transparent,var(--line))}
-.soon i:last-child{background:linear-gradient(90deg,var(--line),transparent)}
-.foot{position:relative;z-index:2;width:100%;padding:26px 0 30px;
-  display:flex;flex-wrap:wrap;justify-content:center;gap:10px 26px;
-  opacity:0;animation:rise 1.2s var(--ease) 1.05s forwards}
-.foot a,.foot span{font-size:clamp(10px,1.5vw,12px);letter-spacing:.16em;
-  text-transform:uppercase;color:var(--muted);text-decoration:none;
-  transition:color .35s var(--ease)}
-.foot a:hover{color:var(--gold)}
-@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
-@media(max-width:560px){
-  body{overflow:auto}
-  .stage{padding:44px 7vw 0}
-  .foot{gap:8px 18px}
-}
-@media(prefers-reduced-motion:reduce){
-  *{animation:none!important;transition-duration:.01ms!important}
-  .kicker,.logo,.tagline,.soon,.foot{opacity:1!important;transform:none!important}
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=dev">
+<link rel="icon" type="image/png" href="assets/img/favicon.png">
 </head>
 <body>
-<main class="stage">
-  <div class="bg"><img src="assets/img/hero-hanuman.jpg" alt="" width="876" height="1558" fetchpriority="high"></div>
-  <div class="veil"></div>
+<div class="scroll-progress" id="scrollProgress"></div>
 
-  <div class="inner">
-    <p class="kicker">Since the 19th century · Five generations</p>
-    <h1 class="logo-wrap" style="margin:0">
-      <img class="logo" src="assets/img/logo.png" alt="Kalaayana Studios" width="736" height="391">
-    </h1>
-    <p class="tagline">Monumental sculpture, temple architecture and the living continuity of a Mysore artistic lineage.</p>
-    <div class="soon"><i></i><span>Coming Soon</span><i></i></div>
+<header class="site-header" id="siteHeader">
+  <a class="brand" href="#top">
+    <img class="brand-mark" src="assets/img/logo-mark.png" alt="" width="736" height="348">
+    <span class="brand-text">Kalaayana<em>Studios</em></span>
+  </a>
+  <nav class="nav" id="nav">
+    <a href="#story">Our Story</a>
+    <a href="#expertise">Expertise</a>
+    <a href="#landmarks">Landmarks</a>
+    <a href="#temples">Temple Architecture</a>
+    <a href="#portraits">Portraits</a>
+    <a href="#murals">Murals</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+</header>
+
+<section class="hero" id="top">
+  <div class="hero-bg" data-parallax="0.35"><img src="assets/img/hero-hanuman.jpg" alt="" width="876" height="1558" fetchpriority="high"></div>
+  <div class="hero-veil"></div>
+  <div class="hero-inner">
+    <p class="hero-kicker" data-reveal>Since the 19th century · Five generations</p>
+    <h1 class="visually-hidden">Kalaayana Studios</h1>
+    <img class="hero-logo" src="assets/img/logo.png" alt="Kalaayana Studios" width="736" height="391">
+    <p class="hero-sub" data-reveal data-delay="200">Monumental sculpture, temple architecture and the living continuity of a Mysore artistic lineage.</p>
+    <div class="hero-cta" data-reveal data-delay="360">
+      <a class="btn btn-solid" href="#landmarks">View Major Projects</a>
+      <a class="btn btn-ghost" href="#contact">Commission a Work</a>
+    </div>
   </div>
+  <div class="scroll-hint"><span></span>Scroll</div>
+</section>
 
-  <footer class="foot">
-    <a href="mailto:kalaayanastudios@gmail.com">kalaayanastudios@gmail.com</a>
-    <a href="tel:+918886870796">+91 88868 70796</a>
-    <a href="https://instagram.com/kalaayana_studios" target="_blank" rel="noopener">Instagram</a>
-    <span>Bangalore, Karnataka</span>
-  </footer>
-</main>
+<section class="section story" id="story">
+  <div class="wrap story-grid">
+    <div class="story-copy">
+      <p class="eyebrow" data-reveal>Our Story</p>
+      <h2 class="section-title" data-reveal data-delay="80">A legacy spanning five generations</h2>
+      <p data-reveal data-delay="160">Embarking upon a legacy spanning five generations, our family lineage is steeped in artistic brilliance. Commencing in the 19th century, our esteemed ancestor, <strong>Sri Tippaji</strong>, emerged as a luminary in the realm of Mysore style painting. His magnum opus, <em>“Vishwaroopa Darshana,”</em> stands as an epitome of excellence within the traditional Mysore painting genre, earning him the distinction of a Gold Medal recipient from the British government.</p>
+      <p data-reveal data-delay="240">Continuing this rich heritage, great grandson of Sri Tippaji, <strong>Shilpi K. Narayana Rao</strong>, distinguished himself through exceptional contributions to traditional temple architecture and the crafting of monumental cement sculptures, gracing diverse landscapes across India.</p>
+      <p data-reveal data-delay="320">Carrying the torch of inspiration ignited by these revered masters, <strong>Vishal Kavatekar</strong>, alongside a devoted team of artists, founded Kalaayana Studios. Here, the confluence of tradition and innovation unfolds, embodying a commitment to artistic excellence and a profound connection with our storied artistic legacy.</p>
+      <p class="signoff" data-reveal data-delay="400">— Team, Kalaayana Studio</p>
+    </div>
+    <div class="story-media">
+      <figure class="story-fig" data-reveal data-delay="120"><img src="assets/img/story-01.svg" alt="Placeholder: Kalaayana Studios workshop" loading="lazy"></figure>
+      <figure class="story-fig offset" data-reveal data-delay="260"><img src="assets/img/story-02.svg" alt="Placeholder: five generations of craft" loading="lazy"></figure>
+    </div>
+  </div>
+  <div class="wrap stats">
+    <div class="stat" data-reveal><span class="num" data-count="5">0</span><span class="lab">Generations</span></div>
+    <div class="stat" data-reveal data-delay="100"><span class="num" data-count="85" data-suffix=" ft">0</span><span class="lab">Tallest sculpture</span></div>
+    <div class="stat" data-reveal data-delay="200"><span class="num" data-count="30" data-suffix="+">0</span><span class="lab">Landmark works</span></div>
+    <div class="stat" data-reveal data-delay="300"><span class="num" data-count="4">0</span><span class="lab">Core materials</span></div>
+  </div>
+</section>
+
+<section class="section expertise" id="expertise">
+  <div class="wrap">
+    <p class="eyebrow" data-reveal>Expertise</p>
+    <h2 class="section-title" data-reveal data-delay="80">What we build</h2>
+    <ul class="exp-list">
+      <li data-reveal><span class="exp-no">01</span><h3>Monumental Landmarks</h3><p>Reinforced concrete icons that define a skyline, engineered from armature to finish.</p></li>
+      <li data-reveal data-delay="80"><span class="exp-no">02</span><h3>Public Sculptures</h3><p>Civic and commemorative works sited across India, built to weather decades.</p></li>
+      <li data-reveal data-delay="160"><span class="exp-no">03</span><h3>Temple Architecture</h3><p>Facades, arches and gopura elements drawn from traditional canon.</p></li>
+      <li data-reveal data-delay="240"><span class="exp-no">04</span><h3>Architectural Installations</h3><p>Narrative installations and site-scaled compositions for campuses and precincts.</p></li>
+      <li data-reveal data-delay="320"><span class="exp-no">05</span><h3>Portrait &amp; Life Sculptures</h3><p>Silicone, bronze and FRP likenesses rendered to life scale and beyond.</p></li>
+    </ul>
+    <div class="materials" data-reveal>
+      <span class="mat-label">Materials</span>
+      <div class="mat-track"><span>FRP</span><span>Metal</span><span>Concrete</span><span>GFRC</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section gallery-section" id="landmarks">
+  <div class="wrap">
+    <p class="eyebrow" data-reveal>Our Major Projects</p>
+    <h2 class="section-title" data-reveal data-delay="80">Monumental Landmarks</h2>
+    <p class="section-lede" data-reveal data-delay="160">Concrete reinforced icons raised across Karnataka, Telangana and Punjab.</p>
+    <div class="grid">
+      <article class="card" data-reveal data-tilt>
+        <div class="card-media"><img src="assets/img/landmark-01.svg" alt="Placeholder image: 85 foot Hanuman statue at Hangluru" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">85 ft</span><h3>Hanuman, Hangluru</h3><p>Concrete reinforced. Hangluru, Kundapura, Karnataka.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="80" data-tilt>
+        <div class="card-media"><img src="assets/img/landmark-02.svg" alt="Placeholder image: 75 foot Hanuman statue at Tumkuru" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">75 ft</span><h3>Hanuman, Tumkuru</h3><p>Concrete reinforced. Tumkuru, Karnataka.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="160" data-tilt>
+        <div class="card-media"><img src="assets/img/landmark-03.svg" alt="Placeholder image: 65 foot Panchamukhi Hanuman statue at Surendrapuri" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">65 ft</span><h3>Panchamukhi Hanuman</h3><p>Concrete reinforced. Surendrapuri, Hyderabad.</p></div>
+      </article>
+      <article class="card" data-reveal data-tilt>
+        <div class="card-media"><img src="assets/img/landmark-04.svg" alt="Placeholder image: 35 foot Samudra Manthana installation at Udupi" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">35 ft</span><h3>Samudra Manthana</h3><p>Concrete reinforced installation. Udupi, Karnataka.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="80" data-tilt>
+        <div class="card-media"><img src="assets/img/landmark-05.svg" alt="Placeholder image: 35 foot Shiva statue at Hubli" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">35 ft</span><h3>Shiva, Hubli</h3><p>Concrete reinforced. Hubli, Karnataka.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="160" data-tilt>
+        <div class="card-media"><img src="assets/img/landmark-06.svg" alt="Placeholder image: 10 foot Buddha statue at Bengaluru" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">10 ft</span><h3>Buddha, Bengaluru</h3><p>Concrete reinforced. Bengaluru, Karnataka.</p></div>
+      </article>
+      <article class="card wide" data-reveal data-tilt>
+        <div class="card-media"><img src="assets/img/landmark-07.svg" alt="Placeholder image: 25 foot Hanuman statue in Punjab" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">25 ft</span><h3>Hanuman, Punjab</h3><p>Concrete reinforced. Punjab, India.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section gallery-section alt" id="temples">
+  <div class="wrap">
+    <p class="eyebrow" data-reveal>Temple Architecture</p>
+    <h2 class="section-title" data-reveal data-delay="80">Facades &amp; arches</h2>
+    <p class="section-lede" data-reveal data-delay="160">Traditional temple form executed in reinforced concrete at architectural scale.</p>
+    <div class="grid four">
+      <article class="card" data-reveal data-tilt>
+        <div class="card-media"><img src="assets/img/temple-01.svg" alt="Placeholder image: temple facade, Whitefield" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">30 ft</span><h3>Shree Varasiddhi Vinayaka</h3><p>Temple facade. Whitefield, Bengaluru, Karnataka.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="80" data-tilt>
+        <div class="card-media"><img src="assets/img/temple-02.svg" alt="Placeholder image: temple arch, Chikkanayakanahalli" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">61 ft</span><h3>Shree Anjaneya</h3><p>Temple arch. Chikkanayakanahalli, Karnataka.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="160" data-tilt>
+        <div class="card-media"><img src="assets/img/temple-03.svg" alt="Placeholder image: temple arch, Shivamogga" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">25 ft</span><h3>Shree Manjunatha</h3><p>Temple arch. Shivamogga, Karnataka.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="240" data-tilt>
+        <div class="card-media"><img src="assets/img/temple-04.svg" alt="Placeholder image: temple arch, Moodigere" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">25 ft</span><h3>Shree Veeranjaneya</h3><p>Temple arch. Moodigere, Karnataka.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section gallery-section" id="portraits">
+  <div class="wrap">
+    <p class="eyebrow" data-reveal>Portraits and Life Sculptures</p>
+    <h2 class="section-title" data-reveal data-delay="80">Likeness at every scale</h2>
+    <p class="section-lede" data-reveal data-delay="160">Silicone, bronze and FRP portraiture — from two-foot busts to eight-foot standing figures.</p>
+    <div class="grid four">
+      <article class="card" data-reveal data-tilt>
+        <div class="card-media"><img src="assets/img/portrait-01.svg" alt="Placeholder image: life sized silicone statue" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">Life size</span><h3>Sri Siddaramaiah</h3><p>Silicone life statue. Chief Minister of Karnataka.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="80" data-tilt>
+        <div class="card-media"><img src="assets/img/portrait-02.svg" alt="Placeholder image: 8 foot FRP statue of Field Marshal Kariappa" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">8 ft</span><h3>Field Marshal Kariappa</h3><p>FRP standing figure.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="160" data-tilt>
+        <div class="card-media"><img src="assets/img/portrait-03.svg" alt="Placeholder image: bronze portrait bust" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">2 ft</span><h3>Bronze Portrait I</h3><p>Cast bronze bust.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="240" data-tilt>
+        <div class="card-media"><img src="assets/img/portrait-04.svg" alt="Placeholder image: bronze portrait bust" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">2 ft</span><h3>Bronze Portrait II</h3><p>Cast bronze bust.</p></div>
+      </article>
+      <article class="card" data-reveal data-tilt>
+        <div class="card-media"><img src="assets/img/portrait-05.svg" alt="Placeholder image: bronze portrait bust" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">2 ft</span><h3>Bronze Portrait III</h3><p>Cast bronze bust.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="80" data-tilt>
+        <div class="card-media"><img src="assets/img/portrait-06.svg" alt="Placeholder image: Padmapani statue in FRP" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">4 ft</span><h3>Padmapani</h3><p>FRP figure.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="160" data-tilt>
+        <div class="card-media"><img src="assets/img/portrait-07.svg" alt="Placeholder image: Kanakadasa sculpture series" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">Series</span><h3>Saint Kanakadasa</h3><p>Installations from the life story of the saint. Bangalore University.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="240" data-tilt>
+        <div class="card-media"><img src="assets/img/portrait-08.svg" alt="Placeholder image: 7 foot statue of Shekon" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">7 ft</span><h3>Shekon</h3><p>Installed at Air Force camp, Hyderabad.</p></div>
+      </article>
+      <article class="card" data-reveal data-tilt>
+        <div class="card-media"><img src="assets/img/portrait-09.svg" alt="Placeholder image: 7 foot FRP statue of General Siddhiah" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">7 ft</span><h3>General Siddhiah</h3><p>FRP standing figure.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section gallery-section alt" id="murals">
+  <div class="wrap">
+    <p class="eyebrow" data-reveal>Murals</p>
+    <h2 class="section-title" data-reveal data-delay="80">Relief &amp; panel work</h2>
+    <p class="section-lede" data-reveal data-delay="160">Wall-mounted narrative panels and reliefs, principally in FRP.</p>
+    <div class="grid four">
+      <article class="card" data-reveal data-tilt>
+        <div class="card-media"><img src="assets/img/mural-01.svg" alt="Placeholder image: Surya mural" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">10 ft dia</span><h3>Surya Mural</h3><p>Circular relief.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="80" data-tilt>
+        <div class="card-media"><img src="assets/img/mural-02.svg" alt="Placeholder image: Krishna relief" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">6 × 4 ft</span><h3>Krishna</h3><p>FRP relief.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="160" data-tilt>
+        <div class="card-media"><img src="assets/img/mural-03.svg" alt="Placeholder image: village scenic panel" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">Panel</span><h3>Village Scenes</h3><p>Scenic views of a village, made in FRP.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="240" data-tilt>
+        <div class="card-media"><img src="assets/img/mural-04.svg" alt="Placeholder image: relief portrait of Ananth Kumar" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">Relief</span><h3>Mr. Ananth Kumar</h3><p>Former minister from Karnataka.</p></div>
+      </article>
+      <article class="card" data-reveal data-tilt>
+        <div class="card-media"><img src="assets/img/mural-05.svg" alt="Placeholder image: Yakshagana panel" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">8 × 4 ft</span><h3>Yakshagana</h3><p>FRP panel.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="80" data-tilt>
+        <div class="card-media"><img src="assets/img/mural-06.svg" alt="Placeholder image: Radha Krishna panel" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">8 × 6 ft</span><h3>Radha Krishna</h3><p>FRP panel.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="160" data-tilt>
+        <div class="card-media"><img src="assets/img/mural-07.svg" alt="Placeholder image: Goddess Saraswathi panel" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">8 × 8 ft</span><h3>Goddess Saraswathi</h3><p>FRP panel.</p></div>
+      </article>
+      <article class="card" data-reveal data-delay="240" data-tilt>
+        <div class="card-media"><img src="assets/img/mural-08.svg" alt="Placeholder image: FRP relief panel" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">8 × 4 ft</span><h3>Relief Panel</h3><p>FRP panel.</p></div>
+      </article>
+      <article class="card" data-reveal data-tilt>
+        <div class="card-media"><img src="assets/img/mural-09.svg" alt="Placeholder image: relief of Sri Siddaramaiah" loading="lazy"></div>
+        <div class="card-body"><span class="card-scale">6 × 4 ft</span><h3>Sri Siddaramaiah</h3><p>Chief Minister of Karnataka. FRP relief.</p></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section contact" id="contact">
+  <div class="wrap contact-grid">
+    <div>
+      <p class="eyebrow" data-reveal>Contact Us</p>
+      <h2 class="section-title" data-reveal data-delay="80">Kalaayana Studios LLP</h2>
+      <address data-reveal data-delay="160">
+        No. 46, 47, BM Kaval,<br>Kengeri, Bangalore South,<br>Karnataka — 560060
+      </address>
+    </div>
+    <ul class="contact-list">
+      <li data-reveal><span>Email</span><a href="mailto:kalaayanastudios@gmail.com">kalaayanastudios@gmail.com</a></li>
+      <li data-reveal data-delay="80"><span>Instagram</span><a href="https://instagram.com/kalaayana_studios" target="_blank" rel="noopener">kalaayana_studios</a></li>
+      <li data-reveal data-delay="160"><span>Phone</span><a href="tel:+918886870796">+91 88868 70796</a></li>
+      <li data-reveal data-delay="240"><span>Phone</span><a href="tel:+918310660720">+91 83106 60720</a></li>
+    </ul>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>© <span id="year"></span> Kalaayana Studios LLP</span>
+    <span class="footer-note">All imagery on this page is placeholder artwork.</span>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" aria-hidden="true">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+  <figure><img id="lightboxImg" src="" alt=""><figcaption id="lightboxCap"></figcaption></figure>
+</div>
+
+<script src="assets/js/main.js?v=dev"></script>
 </body>
 </html>
