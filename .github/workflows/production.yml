@@ -64,10 +64,15 @@ jobs:
             exit 0
           fi
 
+          # The runner has no committer identity, and an annotated tag needs one.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
           # Pull this version's section out of the changelog for the release body.
-          notes="$(awk -v v="## \\[$VERSION\\]" '
-            $0 ~ v {found=1; next}
-            found && /^## \[/ {exit}
+          # Matched literally: a bracketed version is not a usable awk regex.
+          notes="$(awk -v tag="## [$VERSION]" '
+            index($0, tag) == 1 {found=1; next}
+            found && index($0, "## [") == 1 {exit}
             found {print}
           ' CHANGELOG.md)"
           [ -n "$notes" ] || notes="Release $tag"
