@@ -40,7 +40,7 @@ Access, so only allowed accounts can open it. Its settings:
 | Setting | Value |
 | --- | --- |
 | Production branch | `develop` |
-| Build command | `bash scripts/stamp.sh staging` |
+| Build command | `npm run build:staging` |
 | Deploy command | `npx wrangler deploy` |
 | Builds for non-production branches | on — gives every branch its own URL |
 | Protect with Cloudflare Access | on |
@@ -50,14 +50,27 @@ scripts, workflows and docs out of what is served. The build command is what
 makes staging carry a real version — without it staging would serve `?v=dev`
 forever and cache stale assets.
 
+The build command is a single npm script on purpose. It expands to
+`astro build && bash scripts/stamp.sh staging`, and both halves are required:
+Cloudflare installs dependencies itself but never runs the build, so without
+`astro build` there is no `dist/` and `scripts/stamp.sh` aborts. Keeping the
+two steps in `package.json` rather than in the dashboard field means they are
+version-controlled and reviewed, and the dashboard holds one token that cannot
+lose half of itself.
+
+Run `npm run check` against a plain `npm run build`, not after
+`npm run build:staging`. The staging stamp swaps `index.html` and
+`preview.html`, and the checks read the unswapped build — that is the order
+`.github/workflows/ci.yml` uses.
+
 **Staging is where the work happens.**
 
     https://kalaayana.shrenikyd.workers.dev/
 
 Its root serves the site under development — the build swaps `index.html` and
 `preview.html` for the `staging` environment only. The holding page is still
-there at `/coming-soon.html`. Cloudflare Access sits in front, so only you can
-open it.
+there at `/coming-soon.html`. Cloudflare Access sits in front, so only
+permitted accounts and email addresses can open it.
 
 Production is unaffected by that swap: `kalaayanastudios.com` serves the
 holding page at its root until a release deliberately changes which file is
