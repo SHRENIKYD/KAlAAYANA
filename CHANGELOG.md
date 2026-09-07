@@ -10,6 +10,24 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.0.1] — 2026-09-07
+
+Holds the launch. The site is not ready to be public yet, so production goes
+back to the holding page while the full site is verified on staging.
+
+### Changed
+- `index.html` is the **Coming Soon** holding page again, indexable with its
+  canonical tag, so `kalaayanastudios.com` shows it to visitors.
+- The full site returns to `preview.html`, marked `noindex, nofollow` with no
+  canonical tag, so it cannot be indexed or compete with the holding page
+  while it is unfinished.
+- `scripts/check.py` guards `preview.html` again rather than
+  `coming-soon.html`.
+
+### Note
+`1.0.0` remains tagged and is a valid, deployable release. Relaunching is the
+same file swap in reverse, and will be `1.1.0`.
+
 ## [1.0.0] — 2026-09-07
 
 Launch. The full site replaces the holding page at `kalaayanastudios.com`.
@@ -71,7 +89,8 @@ site staged behind it.
   `#22333B` cards, `#5E503F` rules, `#C6AC8F` accent, `#EAE0D5` text — with
   headings in Cinzel and body in Jost.
 
-[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.0.1
 [1.0.0]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.0.0
 [0.1.1]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v0.1.1
 [0.1.0]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v0.1.0

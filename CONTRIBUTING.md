@@ -50,8 +50,9 @@ scripts, workflows and docs out of what is served. The build command is what
 makes staging carry a real version — without it staging would serve `?v=dev`
 forever and cache stale assets.
 
-Staging serves the same tree as production, so `<staging-url>/` is the live
-site. The retired holding page remains at `/coming-soon.html`.
+Production serves the holding page, and so does staging at `/`. Review the
+full site at `<staging-url>/preview.html` — behind Cloudflare Access, so only
+you can open it.
 
 ## Versioning
 
