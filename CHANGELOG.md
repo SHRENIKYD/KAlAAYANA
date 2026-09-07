@@ -47,6 +47,23 @@ is a holding page. `1.0.0` marks the launch of the full site.
   Latin wordmark — two readings of the same name in a 96px bar. The mark is
   gone; `KALAAYANA / STUDIOS` remains. The Kannada logo still leads the hero
   and the holding page, where it has room to be read.
+- The favicon is a bone circle carrying the leading glyph of the Kannada
+  wordmark in ink, cut from `logo.png` itself rather than redrawn. It was a
+  dark square holding the whole wordmark, which is 2.2x wider than it is tall
+  and rendered as an unreadable smudge at the 16px browsers actually draw.
+  One glyph reads at every size, and a light mark stands out against dark
+  browser chrome.
+- The hero photograph is sharper. It was 876x1558 — the resolution of the file
+  originally supplied — stretched across 2880 device pixels on a 1440px screen
+  at 2x, a 3.3x upscale, which is what made it look soft. The company profile
+  PDF holds the same frame at 1590x1967, so the hero now runs from that: no
+  upscale at all on a phone, and 1.8x instead of 3.3x on desktop.
+- Hero framing follows from that. The PDF frame is tighter, so `object-position`
+  moves from `50% 30%` to `50% 0%` and the parallax overscan from 12% to 3%,
+  which brings the face back into view. The overscan was only ever a safety
+  margin — the parallax translates the layer down while the page scrolls up, so
+  it cannot open a gap; measured across the hero's whole scroll range at both
+  widths and at every overscan value down to 0, the gap is 0px.
 - The native scrollbar is hidden on both mobile and desktop. The 2px progress
   bar at the top of the page already reports scroll position, so the two were
   redundant. Scrolling is untouched — wheel, touch, keyboard and anchor links
