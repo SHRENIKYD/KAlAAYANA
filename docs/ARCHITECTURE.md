@@ -42,13 +42,28 @@ Individual project pages and a second language mean 28 projects × 2 languages �
 defeat their purpose, since project pages exist largely for search and must be
 real HTML at real URLs.
 
-**Eleventy** generates them. It is small and mature, takes JSON data files
-directly, has an i18n plugin, and `eleventy-img` produces responsive variants
-with build caching. It emits plain HTML with no client framework, so abandoning
-it later leaves working pages behind rather than a rewrite.
+**Astro** generates them. Content collections validate the project data against
+a schema at build time, so a missing image or a mistyped field fails the build
+instead of shipping. `astro:assets` produces responsive variants without a
+plugin, and i18n routing is first-class. Nothing ships to the browser unless
+asked for: the output is static HTML with zero JavaScript, exactly as now.
 
 The site remains 100% static. Hosting, DNS, Access and the release pipeline are
 unchanged. Only the origin of the HTML changes.
+
+Rejected, and why:
+
+- **Eleventy** — excellent and mature, and the first choice here. Ruled out by
+  the commerce horizon below: it is a pure static generator with no server
+  story, so reaching commerce would mean replacing it or bolting separate
+  infrastructure alongside it.
+- **Next.js, SvelteKit and similar** — ship a JavaScript runtime to render text
+  and photographs that never change. The site's most valuable technical
+  property is that it is plain HTML which renders instantly on a mobile
+  connection. These trade that away for conveniences a portfolio does not need.
+- **Tailwind** — the existing 204 lines of hand-written CSS with custom
+  properties do the job and the tokens are already clean. Replacing them with
+  utility classes is a rewrite that buys nothing.
 
 ### Images are processed at build time
 
@@ -68,6 +83,61 @@ object — no markup, and no way for one card to drift from the others.
 Enquiries continue through `mailto:` and `tel:` links. Rejected: a form endpoint
 would add a service, a secret and a spam surface to a site that otherwise has
 none. Revisit if enquiry volume justifies it.
+
+## Engineering principles
+
+The intent is a codebase that stays principled as it grows into an application.
+What that means concretely differs from what the words usually imply, so it is
+worth being exact.
+
+### Applied from the start
+
+**Separation of concerns.** Content, presentation, behaviour and build tooling
+are separate and stay separate. `src/data` knows nothing about how it is
+rendered; templates know nothing about where data came from.
+
+**Single source of truth.** Every fact is defined once. Design tokens live in
+CSS custom properties only — the duplicate palette in `themes.html` is removed,
+because two definitions of one thing is a defect waiting to happen. Each project
+is one object in `projects.json`, feeding its card, its detail page, its
+translation and its images.
+
+**Dependency direction points inward.** Presentation depends on the content
+schema. The schema does not know presentation exists. Renaming a CSS class must
+never require touching data.
+
+**Open for extension, closed for modification.** Adding a project means adding
+data, never editing rendering code. This is the concrete, useful form of the
+principle here — if adding the twenty-ninth project requires a template change,
+the design is wrong.
+
+**Validate at the boundary.** Content collections carry schemas. A missing
+image, a malformed dimension or a mistyped field fails the build rather than
+reaching a visitor. Errors surface where they are cheap.
+
+**Composition over repetition.** One project template, not twenty-eight cards.
+One layout, not four page shells that drift apart.
+
+### Deliberately deferred
+
+Layered architecture — entities, use cases, repositories, interface adapters —
+and dependency inversion through interfaces are **not** applied now, and that is
+a decision rather than an oversight.
+
+Those patterns exist to protect domain logic from infrastructure. This site has
+no domain logic. There are no business rules, no invariants, no state
+transitions — it renders content. Adding those layers today would create
+indirection with nothing behind it: more files, more concepts, no protection,
+and a codebase that is harder to change while looking more rigorous.
+
+**Trigger for revisiting:** the first real business rule. Commerce brings
+pricing, tax, inventory and orders — genuine domain logic with invariants worth
+protecting. At that point the boundary is drawn properly: domain logic that
+knows nothing about Stripe, Cloudflare or Astro, with those as replaceable
+details at the edges.
+
+The preparation for that is not building the layers early. It is keeping content
+and presentation clean enough that a domain layer has somewhere to land.
 
 ## Target structure
 
@@ -97,7 +167,7 @@ staging before the next begins.
 
 | Version | Delivers | Visible change |
 | --- | --- | --- |
-| `1.1.0` | Eleventy build, `projects.json`, image pipeline | **None** — output byte-identical |
+| `1.1.0` | Astro build, `projects.json`, image pipeline | **None** — output byte-identical |
 | `1.2.0` | Real photographs, responsive variants | The site as intended |
 | `1.3.0` | Individual project pages | New URLs, internal links, sitemap |
 | `2.0.0` | Kannada alongside English | `/kn/` routes, hreflang, language switch |
@@ -108,11 +178,39 @@ entangled with new photography.
 
 Issues 3 and 4 are small and get fixed inside `1.1.0`.
 
+## Commerce, in one to two years
+
+The studio expects to sell work through the site eventually. **Nothing is being
+built for that now** — no product schema, no cart scaffolding, no
+"commerce-ready" abstractions. In two years the tooling will have moved and,
+more to the point, what is being sold will actually be known. Structure invented
+today would be wrong in ways that cannot be predicted now, and would be carried
+the whole way.
+
+What keeps the door open costs nothing extra and is already in the plan: a
+stack that can grow, cleanly modelled content, and stable URLs.
+
+The specific property that matters is Astro's hybrid rendering. A site is static
+by default and individual routes opt into server rendering later. Adding
+commerce means adding the Cloudflare adapter and making, say, `/shop/checkout`
+server-rendered, while every other page stays exactly as fast as it is today.
+The cost is paid only where it is used.
+
+The surrounding platform is already in place: Cloudflare for the adapter, R2 for
+product imagery, D1 for orders if it ever comes to that.
+
+Worth stating plainly, because it is a business project rather than a website
+feature: for a sculpture studio the cart is the easy part. Payments are an
+afternoon. GST, shipping work that is heavy and fragile, insurance, breakage
+liability, returns on bespoke pieces and the legal pages that must exist are the
+real project. Another reason to decide it later with information rather than now
+without any.
+
 ## Known risks
 
 - **Build step in two places.** GitHub Actions and the Cloudflare build command
   both need Node and `npm ci`. Most of `1.1.0`'s risk lives here, not in
-  Eleventy itself.
+  Astro itself.
 - **Kannada copy.** Structure and routing are mechanical; the words are the
   studio's public voice and must be written or reviewed by a native speaker
   before publishing. A Kannada webfont also adds page weight.
