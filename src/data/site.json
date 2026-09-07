@@ -98,7 +98,10 @@
     "temples": {
       "eyebrow": "Temple Architecture",
       "title": "Facades & arches",
-      "lede": "Traditional temple form executed in reinforced concrete at architectural scale."
+      "lede": "Traditional temple form executed in reinforced concrete at architectural scale.",
+      "banner": "temples.jpg",
+      "bannerAlt": "The Shree Varasiddhi Vinayaka temple facade at Whitefield lit at dusk, its carved tiers picked out in gold",
+      "href": "/temples.html"
     },
     "portraits": {
       "eyebrow": "Portraits and Life Sculptures",

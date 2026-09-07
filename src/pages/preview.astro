@@ -6,6 +6,7 @@
 import { Image, type ImageMetadata } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import site from '../data/site.json';
+import SectionBanner from '../components/SectionBanner.astro';
 import projects from '../data/projects.json';
 import hero from '../images/hero-hanuman.jpg';
 import storyDrawing from '../images/story-drawing.jpg';
@@ -27,11 +28,16 @@ const fonts = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&
 const title = 'Kalaayana Studios — Monumental Sculpture & Temple Architecture';
 
 /** Gallery sections in page order, with the alternating ground and grid width. */
+/**
+ * A section either opens with a banner that leads to its own pages, or still
+ * shows its grid inline. Temple Architecture is the first converted; the rest
+ * follow once the pattern is settled.
+ */
 const galleries = [
-  { id: 'landmarks', alt: false, columns: 3 },
-  { id: 'temples',   alt: true,  columns: 4 },
-  { id: 'portraits', alt: false, columns: 4 },
-  { id: 'murals',    alt: true,  columns: 4 },
+  { id: 'landmarks', alt: false, columns: 3, banner: false },
+  { id: 'temples',   alt: true,  columns: 4, banner: true  },
+  { id: 'portraits', alt: false, columns: 4, banner: false },
+  { id: 'murals',    alt: true,  columns: 4, banner: false },
 ];
 
 const byGroup = (id: string) => projects.filter((p) => p.group === id);
@@ -122,7 +128,16 @@ const delay = (i: number, columns: number) => (i % columns) * 80;
     </div>
   </section>
 
-  {galleries.map((g) => (
+  {galleries.map((g) => (g.banner ? (
+    <SectionBanner id={g.id}
+                   eyebrow={site.sections[g.id].eyebrow}
+                   title={site.sections[g.id].title}
+                   lede={site.sections[g.id].lede}
+                   image={site.sections[g.id].banner}
+                   imageAlt={site.sections[g.id].bannerAlt}
+                   href={site.sections[g.id].href}
+                   count={byGroup(g.id).length} />
+  ) : (
     <section class={`section gallery-section${g.alt ? ' alt' : ''}`} id={g.id}>
       <div class="wrap">
         <p class="eyebrow" data-reveal>{site.sections[g.id].eyebrow}</p>
@@ -146,7 +161,7 @@ const delay = (i: number, columns: number) => (i % columns) * 80;
         </div>
       </div>
     </section>
-  ))}
+  )))}
 
   <section class="section contact" id="contact">
     <div class="wrap contact-grid">

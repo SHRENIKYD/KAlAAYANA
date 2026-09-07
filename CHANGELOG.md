@@ -11,6 +11,18 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Added
+- **Sections can open with a banner instead of a grid.** Temple Architecture is
+  the first: the home page now shows the section name over a photograph of the
+  Whitefield facade at dusk, with a single **View All** button. It follows the
+  divider pages in the company profile PDF.
+- `/temples.html` — the section gallery, all four temple projects.
+- `/temples/<slug>.html` — each project on its own page, generated from the
+  data, with scale, description, breadcrumbs and the rest of the section
+  beneath. Adding a project to `projects.json` adds its page; no route is
+  written by hand.
+- `src/components/ProjectCard.astro` and `SectionBanner.astro`, plus
+  `src/lib/photos.ts`, so the home page, the gallery and the project pages
+  resolve and render photographs the same way rather than each keeping a copy.
 - The studio's own photographs of all 29 projects, replacing the generated
   placeholder art. They were extracted from the company profile PDF supplied at
   the start of the project, so every image is work Kalaayana made and owns.
@@ -47,6 +59,17 @@ is a holding page. `1.0.0` marks the launch of the full site.
   Latin wordmark — two readings of the same name in a 96px bar. The mark is
   gone; `KALAAYANA / STUDIOS` remains. The Kannada logo still leads the hero
   and the holding page, where it has room to be read.
+- `scripts/check.py` walks `dist/` rather than listing its top level, so pages
+  in subdirectories are checked too — the four new project pages were invisible
+  to it otherwise. Staged pages are now identified by exclusion: everything
+  except `index.html` must be noindex, so a route added later is covered
+  without anyone remembering to list it.
+- `scripts/check.py` also validates section banner data: a section that names a
+  banner must have the image, alt text and link to go with it.
+- `main.js` no longer assumes the home page's furniture. The footer year,
+  progress bar, nav toggle and lightbox are each optional, and the lightbox
+  skips any card that is itself a link, where the click belongs to the
+  navigation.
 - The logo is vector. `logo.png` was 736px wide but displayed at 560 CSS px,
   which is 1120 device pixels at 2x — a 1.5x upscale, and it sat in `public/`
   so it bypassed the image pipeline entirely. It is now `logo.svg`, traced from

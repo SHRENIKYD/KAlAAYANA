@@ -1,0 +1,30 @@
+---
+/**
+ * One project in a grid. Used by the home page and by a section gallery, so
+ * a card looks and behaves the same wherever it appears.
+ */
+import { Image } from 'astro:assets';
+import { photo } from '../lib/photos';
+
+interface Props {
+  project: { slug: string; title: string; scale: string; description: string; image: string; alt: string };
+  /** Section route this card links into. Omit for a card that does not link. */
+  href?: string;
+  delay?: number;
+}
+
+const { project: p, href, delay = 0 } = Astro.props;
+const Tag = href ? 'a' : 'article';
+---
+<Tag class="card" href={href} data-reveal data-delay={delay} data-tilt>
+  <div class="card-media">
+    <Image src={photo(p.image)} alt={p.alt}
+           widths={[400, 800, 1200]} formats={['avif', 'webp']} loading="lazy"
+           sizes="(max-width: 620px) 92vw, (max-width: 1024px) 46vw, 30vw" />
+  </div>
+  <div class="card-body">
+    <span class="card-scale">{p.scale}</span>
+    <h3>{p.title}</h3>
+    <p>{p.description}</p>
+  </div>
+</Tag>

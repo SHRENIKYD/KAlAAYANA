@@ -2,7 +2,8 @@
   'use strict';
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  document.getElementById('year').textContent = new Date().getFullYear();
+  var yearEl = document.getElementById('year');
+  if (yearEl) { yearEl.textContent = new Date().getFullYear(); }
 
   /* ---------- hero title split ---------- */
   var title = document.querySelector('[data-split]');
@@ -83,8 +84,8 @@
   function onScroll() {
     var y = window.pageYOffset;
     var max = document.documentElement.scrollHeight - window.innerHeight;
-    progress.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
-    header.classList.toggle('solid', y > 60);
+    if (progress) { progress.style.width = (max > 0 ? (y / max) * 100 : 0) + '%'; }
+    if (header) { header.classList.toggle('solid', y > 60); }
 
     if (!reduced) {
       parallaxEls.forEach(function (el) {
@@ -109,13 +110,14 @@
   /* ---------- mobile nav ---------- */
   var toggle = document.getElementById('navToggle');
   var nav = document.getElementById('nav');
-  toggle.addEventListener('click', function () {
+  if (toggle && nav) { toggle.addEventListener('click', function () {
     var open = nav.classList.toggle('open');
     toggle.classList.toggle('open', open);
     toggle.setAttribute('aria-expanded', String(open));
-  });
+  }); }
   navLinks.forEach(function (a) {
     a.addEventListener('click', function () {
+      if (!nav || !toggle) { return; }
       nav.classList.remove('open');
       toggle.classList.remove('open');
       toggle.setAttribute('aria-expanded', 'false');
@@ -160,8 +162,10 @@
   var lb = document.getElementById('lightbox');
   var lbImg = document.getElementById('lightboxImg');
   var lbCap = document.getElementById('lightboxCap');
+  if (lb && lbImg && lbCap) {
   function closeLb() { lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true'); }
   document.querySelectorAll('.card-media').forEach(function (media) {
+    if (media.closest('a')) { return; }   /* a linked card navigates instead */
     media.addEventListener('click', function () {
       var img = media.querySelector('img');
       var body = media.parentElement.querySelector('.card-body h3');
@@ -172,7 +176,9 @@
       lb.setAttribute('aria-hidden', 'false');
     });
   });
-  document.getElementById('lightboxClose').addEventListener('click', closeLb);
+  var lbClose = document.getElementById('lightboxClose');
+  if (lbClose) { lbClose.addEventListener('click', closeLb); }
   lb.addEventListener('click', function (e) { if (e.target === lb) closeLb(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLb(); });
+  }
 })();
