@@ -122,6 +122,27 @@
     });
   });
 
+  /* ---------- in-page links scroll without stamping a #hash on the URL ---------- */
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var id = a.getAttribute('href').slice(1);
+      var target = id ? document.getElementById(id) : null;
+      if (!target) { return; }            /* unresolved: leave it to the browser */
+      e.preventDefault();
+      target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    });
+  });
+  /* A deep link still works: it scrolls, then the hash is dropped from the URL.
+     Covers a fresh load and any later fragment navigation, such as back/forward. */
+  function dropHash() {
+    if (!location.hash) { return; }
+    var target = document.getElementById(location.hash.slice(1));
+    if (target) { target.scrollIntoView({ behavior: 'auto', block: 'start' }); }
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+  window.addEventListener('hashchange', dropHash);
+  dropHash();
+
   /* ---------- pointer tilt on cards ---------- */
   if (!reduced && window.matchMedia('(hover: hover)').matches) {
     document.querySelectorAll('[data-tilt]').forEach(function (card) {
