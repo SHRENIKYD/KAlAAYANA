@@ -50,8 +50,8 @@ scripts, workflows and docs out of what is served. The build command is what
 makes staging carry a real version — without it staging would serve `?v=dev`
 forever and cache stale assets.
 
-Until launch, `index.html` is the holding page on staging too. Review the real
-site at `<staging-url>/preview.html`.
+Staging serves the same tree as production, so `<staging-url>/` is the live
+site. The retired holding page remains at `/coming-soon.html`.
 
 ## Versioning
 

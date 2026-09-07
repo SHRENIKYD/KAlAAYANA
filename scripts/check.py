@@ -35,7 +35,7 @@ if 'index.html' in html:
         bad('index.html is marked noindex — it is the public page')
 
 # 4. Staged pages must stay out of search.
-for page in ('preview.html', 'themes.html'):
+for page in ('coming-soon.html', 'themes.html'):
     if page in html and 'noindex' not in open(page, encoding='utf-8').read():
         bad('%s is not marked noindex but is not the public page' % page)
 

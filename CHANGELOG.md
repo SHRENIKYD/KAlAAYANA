@@ -10,6 +10,22 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.0.0] — 2026-09-07
+
+Launch. The full site replaces the holding page at `kalaayanastudios.com`.
+
+### Changed
+- `index.html` is now the complete site — hero, our story, expertise,
+  monumental landmarks, temple architecture, portraits and life sculptures,
+  murals and contact — with its canonical tag restored and `noindex` removed
+  so it can be found in search.
+- The holding page is retained as `coming-soon.html`, marked
+  `noindex, nofollow` and stripped of its canonical tag so it cannot compete
+  with the live site. It stays available should the site ever need to be
+  taken back down.
+- `scripts/check.py` now expects `coming-soon.html` rather than `preview.html`
+  in its list of pages that must stay out of search.
+
 ## [0.1.1] — 2026-09-07
 
 ### Fixed
@@ -55,6 +71,7 @@ site staged behind it.
   `#22333B` cards, `#5E503F` rules, `#C6AC8F` accent, `#EAE0D5` text — with
   headings in Cinzel and body in Jost.
 
-[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.0.0
 [0.1.1]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v0.1.1
 [0.1.0]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v0.1.0
