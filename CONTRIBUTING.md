@@ -32,6 +32,27 @@ Branch names: `feature/<short-description>`, `fix/<short-description>`,
 
 Nothing reaches `kalaayanastudios.com` without passing through staging first.
 
+## Staging (Cloudflare)
+
+Staging is a Cloudflare Worker built from this repo and protected by Cloudflare
+Access, so only allowed accounts can open it. Its settings:
+
+| Setting | Value |
+| --- | --- |
+| Production branch | `develop` |
+| Build command | `bash scripts/stamp.sh staging` |
+| Deploy command | `npx wrangler deploy` |
+| Builds for non-production branches | on — gives every branch its own URL |
+| Protect with Cloudflare Access | on |
+
+`wrangler.jsonc` serves the repo root as static assets; `.assetsignore` keeps
+scripts, workflows and docs out of what is served. The build command is what
+makes staging carry a real version — without it staging would serve `?v=dev`
+forever and cache stale assets.
+
+Until launch, `index.html` is the holding page on staging too. Review the real
+site at `<staging-url>/preview.html`.
+
 ## Versioning
 
 [Semantic Versioning](https://semver.org). `VERSION` at the repo root is the

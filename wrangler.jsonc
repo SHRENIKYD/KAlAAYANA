@@ -1,0 +1,13 @@
+{
+  // Staging only. Production is served by GitHub Pages from `main`;
+  // this deploys the same tree to a Cloudflare Worker behind Cloudflare Access
+  // so it can be reviewed privately before release.
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "kalaayana",
+  "compatibility_date": "2026-09-07",
+
+  // No `main` script: assets-only Worker, serving the repo root as a static site.
+  "assets": {
+    "directory": "./"
+  }
+}

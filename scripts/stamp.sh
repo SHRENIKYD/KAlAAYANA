@@ -4,8 +4,13 @@
 set -euo pipefail
 
 environment="${1:?environment required}"
-commit="${2:?commit sha required}"
-ref="${3:-unknown}"
+# Commit and ref are optional: CI passes them explicitly, while a Cloudflare
+# build calls this with just the environment and we resolve them from the
+# checkout itself.
+commit="${2:-}"
+ref="${3:-}"
+[[ -n "$commit" ]] || commit="$(git rev-parse HEAD 2>/dev/null || echo unknown)"
+[[ -n "$ref" ]] || ref="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
 
 version="$(tr -d '[:space:]' < VERSION)"
 short="${commit:0:8}"
