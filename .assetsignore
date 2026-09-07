@@ -1,0 +1,12 @@
+# Repository files that are not part of the site.
+.git
+.github
+.gitignore
+.assetsignore
+scripts
+node_modules
+wrangler.jsonc
+README.md
+CONTRIBUTING.md
+CHANGELOG.md
+VERSION
