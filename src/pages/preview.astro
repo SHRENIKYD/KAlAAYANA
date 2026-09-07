@@ -3,11 +3,23 @@
  * The full site. Rendered entirely from src/data — adding a project means
  * adding an object to projects.json, never editing this file.
  */
-import { Image } from 'astro:assets';
+import { Image, type ImageMetadata } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import site from '../data/site.json';
 import projects from '../data/projects.json';
 import hero from '../images/hero-hanuman.jpg';
+
+/**
+ * Project photographs, resolved by filename from the data. Eager so Astro can
+ * process every one at build time into responsive AVIF and WebP.
+ */
+const photos = import.meta.glob<{ default: ImageMetadata }>(
+  '../images/projects/*.jpg', { eager: true });
+const photo = (file: string) => {
+  const found = photos[`../images/projects/${file}`];
+  if (!found) throw new Error(`No photograph for ${file} — check src/data/projects.json`);
+  return found.default;
+};
 
 const fonts = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Jost:wght@200;300;400;500&display=swap';
 const title = 'Kalaayana Studios — Monumental Sculpture & Temple Architecture';
@@ -67,8 +79,8 @@ const delay = (i: number, columns: number) => (i % columns) * 80;
         <p class="signoff" data-reveal data-delay="400">— Team, Kalaayana Studio</p>
       </div>
       <div class="story-media">
-        <figure class="story-fig" data-reveal data-delay="120"><img src="/assets/img/story-01.svg" alt="Placeholder: Kalaayana Studios workshop" loading="lazy"></figure>
-        <figure class="story-fig offset" data-reveal data-delay="260"><img src="/assets/img/story-02.svg" alt="Placeholder: five generations of craft" loading="lazy"></figure>
+        <figure class="story-fig" data-reveal data-delay="120"><img src="/assets/img/story-01.svg" alt="" aria-hidden="true" loading="lazy"></figure>
+        <figure class="story-fig offset" data-reveal data-delay="260"><img src="/assets/img/story-02.svg" alt="" aria-hidden="true" loading="lazy"></figure>
       </div>
     </div>
     <div class="wrap stats">
@@ -108,7 +120,11 @@ const delay = (i: number, columns: number) => (i % columns) * 80;
         <div class={g.columns === 4 ? 'grid four' : 'grid'}>
           {byGroup(g.id).map((p, i) => (
             <article class={`card${p.wide ? ' wide' : ''}`} data-reveal data-delay={delay(i, g.columns)} data-tilt>
-              <div class="card-media"><img src={`/assets/img/${p.image}`} alt={p.alt} loading="lazy"></div>
+              <div class="card-media">
+                <Image src={photo(p.image)} alt={p.alt}
+                       widths={[400, 800, 1200]} formats={['avif', 'webp']} loading="lazy"
+                       sizes="(max-width: 620px) 92vw, (max-width: 1024px) 46vw, 30vw" />
+              </div>
               <div class="card-body">
                 <span class="card-scale">{p.scale}</span>
                 <h3>{p.title}</h3>
@@ -140,7 +156,7 @@ const delay = (i: number, columns: number) => (i % columns) * 80;
   <footer class="site-footer">
     <div class="wrap footer-inner">
       <span>© <span id="year"></span> {site.legalName}</span>
-      <span class="footer-note">All imagery on this page is placeholder artwork.</span>
+      <span class="footer-note">Photography of the studio's own work.</span>
     </div>
   </footer>
 

@@ -10,6 +10,32 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Added
+- The studio's own photographs of all 29 projects, replacing the generated
+  placeholder art. They were extracted from the company profile PDF supplied at
+  the start of the project, so every image is work Kalaayana made and owns.
+  Committed under `src/images/projects/` at up to 1600px, 4.7 MB in total.
+- Real alt text for every project, written from the photographs themselves
+  rather than from the project titles. No image now says "Placeholder".
+
+### Changed
+- Project photographs go through the image pipeline: AVIF and WebP at 400, 800
+  and 1200px with a `sizes` hint matching the grid, so a 385px card fetches the
+  400px variant rather than the 1200px one.
+- Card frame from 4:3 landscape to 3:4 portrait. The work is vertical — at 4:3
+  the 85-foot Hanuman at Hangluru had its head cropped off. Reliefs and murals
+  were checked separately and still read correctly.
+- The footer no longer claims all imagery is placeholder artwork, which stopped
+  being true with this change.
+- The two Our Story figures remain generated and are now marked decorative with
+  empty alt text. They are the only placeholder artwork left.
+- `scripts/check.py` validates project images against `src/images/projects/`
+  rather than the build output, since they are build inputs that the pipeline
+  emits as hashed variants.
+
+### Removed
+- The 29 placeholder SVGs, now unreferenced.
+
 ## [1.1.0] — 2026-09-07
 
 Phase one of the architecture work. The site is now generated from data rather

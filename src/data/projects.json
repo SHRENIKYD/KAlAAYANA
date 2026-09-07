@@ -5,8 +5,8 @@
     "title": "Hanuman, Hangluru",
     "scale": "85 ft",
     "description": "Concrete reinforced. Hangluru, Kundapura, Karnataka.",
-    "image": "landmark-01.svg",
-    "alt": "Placeholder image: 85 foot Hanuman statue at Hangluru",
+    "image": "hanuman-hangluru.jpg",
+    "alt": "The 85-foot reinforced concrete Hanuman at Hangluru, standing among palm trees above a flight of steps",
     "wide": false
   },
   {
@@ -15,8 +15,8 @@
     "title": "Hanuman, Tumkuru",
     "scale": "75 ft",
     "description": "Concrete reinforced. Tumkuru, Karnataka.",
-    "image": "landmark-02.svg",
-    "alt": "Placeholder image: 75 foot Hanuman statue at Tumkuru",
+    "image": "hanuman-tumkuru.jpg",
+    "alt": "The 75-foot Hanuman at Tumkuru, painted and framed by a tall ornamental arch",
     "wide": false
   },
   {
@@ -25,8 +25,8 @@
     "title": "Panchamukhi Hanuman",
     "scale": "65 ft",
     "description": "Concrete reinforced. Surendrapuri, Hyderabad.",
-    "image": "landmark-03.svg",
-    "alt": "Placeholder image: 65 foot Panchamukhi Hanuman statue at Surendrapuri",
+    "image": "panchamukhi-hanuman.jpg",
+    "alt": "The five-faced Panchamukhi Hanuman at Surendrapuri, brightly painted against the sky",
     "wide": false
   },
   {
@@ -35,8 +35,8 @@
     "title": "Samudra Manthana",
     "scale": "35 ft",
     "description": "Concrete reinforced installation. Udupi, Karnataka.",
-    "image": "landmark-04.svg",
-    "alt": "Placeholder image: 35 foot Samudra Manthana installation at Udupi",
+    "image": "samudra-manthana.jpg",
+    "alt": "The Samudra Manthana installation at Udupi, figures ranged along the churning of the ocean",
     "wide": false
   },
   {
@@ -45,8 +45,8 @@
     "title": "Shiva, Hubli",
     "scale": "35 ft",
     "description": "Concrete reinforced. Hubli, Karnataka.",
-    "image": "landmark-05.svg",
-    "alt": "Placeholder image: 35 foot Shiva statue at Hubli",
+    "image": "shiva-hubli.jpg",
+    "alt": "The seated Shiva at Hubli, trident raised, on a dark plinth against cloud",
     "wide": false
   },
   {
@@ -55,8 +55,8 @@
     "title": "Buddha, Bengaluru",
     "scale": "10 ft",
     "description": "Concrete reinforced. Bengaluru, Karnataka.",
-    "image": "landmark-06.svg",
-    "alt": "Placeholder image: 10 foot Buddha statue at Bengaluru",
+    "image": "buddha-bengaluru.jpg",
+    "alt": "The white seated Buddha at Bengaluru on a plain plinth, framed by trees",
     "wide": false
   },
   {
@@ -65,8 +65,8 @@
     "title": "Hanuman, Punjab",
     "scale": "25 ft",
     "description": "Concrete reinforced. Punjab, India.",
-    "image": "landmark-07.svg",
-    "alt": "Placeholder image: 25 foot Hanuman statue in Punjab",
+    "image": "hanuman-punjab.jpg",
+    "alt": "The kneeling Hanuman in Punjab, gilded mace over one shoulder",
     "wide": true
   },
   {
@@ -75,8 +75,8 @@
     "title": "Shree Varasiddhi Vinayaka",
     "scale": "30 ft",
     "description": "Temple facade. Whitefield, Bengaluru, Karnataka.",
-    "image": "temple-01.svg",
-    "alt": "Placeholder image: temple facade, Whitefield",
+    "image": "shree-varasiddhi-vinayaka.jpg",
+    "alt": "The carved facade of Shree Varasiddhi Vinayaka temple at Whitefield, Bengaluru",
     "wide": false
   },
   {
@@ -85,8 +85,8 @@
     "title": "Shree Anjaneya",
     "scale": "61 ft",
     "description": "Temple arch. Chikkanayakanahalli, Karnataka.",
-    "image": "temple-02.svg",
-    "alt": "Placeholder image: temple arch, Chikkanayakanahalli",
+    "image": "shree-anjaneya.jpg",
+    "alt": "The Shree Anjaneya temple arch at Chikkanayakanahalli, tiered and painted, with Anjaneya at its centre",
     "wide": false
   },
   {
@@ -95,8 +95,8 @@
     "title": "Shree Manjunatha",
     "scale": "25 ft",
     "description": "Temple arch. Shivamogga, Karnataka.",
-    "image": "temple-03.svg",
-    "alt": "Placeholder image: temple arch, Shivamogga",
+    "image": "shree-manjunatha.jpg",
+    "alt": "The Shree Manjunatha temple arch at Shivamogga, gold-finialled above a painted tableau",
     "wide": false
   },
   {
@@ -105,8 +105,8 @@
     "title": "Shree Veeranjaneya",
     "scale": "25 ft",
     "description": "Temple arch. Moodigere, Karnataka.",
-    "image": "temple-04.svg",
-    "alt": "Placeholder image: temple arch, Moodigere",
+    "image": "shree-veeranjaneya.jpg",
+    "alt": "The dark stone-finished Shree Veeranjaneya temple arch at Moodigere",
     "wide": false
   },
   {
@@ -115,8 +115,8 @@
     "title": "Sri Siddaramaiah",
     "scale": "Life size",
     "description": "Silicone life statue. Chief Minister of Karnataka.",
-    "image": "portrait-01.svg",
-    "alt": "Placeholder image: life sized silicone statue",
+    "image": "sri-siddaramaiah.jpg",
+    "alt": "The life-sized silicone figure of Sri Siddaramaiah standing on a lit stage",
     "wide": false
   },
   {
@@ -125,8 +125,8 @@
     "title": "Field Marshal Kariappa",
     "scale": "8 ft",
     "description": "FRP standing figure.",
-    "image": "portrait-02.svg",
-    "alt": "Placeholder image: 8 foot FRP statue of Field Marshal Kariappa",
+    "image": "field-marshal-kariappa.jpg",
+    "alt": "The eight-foot FRP figure of Field Marshal Kariappa in uniform, in the studio",
     "wide": false
   },
   {
@@ -135,8 +135,8 @@
     "title": "Bronze Portrait I",
     "scale": "2 ft",
     "description": "Cast bronze bust.",
-    "image": "portrait-03.svg",
-    "alt": "Placeholder image: bronze portrait bust",
+    "image": "bronze-portrait-i.jpg",
+    "alt": "A cast bronze portrait bust of a man in a suit and glasses",
     "wide": false
   },
   {
@@ -145,8 +145,8 @@
     "title": "Bronze Portrait II",
     "scale": "2 ft",
     "description": "Cast bronze bust.",
-    "image": "portrait-04.svg",
-    "alt": "Placeholder image: bronze portrait bust",
+    "image": "bronze-portrait-ii.jpg",
+    "alt": "A clay portrait bust of an elderly woman in a draped sari",
     "wide": false
   },
   {
@@ -155,8 +155,8 @@
     "title": "Bronze Portrait III",
     "scale": "2 ft",
     "description": "Cast bronze bust.",
-    "image": "portrait-05.svg",
-    "alt": "Placeholder image: bronze portrait bust",
+    "image": "bronze-portrait-iii.jpg",
+    "alt": "A portrait bust of a woman wearing a necklace, in pale clay",
     "wide": false
   },
   {
@@ -165,8 +165,8 @@
     "title": "Padmapani",
     "scale": "4 ft",
     "description": "FRP figure.",
-    "image": "portrait-06.svg",
-    "alt": "Placeholder image: Padmapani statue in FRP",
+    "image": "padmapani.jpg",
+    "alt": "The four-foot Padmapani in FRP, seated on a lotus within a carved arch",
     "wide": false
   },
   {
@@ -175,8 +175,8 @@
     "title": "Saint Kanakadasa",
     "scale": "Series",
     "description": "Installations from the life story of the saint. Bangalore University.",
-    "image": "portrait-07.svg",
-    "alt": "Placeholder image: Kanakadasa sculpture series",
+    "image": "saint-kanakadasa.jpg",
+    "alt": "Saint Kanakadasa with his tambura, from the sculpture series at Bangalore University",
     "wide": false
   },
   {
@@ -185,8 +185,8 @@
     "title": "Shekon",
     "scale": "7 ft",
     "description": "Installed at Air Force camp, Hyderabad.",
-    "image": "portrait-08.svg",
-    "alt": "Placeholder image: 7 foot statue of Shekon",
+    "image": "shekon.jpg",
+    "alt": "The seven-foot figure of Shekon in bronze finish, cap in hand",
     "wide": false
   },
   {
@@ -195,8 +195,8 @@
     "title": "General Siddhiah",
     "scale": "7 ft",
     "description": "FRP standing figure.",
-    "image": "portrait-09.svg",
-    "alt": "Placeholder image: 7 foot FRP statue of General Siddhiah",
+    "image": "general-siddhiah.jpg",
+    "alt": "The seven-foot FRP figure of General Siddhiah, saluting, photographed in the workshop",
     "wide": false
   },
   {
@@ -205,8 +205,8 @@
     "title": "Surya Mural",
     "scale": "10 ft dia",
     "description": "Circular relief.",
-    "image": "mural-01.svg",
-    "alt": "Placeholder image: Surya mural",
+    "image": "surya-mural.jpg",
+    "alt": "The ten-foot circular Surya mural, a dancing figure ringed by flame-like rays",
     "wide": false
   },
   {
@@ -215,8 +215,8 @@
     "title": "Krishna",
     "scale": "6 × 4 ft",
     "description": "FRP relief.",
-    "image": "mural-02.svg",
-    "alt": "Placeholder image: Krishna relief",
+    "image": "krishna.jpg",
+    "alt": "A framed FRP relief of Krishna playing the flute beside cattle",
     "wide": false
   },
   {
@@ -225,8 +225,8 @@
     "title": "Village Scenes",
     "scale": "Panel",
     "description": "Scenic views of a village, made in FRP.",
-    "image": "mural-03.svg",
-    "alt": "Placeholder image: village scenic panel",
+    "image": "village-scenes.jpg",
+    "alt": "An FRP relief panel of village life — figures at work beneath palms and thatched roofs",
     "wide": false
   },
   {
@@ -235,8 +235,8 @@
     "title": "Mr. Ananth Kumar",
     "scale": "Relief",
     "description": "Former minister from Karnataka.",
-    "image": "mural-04.svg",
-    "alt": "Placeholder image: relief portrait of Ananth Kumar",
+    "image": "mr-ananth-kumar.jpg",
+    "alt": "A relief portrait of Mr. Ananth Kumar, former minister from Karnataka",
     "wide": false
   },
   {
@@ -245,8 +245,8 @@
     "title": "Yakshagana",
     "scale": "8 × 4 ft",
     "description": "FRP panel.",
-    "image": "mural-05.svg",
-    "alt": "Placeholder image: Yakshagana panel",
+    "image": "yakshagana.jpg",
+    "alt": "An FRP relief of a Yakshagana performer in full headdress, staff in hand",
     "wide": false
   },
   {
@@ -255,8 +255,8 @@
     "title": "Radha Krishna",
     "scale": "8 × 6 ft",
     "description": "FRP panel.",
-    "image": "mural-06.svg",
-    "alt": "Placeholder image: Radha Krishna panel",
+    "image": "radha-krishna.jpg",
+    "alt": "An FRP relief of Radha and Krishna beneath a tree, with a peacock at their feet",
     "wide": false
   },
   {
@@ -265,8 +265,8 @@
     "title": "Goddess Saraswathi",
     "scale": "8 × 8 ft",
     "description": "FRP panel.",
-    "image": "mural-07.svg",
-    "alt": "Placeholder image: Goddess Saraswathi panel",
+    "image": "goddess-saraswathi.jpg",
+    "alt": "An FRP relief of Goddess Saraswathi seated with the veena",
     "wide": false
   },
   {
@@ -275,8 +275,8 @@
     "title": "Relief Panel",
     "scale": "8 × 4 ft",
     "description": "FRP panel.",
-    "image": "mural-08.svg",
-    "alt": "Placeholder image: FRP relief panel",
+    "image": "relief-panel.jpg",
+    "alt": "An FRP relief panel of a seated figure attended by others",
     "wide": false
   },
   {
@@ -285,8 +285,8 @@
     "title": "Sri Siddaramaiah",
     "scale": "6 × 4 ft",
     "description": "Chief Minister of Karnataka. FRP relief.",
-    "image": "mural-09.svg",
-    "alt": "Placeholder image: relief of Sri Siddaramaiah",
+    "image": "sri-siddaramaiah-2.jpg",
+    "alt": "A painted FRP relief portrait of Sri Siddaramaiah, arms folded",
     "wide": false
   }
 ]
