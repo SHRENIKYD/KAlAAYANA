@@ -47,6 +47,15 @@ is a holding page. `1.0.0` marks the launch of the full site.
   Latin wordmark — two readings of the same name in a 96px bar. The mark is
   gone; `KALAAYANA / STUDIOS` remains. The Kannada logo still leads the hero
   and the holding page, where it has room to be read.
+- The logo is vector. `logo.png` was 736px wide but displayed at 560 CSS px,
+  which is 1120 device pixels at 2x — a 1.5x upscale, and it sat in `public/`
+  so it bypassed the image pipeline entirely. It is now `logo.svg`, traced from
+  that same file, so it cannot blur at any size. 30 curves, 29.5 KB gzipped
+  against the PNG's 43 KB.
+- Contact email is now `contact@kalaayanastudios.com`.
+- In-page navigation no longer writes `#section` into the address bar. Links
+  still work and still scroll to the right place; arriving on a deep link
+  scrolls and then drops the fragment, including on back/forward.
 - The favicon is a bone circle carrying the leading glyph of the Kannada
   wordmark in ink, cut from `logo.png` itself rather than redrawn. It was a
   dark square holding the whole wordmark, which is 2.2x wider than it is tall
@@ -77,6 +86,7 @@ is a holding page. `1.0.0` marks the launch of the full site.
 - The 29 placeholder SVGs, now unreferenced.
 - `story-01.svg` and `story-02.svg`, the last two generated illustrations.
 - `logo-mark.png`, the header's Kannada mark, now unreferenced.
+- `logo.png`, superseded by `logo.svg` and no longer referenced.
 
 ## [1.1.0] — 2026-09-07
 
