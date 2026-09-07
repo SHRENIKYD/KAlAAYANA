@@ -1,0 +1,37 @@
+---
+/**
+ * A section opener: the section name set over a photograph, with a single way
+ * in. Replaces showing every project on the home page.
+ */
+import { Image } from 'astro:assets';
+import { banner } from '../lib/photos';
+
+interface Props {
+  id: string;
+  eyebrow: string;
+  title: string;
+  lede: string;
+  image: string;
+  imageAlt: string;
+  href: string;
+  count: number;
+}
+
+const { id, eyebrow, title, lede, image, imageAlt, href, count } = Astro.props;
+---
+<section class="section-banner" id={id}>
+  <div class="banner-bg">
+    <Image src={banner(image)} alt={imageAlt}
+           widths={[640, 960, 1161]} formats={['avif', 'webp']} loading="lazy"
+           sizes="100vw" />
+  </div>
+  <div class="banner-veil"></div>
+  <div class="banner-inner">
+    <h2 class="banner-title" data-reveal>{eyebrow}</h2>
+    <p class="banner-sub" data-reveal data-delay="80">{title}</p>
+    <p class="banner-lede" data-reveal data-delay="160">{lede}</p>
+    <a class="btn btn-solid banner-cta" href={href} data-reveal data-delay="240">
+      View All<span class="banner-count">{count}</span>
+    </a>
+  </div>
+</section>

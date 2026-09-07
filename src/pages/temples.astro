@@ -1,0 +1,54 @@
+---
+/**
+ * Temple Architecture — every project in the section. Reached from the banner
+ * on the home page; each card leads to that project on its own page.
+ */
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import site from '../data/site.json';
+import projects from '../data/projects.json';
+
+const GROUP = 'temples';
+const section = site.sections[GROUP];
+const items = projects.filter((p) => p.group === GROUP);
+const fonts = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Jost:wght@200;300;400;500&display=swap';
+---
+<Base title={`${section.eyebrow} — ${site.name}`} description={section.lede} fonts={fonts}>
+  <link slot="head" rel="stylesheet" href="/assets/css/style.css?v=dev">
+
+  <div class="scroll-progress" id="scrollProgress"></div>
+  <header class="site-header solid" id="siteHeader">
+    <a class="brand" href="/preview.html">
+      <span class="brand-text">Kalaayana<em>Studios</em></span>
+    </a>
+    <nav class="nav" id="nav">
+      {site.nav.map((n) => <a href={`/preview.html${n.href}`}>{n.label}</a>)}
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main class="section subpage">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a href="/preview.html">Home</a><span aria-hidden="true">/</span><span>{section.eyebrow}</span>
+      </nav>
+      <h1 class="section-title" data-reveal>{section.eyebrow}</h1>
+      <p class="section-lede" data-reveal data-delay="80">{section.lede}</p>
+      <div class="grid four">
+        {items.map((p, i) => (
+          <ProjectCard project={p} href={`/temples/${p.slug}.html`} delay={(i % 4) * 80} />
+        ))}
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <span>© <span id="year"></span> Kalaayana Studios LLP</span>
+      <span class="footer-note">Photography of the studio's own work.</span>
+    </div>
+  </footer>
+
+  <script is:inline src="/assets/js/main.js?v=dev"></script>
+</Base>
