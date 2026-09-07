@@ -79,6 +79,24 @@ Content lives in `src/data`. Adding a project is one object in `projects.json`.
 [Semantic Versioning](https://semver.org). `VERSION` at the repo root is the
 single source of truth — no version numbers are derived from commit messages.
 
+**A version is bumped only when the work reaches production.** Everything on
+`develop` keeps the version currently in production, however many changes have
+accumulated. The number describes what the public is being served, not what is
+being worked on.
+
+So a feature PR into `develop` does **not** touch `VERSION`. It adds its notes
+under `## [Unreleased]` in the changelog. When a release is due, one preparation
+PR into `develop` bumps `VERSION` and moves the accumulated `[Unreleased]` notes
+under the new version heading. The `develop` → `main` PR then ships it.
+
+CI enforces this in the right place: the bump and the changelog entry are
+required only on a PR into `main`, never on a PR into `develop`.
+
+    feature/*  ──▶  develop        VERSION untouched, notes under [Unreleased]
+    feature/*  ──▶  develop        the release preparation: bump VERSION,
+                                   move [Unreleased] under the new heading
+    develop    ──▶  main           ships, tags, releases
+
 | Bump | When |
 | --- | --- |
 | **Patch** `0.1.0 → 0.1.1` | Copy fix, colour tweak, bug fix, dependency change |
