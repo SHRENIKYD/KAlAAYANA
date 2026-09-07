@@ -8,6 +8,8 @@ import Base from '../layouts/Base.astro';
 import site from '../data/site.json';
 import projects from '../data/projects.json';
 import hero from '../images/hero-hanuman.jpg';
+import storyDrawing from '../images/story-drawing.jpg';
+import storyWorkshop from '../images/story-workshop.jpg';
 
 /**
  * Project photographs, resolved by filename from the data. Eager so Astro can
@@ -79,8 +81,18 @@ const delay = (i: number, columns: number) => (i % columns) * 80;
         <p class="signoff" data-reveal data-delay="400">— Team, Kalaayana Studio</p>
       </div>
       <div class="story-media">
-        <figure class="story-fig" data-reveal data-delay="120"><img src="/assets/img/story-01.svg" alt="" aria-hidden="true" loading="lazy"></figure>
-        <figure class="story-fig offset" data-reveal data-delay="260"><img src="/assets/img/story-02.svg" alt="" aria-hidden="true" loading="lazy"></figure>
+        <figure class="story-fig" data-reveal data-delay="120">
+          <Image src={storyDrawing}
+                 alt="Shilpi K. Narayana Rao's measured elevation for the Anjaneya Arch Mantapa at Chikkanayakanahalli, drawn in ink and signed"
+                 widths={[400, 800]} formats={['avif', 'webp']} loading="lazy"
+                 sizes="(max-width: 900px) 92vw, 40vw" />
+        </figure>
+        <figure class="story-fig offset" data-reveal data-delay="260">
+          <Image src={storyWorkshop}
+                 alt="Sculptors working on the seated Buddha from a bamboo scaffold, before its finish was applied"
+                 widths={[400, 800]} formats={['avif', 'webp']} loading="lazy"
+                 sizes="(max-width: 900px) 92vw, 40vw" />
+        </figure>
       </div>
     </div>
     <div class="wrap stats">

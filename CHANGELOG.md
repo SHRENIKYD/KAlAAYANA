@@ -27,14 +27,29 @@ is a holding page. `1.0.0` marks the launch of the full site.
   were checked separately and still read correctly.
 - The footer no longer claims all imagery is placeholder artwork, which stopped
   being true with this change.
-- The two Our Story figures remain generated and are now marked decorative with
-  empty alt text. They are the only placeholder artwork left.
+- The two Our Story figures are now photographs from the studio's own archive:
+  Shilpi K. Narayana Rao's signed elevation for the Anjaneya Arch Mantapa at
+  Chikkanayakanahalli, and the team finishing the Bengaluru Buddha on bamboo
+  scaffolding. Both carry real alt text. **No placeholder artwork remains on
+  the site.**
+- The drawing is cropped above the handwritten mobile number beneath the
+  signature, so a personal phone number is not published. The signature itself
+  is kept — it is the provenance.
+- `img` now carries `height:auto` alongside `max-width:100%`. Astro emits real
+  `width`/`height` attributes, so without it the drawing was stretched to its
+  intrinsic height inside a narrower column. Hero and card images set their own
+  height and are unaffected.
+- The one wide card, Hanuman, Punjab, is now a normal card. `wide` spanned three
+  columns, which under the 3:4 frame rendered a 1218×1624 image; the flag was a
+  leftover from the 4:3 placeholder grid and every photograph is portrait. All
+  29 cards now share one frame.
 - `scripts/check.py` validates project images against `src/images/projects/`
   rather than the build output, since they are build inputs that the pipeline
   emits as hashed variants.
 
 ### Removed
 - The 29 placeholder SVGs, now unreferenced.
+- `story-01.svg` and `story-02.svg`, the last two generated illustrations.
 
 ## [1.1.0] — 2026-09-07
 
