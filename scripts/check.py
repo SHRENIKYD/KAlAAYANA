@@ -65,9 +65,11 @@ for i, p in enumerate(projects):
     if p.get('slug') in seen:
         bad('duplicate project slug: %s' % p.get('slug'))
     seen.add(p.get('slug'))
-    img = os.path.join(OUT, 'assets', 'img', str(p.get('image', '')))
+    # Project photographs are build inputs: the pipeline emits hashed variants
+    # into the output, so the invariant is that the source file exists.
+    img = os.path.join('src', 'images', 'projects', str(p.get('image', '')))
     if p.get('image') and not os.path.exists(img):
-        bad('project %s references a missing image: %s' % (where, p.get('image')))
+        bad('project %s references a missing source image: %s' % (where, img))
 
 # 6. Releasing to production requires a changelog entry for this version.
 if os.environ.get('REQUIRE_RELEASE_NOTES') == 'true' and version:

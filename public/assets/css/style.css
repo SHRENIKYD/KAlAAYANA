@@ -140,7 +140,7 @@ a{color:inherit;text-decoration:none}
   transform-style:preserve-3d}
 .card:hover{border-color:rgba(198,172,143,.6);box-shadow:0 26px 60px -30px rgba(0,0,0,.9)}
 .card.wide{grid-column:span 3}
-.card-media{overflow:hidden;position:relative;cursor:zoom-in;aspect-ratio:4/3;background:#070606}
+.card-media{overflow:hidden;position:relative;cursor:zoom-in;aspect-ratio:3/4;background:#070606}
 .card-media img{width:100%;height:100%;object-fit:cover;transition:transform 1.3s var(--ease),filter .6s var(--ease)}
 .card:hover .card-media img{transform:scale(1.08)}
 .card-media::after{content:"";position:absolute;inset:0;
