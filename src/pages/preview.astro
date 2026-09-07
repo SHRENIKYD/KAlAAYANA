@@ -1,0 +1,153 @@
+---
+/**
+ * The full site. Rendered entirely from src/data — adding a project means
+ * adding an object to projects.json, never editing this file.
+ */
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import site from '../data/site.json';
+import projects from '../data/projects.json';
+import hero from '../images/hero-hanuman.jpg';
+
+const fonts = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Jost:wght@200;300;400;500&display=swap';
+const title = 'Kalaayana Studios — Monumental Sculpture & Temple Architecture';
+
+/** Gallery sections in page order, with the alternating ground and grid width. */
+const galleries = [
+  { id: 'landmarks', alt: false, columns: 3 },
+  { id: 'temples',   alt: true,  columns: 4 },
+  { id: 'portraits', alt: false, columns: 4 },
+  { id: 'murals',    alt: true,  columns: 4 },
+];
+
+const byGroup = (id: string) => projects.filter((p) => p.group === id);
+/** Reveal delays stagger across a row, then restart. */
+const delay = (i: number, columns: number) => (i % columns) * 80;
+---
+<Base {title} fonts={fonts}>
+  <link slot="head" rel="stylesheet" href="/assets/css/style.css?v=dev">
+
+  <div class="scroll-progress" id="scrollProgress"></div>
+
+  <header class="site-header" id="siteHeader">
+    <a class="brand" href="#top">
+      <img class="brand-mark" src="/assets/img/logo-mark.png" alt="" width="736" height="348">
+      <span class="brand-text">Kalaayana<em>Studios</em></span>
+    </a>
+    <nav class="nav" id="nav">
+      {site.nav.map((n) => <a href={n.href}>{n.label}</a>)}
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+  </header>
+
+  <section class="hero" id="top">
+    <div class="hero-bg" data-parallax="0.35">
+        <Image src={hero} alt="" widths={[640, 960, 1400, 1920]} formats={['avif', 'webp']} loading="eager" />
+      </div>
+    <div class="hero-veil"></div>
+    <div class="hero-inner">
+      <p class="hero-kicker" data-reveal>{site.kicker}</p>
+      <h1 class="visually-hidden">{site.name}</h1>
+      <img class="hero-logo" src="/assets/img/logo.png" alt={site.name} width="736" height="391">
+      <p class="hero-sub" data-reveal data-delay="200">{site.tagline}</p>
+      <div class="hero-cta" data-reveal data-delay="360">
+        <a class="btn btn-solid" href="#landmarks">View Major Projects</a>
+        <a class="btn btn-ghost" href="#contact">Commission a Work</a>
+      </div>
+    </div>
+    <div class="scroll-hint"><span></span>Scroll</div>
+  </section>
+
+  <section class="section story" id="story">
+    <div class="wrap story-grid">
+      <div class="story-copy">
+        <p class="eyebrow" data-reveal>Our Story</p>
+        <h2 class="section-title" data-reveal data-delay="80">A legacy spanning five generations</h2>
+        {site.story.map((para, i) => <p data-reveal data-delay={160 + i * 80} set:html={para} />)}
+        <p class="signoff" data-reveal data-delay="400">— Team, Kalaayana Studio</p>
+      </div>
+      <div class="story-media">
+        <figure class="story-fig" data-reveal data-delay="120"><img src="/assets/img/story-01.svg" alt="Placeholder: Kalaayana Studios workshop" loading="lazy"></figure>
+        <figure class="story-fig offset" data-reveal data-delay="260"><img src="/assets/img/story-02.svg" alt="Placeholder: five generations of craft" loading="lazy"></figure>
+      </div>
+    </div>
+    <div class="wrap stats">
+      {site.stats.map((s, i) => (
+        <div class="stat" data-reveal data-delay={i * 100}>
+          <span class="num" data-count={s.value} data-suffix={s.suffix || undefined}>0</span>
+          <span class="lab">{s.label}</span>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="section expertise" id="expertise">
+    <div class="wrap">
+      <p class="eyebrow" data-reveal>Expertise</p>
+      <h2 class="section-title" data-reveal data-delay="80">What we build</h2>
+      <ul class="exp-list">
+        {site.expertise.map((e, i) => (
+          <li data-reveal data-delay={i * 80}>
+            <span class="exp-no">{e.no}</span><h3>{e.title}</h3><p>{e.body}</p>
+          </li>
+        ))}
+      </ul>
+      <div class="materials" data-reveal>
+        <span class="mat-label">Materials</span>
+        <div class="mat-track">{site.materials.map((m) => <span>{m}</span>)}</div>
+      </div>
+    </div>
+  </section>
+
+  {galleries.map((g) => (
+    <section class={`section gallery-section${g.alt ? ' alt' : ''}`} id={g.id}>
+      <div class="wrap">
+        <p class="eyebrow" data-reveal>{site.sections[g.id].eyebrow}</p>
+        <h2 class="section-title" data-reveal data-delay="80">{site.sections[g.id].title}</h2>
+        <p class="section-lede" data-reveal data-delay="160">{site.sections[g.id].lede}</p>
+        <div class={g.columns === 4 ? 'grid four' : 'grid'}>
+          {byGroup(g.id).map((p, i) => (
+            <article class={`card${p.wide ? ' wide' : ''}`} data-reveal data-delay={delay(i, g.columns)} data-tilt>
+              <div class="card-media"><img src={`/assets/img/${p.image}`} alt={p.alt} loading="lazy"></div>
+              <div class="card-body">
+                <span class="card-scale">{p.scale}</span>
+                <h3>{p.title}</h3>
+                <p>{p.description}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  ))}
+
+  <section class="section contact" id="contact">
+    <div class="wrap contact-grid">
+      <div>
+        <p class="eyebrow" data-reveal>Contact Us</p>
+        <h2 class="section-title" data-reveal data-delay="80">{site.legalName}</h2>
+        <address data-reveal data-delay="160" set:html={site.contact.address.join('<br>')} />
+      </div>
+      <ul class="contact-list">
+        <li data-reveal><span>Email</span><a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></li>
+        <li data-reveal data-delay="80"><span>Instagram</span><a href={`https://instagram.com/${site.contact.instagram}`} target="_blank" rel="noopener">{site.contact.instagram}</a></li>
+        <li data-reveal data-delay="160"><span>Phone</span><a href={`tel:${site.contact.phones[0]}`}>+91 88868 70796</a></li>
+        <li data-reveal data-delay="240"><span>Phone</span><a href={`tel:${site.contact.phones[1]}`}>+91 83106 60720</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <span>© <span id="year"></span> {site.legalName}</span>
+      <span class="footer-note">All imagery on this page is placeholder artwork.</span>
+    </div>
+  </footer>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox-close" id="lightboxClose" aria-label="Close">&times;</button>
+    <figure><img id="lightboxImg" src="" alt=""><figcaption id="lightboxCap"></figcaption></figure>
+  </div>
+
+  <script is:inline src="/assets/js/main.js?v=dev"></script>
+</Base>

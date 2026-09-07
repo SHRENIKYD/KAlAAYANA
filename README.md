@@ -25,6 +25,10 @@ exactly what is live.
 marked `noindex, nofollow`, and is reviewed on the private staging
 environment until it is signed off.
 
+Work happens on **https://kalaayana.shrenikyd.workers.dev/**, which serves the
+site under development at its root and is private behind Cloudflare Access.
+Only a `develop` → `main` release changes what the public domain shows.
+
 `1.0.0` launched the full site and `1.0.1` pulled it back pending
 verification. Relaunching is the same swap in reverse:
 
@@ -103,8 +107,10 @@ and update the `src` attribute in `index.html` if the extension changes.
 ## Local preview
 
 ```bash
-python3 -m http.server 8000
-# open http://localhost:8000
+npm ci
+npm run dev          # http://localhost:4321
+npm run build        # writes dist/
+npm run check        # validates the build and the project data
 ```
 
 ## Hosting
@@ -161,6 +167,22 @@ workflow substitutes, and it means local preview is never cached either.
 
 ## Stack
 
-Plain HTML, CSS and vanilla JavaScript — no build step. Scroll effects use
-`IntersectionObserver` and a `requestAnimationFrame`-throttled scroll handler, and
-all motion is disabled under `prefers-reduced-motion`.
+Astro generates static HTML from `src/data`. No client framework and no
+JavaScript shipped beyond the site's own scroll effects, which use
+`IntersectionObserver` and a `requestAnimationFrame`-throttled scroll handler and
+are disabled under `prefers-reduced-motion`.
+
+```
+src/data/     content — projects.json, site.json
+src/pages/    index.astro (holding page), preview.astro (the site)
+src/layouts/  Base.astro — the document head
+src/images/   originals, processed at build time
+public/       served verbatim: CSS, JS, placeholder art, CNAME, robots, sitemap
+dist/         build output, deployed
+```
+
+Adding a project means adding an object to `src/data/projects.json`. No template
+is touched, and `npm run check` fails the build if a required field is missing,
+a slug is duplicated or an image is absent.
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the reasoning.
