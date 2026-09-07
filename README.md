@@ -3,6 +3,21 @@
 Static marketing site for **Kalaayana Studios LLP** — monumental sculpture, temple
 architecture and portrait work — built from the studio's profile deck.
 
+## Development
+
+Branching, versioning, releases and rollback are documented in
+**[CONTRIBUTING.md](CONTRIBUTING.md)**. In short:
+
+```
+feature/*  ──PR──▶  develop  ──PR──▶  main
+                       │                │
+                 staging (private)   kalaayanastudios.com
+```
+
+`main` and `develop` are both PR-only. `VERSION` plus `CHANGELOG.md` drive
+releases, and every deployment publishes `/version.json` so you can always tell
+exactly what is live.
+
 ## Current state: holding page
 
 `index.html` is a self-contained **Coming Soon** page — hero photograph, the
