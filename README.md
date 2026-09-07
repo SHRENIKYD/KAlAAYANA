@@ -18,11 +18,22 @@ feature/*  ──PR──▶  develop  ──PR──▶  main
 releases, and every deployment publishes `/version.json` so you can always tell
 exactly what is live.
 
-## Current state: live
+## Current state: holding page
 
-`index.html` is the full site. The holding page it replaced is kept at
-`coming-soon.html`, marked `noindex, nofollow` — swapping the two filenames
-back would take the site down again if that were ever needed.
+`index.html` is the **Coming Soon** holding page — that is what
+`kalaayanastudios.com` serves. The complete site sits at `preview.html`,
+marked `noindex, nofollow`, and is reviewed on the private staging
+environment until it is signed off.
+
+`1.0.0` launched the full site and `1.0.1` pulled it back pending
+verification. Relaunching is the same swap in reverse:
+
+```bash
+git mv index.html coming-soon.html
+git mv preview.html index.html
+```
+
+then remove `noindex` from the new `index.html` and restore its canonical tag.
 
 ## Sections
 
