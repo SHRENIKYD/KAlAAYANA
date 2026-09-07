@@ -11,6 +11,21 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Added
+- Project pages are a third of their former length. The lead photograph filled
+  its column at natural aspect, so a tall one ran off the screen — the Kariappa
+  figure is 401x1026 and rendered nearly 2000px tall. It is capped by height
+  now: the tallest lead image is 702px on desktop, 523px on a phone.
+- Supporting photographs are a tidy grid of equal 4:3 frames rather than a stack
+  of raw pictures at their own sizes, each of which ran 841-936px tall on a
+  phone. Tapping one opens it full size in the existing lightbox, so nothing is
+  lost to the crop.
+- Galleries show two cards per row on a phone instead of one, and a project
+  lists four others from its section rather than all eight, with a link to the
+  rest. Phone pages went from 6400-7700px to 2500-3300px.
+- The scroll hint no longer collides with the hero buttons. It sits absolutely
+  at the bottom while the hero content is centred with no bottom padding, so on
+  a short viewport — an iOS window whose chrome eats the height — the two met.
+  It now has its own space, and is hidden below 680px where there is none.
 - Cards top-align their photograph instead of centring it. A standing figure
   taller than the 3:4 frame was losing its head: Field Marshal Kariappa showed
   52% of his image and General Siddhiah 57%. Only images taller than the frame

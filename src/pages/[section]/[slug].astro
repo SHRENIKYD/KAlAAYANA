@@ -20,7 +20,9 @@ export function getStaticPaths() {
 const { project } = Astro.props;
 const key = project.group;
 const section = site.sections[key];
-const siblings = projects.filter((p) => p.group === key && p.slug !== project.slug);
+const siblings = projects
+  .filter((p) => p.group === key && p.slug !== project.slug)
+  .slice(0, 4);   /* a single row; the section page carries the rest */
 const [lead, ...rest] = project.images;
 const fonts = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Jost:wght@200;300;400;500&display=swap';
 ---
@@ -69,9 +71,11 @@ const fonts = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&
           <div class="shot-grid">
             {rest.map((img, i) => (
               <figure class="shot" data-reveal data-delay={(i % 3) * 80}>
-                <Image src={photo(img.file)} alt={img.alt}
-                       widths={[400, 800, 1200]} formats={['avif', 'webp']} loading="lazy"
-                       sizes="(max-width: 620px) 92vw, (max-width: 1024px) 46vw, 31vw" />
+                <div class="shot-media">
+                  <Image src={photo(img.file)} alt={img.alt}
+                         widths={[400, 800]} formats={['avif', 'webp']} loading="lazy"
+                         sizes="(max-width: 620px) 46vw, 31vw" />
+                </div>
                 <figcaption>{img.alt}</figcaption>
               </figure>
             ))}
@@ -82,6 +86,7 @@ const fonts = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&
       {siblings.length > 0 && (
         <section class="more">
           <h2 class="more-title">More in {section.eyebrow}</h2>
+          <a class="more-all" href={`/${key}.html`}>See all {projects.filter((p) => p.group === key).length}</a>
           <div class="grid four">
             {siblings.map((p, i) => (
               <a class="card" href={`/${key}/${p.slug}.html`} data-reveal data-delay={(i % 4) * 80} data-tilt>

@@ -172,11 +172,11 @@
   var lbCap = document.getElementById('lightboxCap');
   if (lb && lbImg && lbCap) {
   function closeLb() { lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true'); }
-  document.querySelectorAll('.card-media').forEach(function (media) {
+  document.querySelectorAll('.card-media, .shot-media').forEach(function (media) {
     if (media.closest('a')) { return; }   /* a linked card navigates instead */
     media.addEventListener('click', function () {
       var img = media.querySelector('img');
-      var body = media.parentElement.querySelector('.card-body h3');
+      var body = media.parentElement.querySelector('.card-body h3, figcaption');
       lbImg.src = img.src;
       lbImg.alt = img.alt;
       lbCap.textContent = body ? body.textContent : '';
