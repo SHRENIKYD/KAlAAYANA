@@ -11,6 +11,22 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Added
+- Section banner photographs are visibly sharper. Showing the subjects rather
+  than cropping past them exposed how soft these pictures were: they came out
+  of the company profile at 1119-1257px wide and a full-bleed banner asks for
+  2000 CSS px, which the browser was filling by upscaling 1.7x (3.4x on a
+  retina screen). The four sources are now resampled to 1800px with Lanczos
+  and an unsharp mask, and the srcset carries 1400 and 1800 variants, so the
+  browser has real pixels to work with instead of stretching. Measured on the
+  rendered page, gradient energy is up 24.5% and 19.9% on the two worst
+  banners at 2000px, and 15.6% and 12.4% at 1440px on a 2x screen. Encode
+  quality is 68 rather than the default, which holds all of that gain while
+  keeping the four banners to 1053KB from 1336KB. This adds no detail that was
+  never photographed — better source images remain the only real ceiling.
+- The banner veil is lighter through its middle again (0.36 rather than 0.46
+  at 64%). Darkening it had been part of moving the type off the subjects'
+  faces, but it also flattened contrast across exactly the part of the picture
+  the subject now occupies.
 - Section banners no longer cut the heads off their subjects. The frame is far
   more panoramic than any of the four photographs — 2.6:1 on a 2000px screen
   against sources from 1.06:1 to 1.89:1 — so 28-60% of each picture was being

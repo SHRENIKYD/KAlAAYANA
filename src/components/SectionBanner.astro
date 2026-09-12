@@ -26,7 +26,7 @@ const { id, eyebrow, title, lede, image, imageAlt, href, count, focus = '50% 45%
 <section class="section-banner" id={id}>
   <div class="banner-bg">
     <Image src={banner(image)} alt={imageAlt}
-           widths={[640, 960, 1161]} formats={['avif', 'webp']} loading="lazy"
+           widths={[640, 960, 1400, 1800]} formats={['avif', 'webp']} quality={68} loading="lazy"
            sizes="100vw" style={`object-position:${focus}`} />
   </div>
   <div class="banner-veil"></div>
