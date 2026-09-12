@@ -11,6 +11,15 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Added
+- Landmarks and Murals open with different photographs, chosen for resolution
+  rather than because the PDF used them as divider pages. The Udupi image
+  carried only 292x261 pixels of real data in its figure and was soft at 1:1,
+  so no amount of resampling could hold it at banner scale; the seated Shiva at
+  Hubli carries 498x544 and is crisply resolved. Murals moves to the village
+  relief at 1600x1043 from 1119x629. Temples keeps its image, which is already
+  the sharpest temple photograph in the set. Portraits keeps its group of five
+  figures: the sharpest portrait available is a single centred bust, and a
+  centred section title lands straight across its face.
 - Section banner photographs are visibly sharper. Showing the subjects rather
   than cropping past them exposed how soft these pictures were: they came out
   of the company profile at 1119-1257px wide and a full-bleed banner asks for
