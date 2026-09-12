@@ -119,15 +119,26 @@ a{color:inherit;text-decoration:none}
 .stat .lab{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
 
 /* section banner — a section opens with its name over a photograph */
-.section-banner{position:relative;min-height:min(78svh,760px);display:grid;place-items:center;
+/* The cap governs how panoramic the frame becomes on a wide monitor, and that
+   is what decides how much of the photograph survives the crop. At 760px on a
+   2000px screen the frame was 2.6:1 against source pictures of 1.06:1 to 1.9:1,
+   so 28-60% of each one was discarded — enough to take the head off the Udupi
+   figure and the whole gopuram off the Whitefield facade. A taller cap keeps
+   more; object-position, set per section, decides which part goes. */
+.section-banner{position:relative;min-height:min(82svh,880px);display:grid;place-items:end center;
   overflow:hidden;isolation:isolate;border-block:1px solid var(--line)}
 .banner-bg{position:absolute;inset:0;z-index:-2}
 .banner-bg img{width:100%;height:100%;object-fit:cover;object-position:50% 45%;
   filter:saturate(.78) contrast(1.04)}
 .banner-veil{position:absolute;inset:0;z-index:-1;
   background:radial-gradient(ellipse at 50% 44%,rgba(10,9,8,.08),rgba(10,9,8,.58) 78%),
-             linear-gradient(180deg,var(--ink),rgba(10,9,8,.14) 24%,rgba(10,9,8,.34) 68%,var(--ink))}
-.banner-inner{position:relative;text-align:center;padding:80px 6vw;max-width:900px}
+             linear-gradient(180deg,var(--ink),rgba(10,9,8,.10) 22%,rgba(10,9,8,.46) 64%,var(--ink))}
+/* Held low rather than centred: the photographs put their subject in the upper
+   two thirds, and centred type crossed the faces of the Udupi figure and the
+   five bronzes. The veil is heaviest at the foot of the frame, so this is also
+   where the type sits on the least picture. */
+.banner-inner{position:relative;text-align:center;max-width:900px;
+  padding:80px 6vw clamp(52px,7vh,104px)}
 .banner-title{font-family:var(--serif);font-weight:400;margin:0;
   font-size:clamp(2rem,6.4vw,4.4rem);line-height:1.06;letter-spacing:.06em;
   text-transform:uppercase;color:var(--gold-soft);

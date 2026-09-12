@@ -11,6 +11,16 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Added
+- Section banners no longer cut the heads off their subjects. The frame is far
+  more panoramic than any of the four photographs — 2.6:1 on a 2000px screen
+  against sources from 1.06:1 to 1.89:1 — so 28-60% of each picture was being
+  discarded, taken from top and bottom around a single `object-position` of 45%
+  shared by all four. That removed the crown and head of the Udupi figure, the
+  entire gopuram from the Whitefield facade, and the raised torch from the
+  bronze group. Each section now carries its own vertical anchor, and the
+  height cap rises from 760px to 880px so there is less to throw away in the
+  first place. Banner type sits in the lower third rather than dead centre,
+  because moving the subjects up put centred type across their faces.
 - A loading screen: the mark arrives one cluster at a time over a dark ground,
   each filling upward from its own baseline, with nothing on screen before its
   turn — no ghost, no outline, no faint version waiting to be filled. The clip
