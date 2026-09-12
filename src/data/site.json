@@ -96,7 +96,8 @@
       "lede": "Concrete reinforced icons raised across Karnataka, Telangana and Punjab.",
       "banner": "landmarks.jpg",
       "bannerAlt": "The Samudra Manthana installation at Udupi, its ranks of figures ranged along the churning of the ocean",
-      "href": "/landmarks.html"
+      "href": "/landmarks.html",
+      "bannerFocus": "50% 6%"
     },
     "temples": {
       "eyebrow": "Temple Architecture",
@@ -104,7 +105,8 @@
       "lede": "Traditional temple form executed in reinforced concrete at architectural scale.",
       "banner": "temples.jpg",
       "bannerAlt": "The Shree Varasiddhi Vinayaka temple facade at Whitefield lit at dusk, its carved tiers picked out in gold",
-      "href": "/temples.html"
+      "href": "/temples.html",
+      "bannerFocus": "50% 8%"
     },
     "portraits": {
       "eyebrow": "Portraits and Life Sculptures",
@@ -112,7 +114,8 @@
       "lede": "Silicone, bronze and FRP portraiture — from two-foot busts to eight-foot standing figures.",
       "banner": "portraits.jpg",
       "bannerAlt": "Five bronze figures in turbans and dhotis standing as a group, from the studio’s portrait work",
-      "href": "/portraits.html"
+      "href": "/portraits.html",
+      "bannerFocus": "50% 25%"
     },
     "murals": {
       "eyebrow": "Murals",
@@ -120,7 +123,8 @@
       "lede": "Wall-mounted narrative panels and reliefs, principally in FRP.",
       "banner": "murals.jpg",
       "bannerAlt": "A terracotta relief of village life — a seated figure beneath a tree, a hut, cattle and a peacock",
-      "href": "/murals.html"
+      "href": "/murals.html",
+      "bannerFocus": "50% 30%"
     }
   },
   "story": [

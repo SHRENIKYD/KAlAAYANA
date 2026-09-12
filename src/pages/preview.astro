@@ -132,6 +132,7 @@ const delay = (i: number, columns: number) => (i % columns) * 80;
                    image={site.sections[id].banner}
                    imageAlt={site.sections[id].bannerAlt}
                    href={site.sections[id].href}
+                   focus={site.sections[id].bannerFocus}
                    count={byGroup(id).length} />
   ))}
 
