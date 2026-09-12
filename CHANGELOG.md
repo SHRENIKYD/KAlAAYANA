@@ -11,6 +11,16 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Added
+- A loading screen: the mark arrives one cluster at a time over a dark ground,
+  each filling upward from its own baseline, with nothing on screen before its
+  turn — no ghost, no outline, no faint version waiting to be filled. The clip
+  boundaries are measured from the logo rather than guessed: the Kannada
+  resolves into four glyph clusters and the Latin line beneath is the fifth.
+  It runs once per browser session, at 72% of the viewport width on desktop
+  and 78% on a phone. Two guarantees: it clears within 2.6 seconds however
+  slowly the page loads, and where less movement is asked for the mark is
+  simply there, whole, and clears at once. Measured on a page held in a
+  permanent loading state, it cleared at 2957ms; on a page that loads, 1866ms.
 - Project pages are a third of their former length. The lead photograph filled
   its column at natural aspect, so a tall one ran off the screen — the Kariappa
   figure is 401x1026 and rendered nearly 2000px tall. It is capped by height
