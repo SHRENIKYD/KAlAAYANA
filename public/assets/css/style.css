@@ -132,7 +132,7 @@ a{color:inherit;text-decoration:none}
   filter:saturate(.78) contrast(1.04)}
 .banner-veil{position:absolute;inset:0;z-index:-1;
   background:radial-gradient(ellipse at 50% 44%,rgba(10,9,8,.08),rgba(10,9,8,.58) 78%),
-             linear-gradient(180deg,var(--ink),rgba(10,9,8,.10) 22%,rgba(10,9,8,.46) 64%,var(--ink))}
+             linear-gradient(180deg,var(--ink),rgba(10,9,8,.10) 22%,rgba(10,9,8,.36) 64%,var(--ink))}
 /* Held low rather than centred: the photographs put their subject in the upper
    two thirds, and centred type crossed the faces of the Udupi figure and the
    five bronzes. The veil is heaviest at the foot of the frame, so this is also
