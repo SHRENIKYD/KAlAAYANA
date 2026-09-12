@@ -44,9 +44,101 @@ const card = `${origin}/assets/img/social-card.jpg`;
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href={fonts} rel="stylesheet">
+<style is:inline>
+/* ---------- boot screen ----------
+   The mark arrives one cluster at a time, and nothing is on screen before its
+   turn: no ghost, no outline, no faint version waiting to be filled. The clip
+   values are measured from logo.svg, not guessed — the Kannada resolves into
+   four glyph clusters and the Latin line underneath is the fifth.
+
+   It is inert until the script below adds .booting to <html>, which happens
+   only once per browser session. Until then #boot is display:none, so the
+   background-image is never even fetched. */
+#boot{display:none}
+html.booting{overflow:hidden}
+html.booting #boot{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:clamp(26px,4vw,58px);
+  background:#0A0908;opacity:1;transition:opacity .3s linear}
+html.booting.boot-done #boot{opacity:0}
+.boot-mark{position:relative;width:min(72vw,1120px);aspect-ratio:2856/1479}
+@media(max-width:620px){.boot-mark{width:78vw}}
+/* Outer element isolates one cluster; the inner one fills it from the base up. */
+.boot-seg{position:absolute;inset:0}
+.boot-seg i{position:absolute;inset:0;display:block;
+  background:url(/assets/img/logo.svg) center/contain no-repeat;
+  animation:boot-fill .26s cubic-bezier(.33,1,.68,1) both}
+.boot-seg.s1{clip-path:inset(0 81.72% 9.26% 0)}
+.boot-seg.s2{clip-path:inset(0 55.95% 9.26% 18.28%)}
+.boot-seg.s3{clip-path:inset(0 24.23% 9.26% 44.05%)}
+.boot-seg.s4{clip-path:inset(0 0 9.26% 75.77%)}
+.boot-seg.s5{clip-path:inset(90.74% 0 0 0)}
+.boot-seg.s1 i{animation-delay:.06s}
+.boot-seg.s2 i{animation-delay:.32s}
+.boot-seg.s3 i{animation-delay:.58s}
+.boot-seg.s4 i{animation-delay:.84s}
+.boot-seg.s5 i{animation-delay:1.1s}
+@keyframes boot-fill{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0 0 0 0)}}
+.boot-place{margin:0;font-family:"Cinzel",Georgia,serif;font-size:11px;letter-spacing:.3em;
+  text-transform:uppercase;color:rgba(169,156,125,.72)}
+/* Asked for less movement: the mark is simply there, whole, and clears at once. */
+@media(prefers-reduced-motion:reduce){
+  .boot-seg i{animation:none;clip-path:inset(0 0 0 0)}
+}
+</style>
+<script is:inline>
+/* Decides whether the boot screen runs at all, and guarantees it ends.
+   Runs in the document head, so the decision is made before the body paints.
+   Do not write the head tag literally in here: stamp.sh injects its version
+   meta by a plain sed on that string, and would land inside this comment. */
+(function () {
+  var root = document.documentElement;
+  try {
+    /* Once per browser session. Without storage we cannot remember, so rather
+       than replay the reveal on every navigation, skip it. */
+    if (sessionStorage.getItem('kal-boot')) { return; }
+    sessionStorage.setItem('kal-boot', '1');
+  } catch (e) { return; }
+
+  root.classList.add('booting');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var REVEAL = reduced ? 220 : 1500;   /* how long the reveal itself takes */
+  var CAP    = reduced ? 900 : 2600;   /* never hold the page longer than this */
+  var started = Date.now();
+  var done = false;
+
+  function finish(force) {
+    if (done) { return; }
+    done = true;
+    /* Let the reveal play out if the page beat it, but never past the cap. */
+    var wait = force ? 0 : Math.max(0, REVEAL - (Date.now() - started));
+    setTimeout(function () {
+      root.classList.add('boot-done');
+      setTimeout(function () {
+        root.classList.remove('booting', 'boot-done');
+        var el = document.getElementById('boot');
+        if (el && el.parentNode) { el.parentNode.removeChild(el); }
+      }, 320);
+    }, wait);
+  }
+
+  if (document.readyState === 'complete') { finish(false); }
+  else { window.addEventListener('load', function () { finish(false); }); }
+  setTimeout(function () { finish(true); }, CAP);
+})();
+</script>
 <slot name="head" />
 </head>
 <body class={bodyClass}>
+<div id="boot" aria-hidden="true">
+  <div class="boot-mark">
+    <div class="boot-seg s1"><i></i></div>
+    <div class="boot-seg s2"><i></i></div>
+    <div class="boot-seg s3"><i></i></div>
+    <div class="boot-seg s4"><i></i></div>
+    <div class="boot-seg s5"><i></i></div>
+  </div>
+  <p class="boot-place">Bengaluru</p>
+</div>
 <slot />
 </body>
 </html>
