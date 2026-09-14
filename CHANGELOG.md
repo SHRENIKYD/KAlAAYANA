@@ -11,6 +11,12 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Added
+- Eight experiential installation projects from `New Works.zip`: Burger,
+  Face, Fries, Noodles, Pizza, Pori, Pot, and Sandwich, with all 40 supplied
+  photographs preserved in source order and added to the existing project
+  image pipeline.
+- A new Experiential Installations collection and motion-homepage card that
+  opens its data-driven gallery and project detail routes.
 - A fully motion-led staging experience with a Kannada `ಕ` loader mark,
   cinematic navigation, pinned hero and project sequences, parallax materials,
   animated archive, draggable process comparison, and an immersive project page.
@@ -118,6 +124,9 @@ is a holding page. `1.0.0` marks the launch of the full site.
   rather than from the project titles. No image now says "Placeholder".
 
 ### Changed
+- Motion homepage project cards now link to their real collection routes; the
+  generic hard-coded project page has been removed so every selected-work click
+  resolves through the project metadata and displays its associated media.
 - Project photographs go through the image pipeline: AVIF and WebP at 400, 800
   and 1200px with a `sizes` hint matching the grid, so a 385px card fetches the
   400px variant rather than the 1200px one.

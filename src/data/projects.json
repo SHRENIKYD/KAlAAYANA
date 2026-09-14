@@ -603,5 +603,237 @@
         "alt": "A clay relief portrait of Sri Siddaramaiah, arms folded"
       }
     ]
+  },
+  {
+    "slug": "burger",
+    "group": "installations",
+    "title": "Burger Installation",
+    "scale": "Oversized",
+    "description": "Oversized burger sculpture and branded restaurant installation.",
+    "images": [
+      {
+        "file": "burger-1.jpg",
+        "alt": "oversized burger sculpture, primary view"
+      },
+      {
+        "file": "burger-2.jpg",
+        "alt": "oversized burger sculpture, view 2"
+      },
+      {
+        "file": "burger-3.jpg",
+        "alt": "oversized burger sculpture, view 3"
+      },
+      {
+        "file": "burger-4.jpg",
+        "alt": "oversized burger sculpture, view 4"
+      }
+    ]
+  },
+  {
+    "slug": "face",
+    "group": "installations",
+    "title": "Monumental Face Facade",
+    "scale": "Architectural",
+    "description": "A monumental sculpted face integrated into an architectural facade.",
+    "images": [
+      {
+        "file": "face-1.jpg",
+        "alt": "monumental face facade, primary view"
+      },
+      {
+        "file": "face-2.jpg",
+        "alt": "monumental face facade, view 2"
+      },
+      {
+        "file": "face-3.jpg",
+        "alt": "monumental face facade, view 3"
+      },
+      {
+        "file": "face-4.jpg",
+        "alt": "monumental face facade, view 4"
+      },
+      {
+        "file": "face-5.jpg",
+        "alt": "monumental face facade, view 5"
+      }
+    ]
+  },
+  {
+    "slug": "fries",
+    "group": "installations",
+    "title": "Fries Installation",
+    "scale": "Oversized",
+    "description": "Oversized fries sculpture created as an immersive hospitality display.",
+    "images": [
+      {
+        "file": "fries-1.jpg",
+        "alt": "oversized fries sculpture, primary view"
+      },
+      {
+        "file": "fries-2.jpg",
+        "alt": "oversized fries sculpture, view 2"
+      },
+      {
+        "file": "fries-3.jpg",
+        "alt": "oversized fries sculpture, view 3"
+      },
+      {
+        "file": "fries-4.jpg",
+        "alt": "oversized fries sculpture, view 4"
+      }
+    ]
+  },
+  {
+    "slug": "noodles",
+    "group": "installations",
+    "title": "Noodles Installation",
+    "scale": "Oversized",
+    "description": "Oversized noodles sculpture developed from workshop form to finished display.",
+    "images": [
+      {
+        "file": "noodles-1.jpg",
+        "alt": "oversized noodles sculpture, primary view"
+      },
+      {
+        "file": "noodles-2.jpg",
+        "alt": "oversized noodles sculpture, view 2"
+      },
+      {
+        "file": "noodles-3.jpg",
+        "alt": "oversized noodles sculpture, view 3"
+      },
+      {
+        "file": "noodles-4.jpg",
+        "alt": "oversized noodles sculpture, view 4"
+      }
+    ]
+  },
+  {
+    "slug": "pizza",
+    "group": "installations",
+    "title": "Pizza Installation",
+    "scale": "Oversized",
+    "description": "A monumental pizza-slice sculpture created for a restaurant interior.",
+    "images": [
+      {
+        "file": "pizza-1.jpg",
+        "alt": "monumental pizza-slice sculpture, primary view"
+      },
+      {
+        "file": "pizza-2.jpg",
+        "alt": "monumental pizza-slice sculpture, view 2"
+      },
+      {
+        "file": "pizza-3.jpg",
+        "alt": "monumental pizza-slice sculpture, view 3"
+      },
+      {
+        "file": "pizza-4.jpg",
+        "alt": "monumental pizza-slice sculpture, view 4"
+      },
+      {
+        "file": "pizza-5.jpg",
+        "alt": "monumental pizza-slice sculpture, view 5"
+      },
+      {
+        "file": "pizza-6.jpg",
+        "alt": "monumental pizza-slice sculpture, view 6"
+      },
+      {
+        "file": "pizza-7.jpg",
+        "alt": "monumental pizza-slice sculpture, view 7"
+      }
+    ]
+  },
+  {
+    "slug": "pori",
+    "group": "installations",
+    "title": "Pori Installation",
+    "scale": "Oversized",
+    "description": "Oversized pori-inspired food sculpture for a hospitality environment.",
+    "images": [
+      {
+        "file": "pori-1.jpg",
+        "alt": "oversized pori-inspired sculpture, primary view"
+      },
+      {
+        "file": "pori-2.jpg",
+        "alt": "oversized pori-inspired sculpture, view 2"
+      },
+      {
+        "file": "pori-3.jpg",
+        "alt": "oversized pori-inspired sculpture, view 3"
+      },
+      {
+        "file": "pori-4.jpg",
+        "alt": "oversized pori-inspired sculpture, view 4"
+      }
+    ]
+  },
+  {
+    "slug": "pot",
+    "group": "installations",
+    "title": "Culinary Pot Installation",
+    "scale": "Oversized",
+    "description": "A monumental culinary pot and food installation for a restaurant interior.",
+    "images": [
+      {
+        "file": "pot-1.jpg",
+        "alt": "monumental culinary pot installation, primary view"
+      },
+      {
+        "file": "pot-2.jpg",
+        "alt": "monumental culinary pot installation, view 2"
+      },
+      {
+        "file": "pot-3.jpg",
+        "alt": "monumental culinary pot installation, view 3"
+      },
+      {
+        "file": "pot-4.jpg",
+        "alt": "monumental culinary pot installation, view 4"
+      }
+    ]
+  },
+  {
+    "slug": "sandwich",
+    "group": "installations",
+    "title": "Sandwich Installation",
+    "scale": "Oversized",
+    "description": "Oversized sandwich sculpture developed through workshop and installation stages.",
+    "images": [
+      {
+        "file": "sandwich-1.jpg",
+        "alt": "oversized sandwich sculpture, primary view"
+      },
+      {
+        "file": "sandwich-2.jpg",
+        "alt": "oversized sandwich sculpture, view 2"
+      },
+      {
+        "file": "sandwich-3.jpg",
+        "alt": "oversized sandwich sculpture, view 3"
+      },
+      {
+        "file": "sandwich-4.jpg",
+        "alt": "oversized sandwich sculpture, view 4"
+      },
+      {
+        "file": "sandwich-5.jpg",
+        "alt": "oversized sandwich sculpture, view 5"
+      },
+      {
+        "file": "sandwich-6.jpg",
+        "alt": "oversized sandwich sculpture, view 6"
+      },
+      {
+        "file": "sandwich-7.jpg",
+        "alt": "oversized sandwich sculpture, view 7"
+      },
+      {
+        "file": "sandwich-8.jpg",
+        "alt": "oversized sandwich sculpture, view 8"
+      }
+    ]
   }
 ]

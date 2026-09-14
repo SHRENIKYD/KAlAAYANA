@@ -57,7 +57,7 @@ for page in sorted(html):
 # 5. Content data must be well formed — a malformed project must fail the build,
 #    not reach a visitor. Presentation is not consulted; this checks data alone.
 REQUIRED = ('slug', 'group', 'title', 'scale', 'description')
-GROUPS = {'landmarks', 'temples', 'portraits', 'murals'}
+GROUPS = {'landmarks', 'temples', 'portraits', 'murals', 'installations'}
 try:
     projects = json.load(open('src/data/projects.json', encoding='utf-8'))
 except Exception as e:
