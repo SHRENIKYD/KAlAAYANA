@@ -11,6 +11,11 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Added
+- A fully motion-led staging experience with a Kannada `ಕ` loader mark,
+  cinematic navigation, pinned hero and project sequences, parallax materials,
+  animated archive, draggable process comparison, and an immersive project page.
+- The Kalaayana logo now appears in both the main navigation and full-screen
+  navigation while the loading screen keeps only the Kannada leading mark.
 - Landmarks and Murals open with different photographs, chosen for resolution
   rather than because the PDF used them as divider pages. The Udupi image
   carried only 292x261 pixels of real data in its figure and was soft at 1:1,
