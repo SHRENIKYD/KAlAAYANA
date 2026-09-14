@@ -125,6 +125,15 @@
       "bannerAlt": "An FRP relief panel of village life — elephants at the plough, figures at work, palms and a thatched hut",
       "href": "/murals.html",
       "bannerFocus": "50% 24%"
+    },
+    "installations": {
+      "eyebrow": "Experiential Installations",
+      "title": "Sculpture at the scale of experience",
+      "lede": "Oversized hospitality and architectural installations shaped from workshop studies through final placement.",
+      "banner": "installations.jpg",
+      "bannerAlt": "An oversized burger sculpture installed inside a restaurant",
+      "href": "/installations.html",
+      "bannerFocus": "50% 55%"
     }
   },
   "story": [
