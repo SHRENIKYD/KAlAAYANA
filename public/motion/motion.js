@@ -60,7 +60,8 @@ const render = () => {
   $('[data-zoom]').style.clipPath = `inset(${6 - heroProgress * 6}% ${5 - heroProgress * 5}%)`;
   $('.hero-title').style.transform = `translate3d(0,${-heroProgress * 150}px,0) scale(${1 + heroProgress * 0.08})`;
   $('.hero-title').style.opacity = 1 - heroProgress;
-  $('.hero-orbit').style.transform = `rotate(${heroProgress * 240}deg)`;
+  const heroOrbit = $('.hero-orbit');
+  if (heroOrbit) heroOrbit.style.transform = `rotate(${heroProgress * 240}deg)`;
 
   const statement = $('.statement');
   const statementProgress = clamp((innerHeight - statement.getBoundingClientRect().top) / (statement.offsetHeight * 0.85));

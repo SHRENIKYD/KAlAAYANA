@@ -11,6 +11,9 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Added
+- A dedicated touch-responsive staging layout that preserves the horizontal
+  "Works of Presence" scroll sequence while stacking the process and archive
+  content cleanly on phones, including browsers that request a wide viewport.
 - Eight experiential installation projects from `New Works.zip`: Burger,
   Face, Fries, Noodles, Pizza, Pori, Pot, and Sandwich, with all 40 supplied
   photographs preserved in source order and added to the existing project
@@ -22,6 +25,10 @@ is a holding page. `1.0.0` marks the launch of the full site.
   animated archive, draggable process comparison, and an immersive project page.
 - The Kalaayana logo now appears in both the main navigation and full-screen
   navigation while the loading screen keeps only the Kannada leading mark.
+
+### Changed
+- Removed the rotating circular hero ornament so it no longer obscures the
+  sculpture on desktop or mobile.
 - Landmarks and Murals open with different photographs, chosen for resolution
   rather than because the PDF used them as divider pages. The Udupi image
   carried only 292x261 pixels of real data in its figure and was soft at 1:1,
