@@ -12,11 +12,12 @@ export function getStaticPaths() {
 
 const { section: key } = Astro.params;
 const section = site.sections[key];
+const sectionLabel = key === 'landmarks' ? 'Landmarks' : section.eyebrow;
 const items = projects.filter((p) => p.group === key);
 const sectionNumber = String(Object.keys(site.sections).indexOf(key) + 1).padStart(2, '0');
 const fonts = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap';
 ---
-<Base title={`${section.eyebrow} — ${site.name}`} description={section.lede} fonts={fonts} bodyClass="motion-inner">
+<Base title={`${sectionLabel} — ${site.name}`} description={section.lede} fonts={fonts} bodyClass="motion-inner">
   <link slot="head" rel="stylesheet" href="/motion/inner.css?v=1.2.1">
 
   <header class="inner-nav">
@@ -28,10 +29,10 @@ const fonts = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500
   <main>
     <section class="collection-hero">
       <div class="collection-index">{sectionNumber} / COLLECTION</div>
-      <div class="collection-heading"><small>Kalaayana archive</small><h1>{section.eyebrow}</h1><p>{section.lede}</p></div>
+      <div class="collection-heading"><small>Kalaayana archive</small><h1>{sectionLabel}</h1><p>{section.lede}</p></div>
     </section>
 
-    <section class="collection-grid" aria-label={`${section.eyebrow} projects`}>
+    <section class="collection-grid" aria-label={`${sectionLabel} projects`}>
       {items.map((project, index) => (
         <a class="work-tile" href={`/${key}/${project.slug}.html`}>
           <div class="work-image"><Image src={photo(project.images[0].file)} alt={project.images[0].alt} widths={[640, 960, 1400]} formats={['avif', 'webp']} loading={index < 2 ? 'eager' : 'lazy'} sizes="(max-width: 760px) 100vw, 48vw" /></div>
