@@ -26,6 +26,31 @@ is a holding page. `1.0.0` marks the launch of the full site.
   Apple touch icon.
 
 ### Fixed
+- Header labels are legible wherever they sit. All three fixed headers — the
+  homepage, the collection and archive pages, the project pages — were drawn
+  with `mix-blend-mode: difference` and no ground of their own. That guarantees
+  contrast only against near-black or near-white: difference-blending white
+  against a mid-tone returns the same mid-tone, so every label vanished wherever
+  a mid-grey part of a photograph scrolled beneath it. Measured by isolating the
+  glyph pixels and the composited ground behind them, 13 of 17 label/page/width
+  combinations fell below the 4.5:1 AA threshold, most of them at 1.0:1 — the
+  archive, the one page with no imagery under its header, was the only one that
+  passed throughout. The blend mode is replaced by a 150px gradient scrim behind
+  each header, and the worst case is now 5.88:1. The cost is a soft dark
+  vignette at the top of the cream sections, where the old blend mode used to
+  invert the labels instead; it is the price of a fixed header over arbitrary
+  photographs.
+- The closed menu panel no longer holds five phantom tab stops. It is hidden
+  with `clip-path`, which clips painting and clicks but not focus, so tabbing
+  the homepage went from MENU into CLOSE, Index, Selected works, Archive and
+  Contact with nothing visible on screen. It also carried `aria-hidden="true"`
+  while holding focusable children, which is a contradiction screen readers and
+  keyboards resolve differently. The panel is `inert` and `visibility: hidden`
+  while closed, and the open state is unchanged.
+- Every control clears the 24px minimum target size. Fourteen links across the
+  site were 11 to 18px tall — the header's Collections and Contact, the
+  collection-end link, the project crumb, the three project pager links and the
+  five footer links. They carry real padding now, not a decorative hit area.
 - The closing panel centres its grid items to their content, so a long label or
   title had nothing to wrap against. Its span, title, pager and commission line
   are held to the viewport now.
