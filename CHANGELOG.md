@@ -10,6 +10,12 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.2] — 2026-09-16
+
+### Removed
+- Removed the oversized “FORM × FAITH × MEMORY” kinetic strip from the staging
+  homepage, including its scroll animation and responsive styling.
+
 ## [1.2.1] — 2026-09-16
 
 ### Changed

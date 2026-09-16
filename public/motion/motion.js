@@ -83,10 +83,6 @@ const render = () => {
     $('.media', card).style.setProperty('--tilt', `${offset * -3}deg`);
     $('.media', card).style.setProperty('--wipe', clamp(Math.abs(offset) - 0.12, 0, 1));
   });
-  const kinetic = $('.kinetic');
-  const kineticOffset = kinetic.getBoundingClientRect().top - innerHeight;
-  $('.kinetic>div').style.transform = `translate3d(${-20 + kineticOffset * 0.18}px,0,0) skewX(${clamp(velocity * -0.12,-5,5)}deg)`;
-
   const material = $('.material');
   const materialProgress = clamp((innerHeight - material.getBoundingClientRect().top) / (material.offsetHeight + innerHeight));
   $('.material-bg').style.transform = `translateY(${(materialProgress - 0.5) * 12}%) scale(${1.03 + materialProgress * 0.12})`;
