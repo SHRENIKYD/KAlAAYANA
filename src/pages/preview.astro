@@ -40,12 +40,11 @@ const total = String(collections.length).padStart(2, '0');
   <link rel="stylesheet" href="/motion/effects.css">
   <link rel="stylesheet" href="/motion/phase.css">
   <link rel="stylesheet" href="/motion/logo.css">
-  <link rel="stylesheet" href="/motion/loader.css">
   <link rel="stylesheet" href="/motion/routing.css">
   <link rel="stylesheet" href="/motion/responsive.css">
+  <script is:inline>try{sessionStorage.setItem("kal-boot","1")}catch(e){}</script>
 </head>
 <body>
-  <div class="loader" aria-hidden="true"><div class="loader-mark" lang="kn">ಕ</div><div class="loader-copy"><span>Shaping stories</span><b>000</b></div><div class="loader-line"></div></div>
   <div class="scroll-progress" aria-hidden="true"></div>
   <header class="nav">
     <a class="logo" href="#home"><img src="/motion/assets/logo.svg" alt="Kalaayana Studios"></a>
@@ -72,8 +71,8 @@ const total = String(collections.length).padStart(2, '0');
             </div>
             <div class="caption">
               <span>COLLECTION {c.n} / {total} · {c.short}</span>
-              <h3>{c.cardName.map((line, i) => (i === 0 ? line : <><br />{line}</>))}</h3>
-              <p>{c.cardSub.map((line, i) => (i === 0 ? line : <><br />{line}</>))}</p>
+              <h3>{c.cardName.join(' ')}</h3>
+              <p>{c.cardSub.join(' ')}</p>
             </div>
           </a>
         ))}
