@@ -6,16 +6,14 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 let count = 0;
 const counter = $('.loader-copy b');
-if (counter) {
-  const counterTimer = setInterval(() => {
-    count = Math.min(100, count + Math.ceil((100 - count) * 0.12));
-    counter.textContent = String(count).padStart(3, '0');
-    if (count === 100) clearInterval(counterTimer);
-  }, 45);
-}
+const counterTimer = setInterval(() => {
+  count = Math.min(100, count + Math.ceil((100 - count) * 0.12));
+  counter.textContent = String(count).padStart(3, '0');
+  if (count === 100) clearInterval(counterTimer);
+}, 45);
 
 const cursor = $('.cursor');
-if (cursor && !reduced) {
+if (!reduced) {
   let mouseX = -100, mouseY = -100, cursorX = -100, cursorY = -100;
   addEventListener('pointermove', event => {
     mouseX = event.clientX;
@@ -38,6 +36,7 @@ const statementCopy = $('.word-reveal');
 const wordList = statementCopy.textContent.trim().split(/\s+/);
 statementCopy.innerHTML = wordList.map(word => `<span class="word">${word}</span> `).join('');
 const words = $$('.word');
+const sections = [$('.hero'), $('.statement'), $('.projects'), $('.material'), $('.process')];
 let previousScroll = scrollY;
 let velocity = 0;
 
@@ -50,12 +49,17 @@ const render = () => {
   const nav = $('.nav');
   nav.classList.toggle('hidden', velocity > 1.8 && scrollTop > innerHeight);
   if (velocity < -1) nav.classList.remove('hidden');
+  let activeSection = 0;
+  sections.forEach((section, index) => { if (section.getBoundingClientRect().top < innerHeight * 0.52) activeSection = index; });
+  $('.section-meter b').textContent = String(activeSection + 1).padStart(2, '0');
+  $('.section-meter').style.setProperty('--meter', `${(activeSection + 1) / sections.length * 100}%`);
+
   const hero = $('.hero');
   const heroProgress = clamp(-hero.getBoundingClientRect().top / (hero.offsetHeight - innerHeight));
   $('[data-zoom]').style.transform = `scale(${1 + heroProgress * 0.18})`;
   $('[data-zoom]').style.clipPath = `inset(${6 - heroProgress * 6}% ${5 - heroProgress * 5}%)`;
   $('.hero-title').style.transform = `translate3d(0,${-heroProgress * 150}px,0) scale(${1 + heroProgress * 0.08})`;
-  $('.hero-title').style.opacity = 1 - heroProgress * 0.55;
+  $('.hero-title').style.opacity = 1 - heroProgress;
   const heroOrbit = $('.hero-orbit');
   if (heroOrbit) heroOrbit.style.transform = `rotate(${heroProgress * 240}deg)`;
 

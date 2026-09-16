@@ -2,4 +2,3 @@
 .hero-orbit{display:none!important}
 @media(max-width:760px){.section-meter{display:none}}
 @media(prefers-reduced-motion:reduce){.project-card .media:after{display:none}}
-.project-card .media:after{display:none!important}

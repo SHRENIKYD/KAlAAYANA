@@ -14,41 +14,8 @@ const key = project.group;
 const section = site.sections[key];
 const group = projects.filter((item) => item.group === key);
 const current = group.findIndex((item) => item.slug === project.slug);
-/**
- * Both neighbours, and whether reaching them wraps. The collection is a ring —
- * that is deliberate — but it used to wrap in silence, so the last project
- * offered "NEXT" and delivered the first. The labels below say which it is.
- */
 const next = group[(current + 1) % group.length];
-const prev = group[(current - 1 + group.length) % group.length];
-const wrapsForward = current === group.length - 1;
-const wrapsBack = current === 0;
-const position = String(current + 1).padStart(2, '0');
-/**
- * Scale holds a measurement and form holds a category; until Phase 5 they were
- * one field, so "Panel" and "Oversized" were being presented as sizes. A
- * project states whichever it has, labelled for what it is, and both once the
- * studio supplies the missing measurements.
- *
- * Year and client are empty on every project today — they live in the studio's
- * memory, not in this repository. A blank one is omitted rather than rendered
- * as an empty row, so filling docs/CONTENT-NEEDED.md in is the only step
- * needed to make them appear.
- */
-const facts = [
-  project.scale && { term: 'Scale', value: project.scale },
-  project.form && { term: 'Form', value: project.form },
-  project.year && { term: 'Year', value: project.year },
-  project.client && { term: 'Client', value: project.client },
-].filter(Boolean);
-const groupTotal = String(group.length).padStart(2, '0');
 const [lead, ...rest] = project.images;
-const leadPhoto = photo(lead.file);
-const leadOrientation = leadPhoto.height > leadPhoto.width ? 'portrait' : 'landscape';
-const gallery = rest.map((image, index) => {
-  const source = photo(image.file);
-  return { ...image, source, large: index % 3 === 0, orientation: source.height > source.width ? 'portrait' : 'landscape' };
-});
 const fonts = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap';
 ---
 <Base title={`${project.title} — ${site.name}`} description={project.description} fonts={fonts} bodyClass="motion-inner detail-page">
@@ -57,36 +24,27 @@ const fonts = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500
 
   <header class="detail-nav">
     <a class="detail-brand" href="/"><img src="/motion/assets/logo.svg" alt="Kalaayana Studios"></a>
-    <a class="detail-back" href={`/${key}.html`}>← {section.label}</a>
+    <a class="detail-back" href={`/${key}.html`}>← {section.eyebrow}</a>
   </header>
 
   <main>
     <section class="detail-hero">
-      <div class={`detail-image ${leadOrientation}`}><Image src={leadPhoto} alt={lead.alt} widths={[960, 1600, 2200]} formats={['avif', 'webp']} loading="eager" quality={92} sizes="100vw" /></div>
-      <h1><span>{project.title}</span><i>{section.label}</i></h1>
+      <div class="detail-image"><Image src={photo(lead.file)} alt={lead.alt} widths={[960, 1600, 2200]} formats={['avif', 'webp']} loading="eager" sizes="100vw" /></div>
+      <h1><span>{project.title}</span><i>{section.eyebrow}</i></h1>
       <div class="detail-scroll">SCROLL TO EXPLORE ↓</div>
     </section>
 
     <section class="detail-intro">
       <span>01 / THE WORK</span>
       <p>{project.description}</p>
-      <dl>{facts.map((fact) => (<div><dt>{fact.term}</dt><dd>{fact.value}</dd></div>))}<div><dt>Collection</dt><dd>{section.label} · {position} / {groupTotal}</dd></div><div><dt>Archive</dt><dd>{project.images.length} {project.images.length === 1 ? 'image' : 'images'}</dd></div></dl>
+      <dl><div><dt>Scale</dt><dd>{project.scale}</dd></div><div><dt>Collection</dt><dd>{section.eyebrow}</dd></div><div><dt>Archive</dt><dd>{project.images.length} {project.images.length === 1 ? 'image' : 'images'}</dd></div></dl>
     </section>
 
-    {gallery.length > 0 && <section class="detail-gallery" aria-label={`${project.title} photographs`}>
-      {gallery.map((image) => <figure class={`${image.large ? 'large ' : ''}${image.orientation}`}><Image src={image.source} alt={image.alt} widths={[640, 1000, 1600]} formats={['avif', 'webp']} loading="lazy" quality={92} sizes={image.large ? '(max-width: 1600px) 100vw, 1600px' : '(max-width: 760px) 100vw, 50vw'} /><figcaption>{image.alt}</figcaption></figure>)}
+    {rest.length > 0 && <section class="detail-gallery" aria-label={`${project.title} photographs`}>
+      {rest.map((image, index) => <figure class={index % 3 === 0 ? 'large' : undefined}><Image src={photo(image.file)} alt={image.alt} widths={[640, 1000, 1600]} formats={['avif', 'webp']} loading="lazy" sizes={index % 3 === 0 ? '100vw' : '(max-width: 760px) 100vw, 50vw'} /><figcaption>{image.alt}</figcaption></figure>)}
     </section>}
 
-    <section class="detail-next">
-      <span>{wrapsForward ? `FIRST IN ${section.label.toUpperCase()}` : `NEXT IN ${section.label.toUpperCase()}`}</span>
-      <h2>{next.title}<i>awaits.</i></h2>
-      <nav class="detail-pager" aria-label="Project navigation">
-        <a href={`/${key}/${prev.slug}.html`} rel="prev">↖ {wrapsBack ? 'LAST PROJECT' : 'PREVIOUS PROJECT'}</a>
-        <a href={`/${key}.html`}>ALL {groupTotal} IN {section.label.toUpperCase()}</a>
-        <a href={`/${key}/${next.slug}.html`} rel="next">{wrapsForward ? 'FIRST PROJECT' : 'NEXT PROJECT'} ↗</a>
-      </nav>
-      <p class="detail-commission">Have a story worth shaping? <a href={`mailto:${site.contact.email}`}>BEGIN A COMMISSION ↗</a></p>
-    </section>
+    <section class="detail-next"><span>NEXT IN {section.eyebrow.toUpperCase()}</span><h2>{next.title}<i>awaits.</i></h2><a href={`/${key}/${next.slug}.html`}>VIEW NEXT PROJECT ↗</a></section>
   </main>
   <script is:inline src="/motion/project.js"></script>
 </Base>
