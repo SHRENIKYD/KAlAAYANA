@@ -6,11 +6,13 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 let count = 0;
 const counter = $('.loader-copy b');
-const counterTimer = setInterval(() => {
-  count = Math.min(100, count + Math.ceil((100 - count) * 0.12));
-  counter.textContent = String(count).padStart(3, '0');
-  if (count === 100) clearInterval(counterTimer);
-}, 45);
+if (counter) {
+  const counterTimer = setInterval(() => {
+    count = Math.min(100, count + Math.ceil((100 - count) * 0.12));
+    counter.textContent = String(count).padStart(3, '0');
+    if (count === 100) clearInterval(counterTimer);
+  }, 45);
+}
 
 const cursor = $('.cursor');
 if (cursor && !reduced) {
