@@ -72,8 +72,10 @@ const render = () => {
   track.style.transform = `translate3d(${-travel * projectProgress}px,0,0)`;
   $('.track-line i').style.width = `${12 + projectProgress * 88}%`;
   $$('.project-card').forEach(card => {
-    const offset = card.getBoundingClientRect().left / innerWidth;
-    $('.media img', card).style.transform = `scale(1.15) translateX(${-offset * 4}%)`;
+    const box = card.getBoundingClientRect();
+    const offset = (box.left + box.width / 2 - innerWidth / 2) / innerWidth;
+    const parallax = clamp(offset, -1, 1);
+    $('.media img', card).style.transform = `scale(1.08) translateX(${-parallax * 3}%)`;
     const focus = 1 - Math.min(1, Math.abs(offset));
     $('.media', card).style.setProperty('--focus', 0.94 + focus * 0.06);
     $('.media', card).style.setProperty('--tilt', `${offset * -3}deg`);
