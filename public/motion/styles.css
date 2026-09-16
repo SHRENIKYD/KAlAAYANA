@@ -165,3 +165,17 @@
 @media(prefers-reduced-motion:reduce){
   .slide.project-card,.slide.project-card.invert{width:100%;min-width:0}
 }
+
+
+/* Loading mark: use the studio's Kannada monogram. */
+.loader-mark{
+  width:clamp(74px,6.2vw,112px);
+  height:auto;
+  max-height:26vh;
+  object-fit:contain;
+  transform:scale(.72);
+  animation:markIn 1.2s cubic-bezier(.2,.8,.2,1) forwards;
+}
+@media(max-width:760px){
+  .loader-mark{width:78px;max-height:22vh}
+}
