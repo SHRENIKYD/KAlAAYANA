@@ -13,7 +13,7 @@ const counterTimer = setInterval(() => {
 }, 45);
 
 const cursor = $('.cursor');
-if (!reduced) {
+if (cursor && !reduced) {
   let mouseX = -100, mouseY = -100, cursorX = -100, cursorY = -100;
   addEventListener('pointermove', event => {
     mouseX = event.clientX;
@@ -36,7 +36,6 @@ const statementCopy = $('.word-reveal');
 const wordList = statementCopy.textContent.trim().split(/\s+/);
 statementCopy.innerHTML = wordList.map(word => `<span class="word">${word}</span> `).join('');
 const words = $$('.word');
-const sections = Array.from(document.querySelectorAll('main > section'))  /* every section, not a hand-listed five: the list stopped at .process, so the meter read 03 for the whole slider and never passed 05 */;
 let previousScroll = scrollY;
 let velocity = 0;
 
@@ -49,19 +48,12 @@ const render = () => {
   const nav = $('.nav');
   nav.classList.toggle('hidden', velocity > 1.8 && scrollTop > innerHeight);
   if (velocity < -1) nav.classList.remove('hidden');
-  let activeSection = 0;
-  sections.forEach((section, index) => { if (section.getBoundingClientRect().top < innerHeight * 0.52) activeSection = index; });
-  $('.section-meter b').textContent = String(activeSection + 1).padStart(2, '0');
-  $('.section-meter').style.setProperty('--meter', `${(activeSection + 1) / sections.length * 100}%`);
-  const meterTotal = $('.section-meter span');
-  if (meterTotal) meterTotal.textContent = String(sections.length).padStart(2, '0');
-
   const hero = $('.hero');
   const heroProgress = clamp(-hero.getBoundingClientRect().top / (hero.offsetHeight - innerHeight));
   $('[data-zoom]').style.transform = `scale(${1 + heroProgress * 0.18})`;
   $('[data-zoom]').style.clipPath = `inset(${6 - heroProgress * 6}% ${5 - heroProgress * 5}%)`;
   $('.hero-title').style.transform = `translate3d(0,${-heroProgress * 150}px,0) scale(${1 + heroProgress * 0.08})`;
-  $('.hero-title').style.opacity = 1 - heroProgress;
+  $('.hero-title').style.opacity = 1 - heroProgress * 0.55;
   const heroOrbit = $('.hero-orbit');
   if (heroOrbit) heroOrbit.style.transform = `rotate(${heroProgress * 240}deg)`;
 

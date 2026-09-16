@@ -105,7 +105,9 @@
       "cardSub": [
         "Architecture and devotion",
         "formed as one."
-      ]
+      ],
+      "label": "Temple Architecture",
+      "short": "TEMPLES"
     },
     "portraits": {
       "eyebrow": "Portraits and Life Sculptures",
@@ -122,7 +124,9 @@
       "cardSub": [
         "Presence preserved",
         "through proportion."
-      ]
+      ],
+      "label": "Portraits and Life Sculptures",
+      "short": "PORTRAITS"
     },
     "murals": {
       "eyebrow": "Murals",
@@ -138,7 +142,9 @@
       "cardSub": [
         "History unfolded",
         "across a surface."
-      ]
+      ],
+      "label": "Murals",
+      "short": "MURALS"
     },
     "landmarks": {
       "eyebrow": "Our Major Projects",
@@ -149,13 +155,14 @@
       "href": "/landmarks.html",
       "bannerFocus": "50% 16%",
       "cardName": [
-        "Major",
-        "Projects"
+        "Landmarks"
       ],
       "cardSub": [
         "Public form, collective",
         "memory."
-      ]
+      ],
+      "label": "Landmarks",
+      "short": "LANDMARKS"
     },
     "installations": {
       "eyebrow": "Experiential Installations",
@@ -172,7 +179,9 @@
       "cardSub": [
         "Hospitality sculpture",
         "at immersive scale."
-      ]
+      ],
+      "label": "Experiential Installations",
+      "short": "INSTALLATIONS"
     }
   },
   "story": [
