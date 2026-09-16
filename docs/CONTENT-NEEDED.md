@@ -33,8 +33,10 @@ Matching one of those keeps the collection pages consistent.
 
 ## 2. Years — no project carries one
 
-The homepage states "Selected works · 2012—2026". Nothing in the data supports
-that range, so the claim currently rests on nobody's memory in particular.
+The homepage now reads "Selected works" alone. It used to claim "Selected works
+· 2012—2026" with nothing in the data behind it. Once any year is recorded the
+line derives its own range from the earliest and latest, so it cannot drift out
+of step with the work again.
 
 | Collection | Project | Year (or range) |
 | --- | --- | --- |
@@ -189,8 +191,8 @@ deck. If it is wrong, say what it should be and the slug changes with it.
 | --- | --- |
 | `scale` | Collection tiles and the project's fact list, as Scale |
 | `form` | The same places, as Form — already live |
-| `year` | Not yet rendered; needs a decision on where it belongs |
-| `client` | Not yet rendered; needs the same decision, plus your permission |
+| `year` | The project's fact list, as Year — and the homepage's "Selected works" line, which derives its range from the earliest and latest year recorded rather than a typed one |
+| `client` | The project's fact list, as Client — only for the ones you mark nameable |
 | `description` | The project page and the collection tile, as it does now |
 
 Nothing here blocks a release. The site is accurate about what it knows; these

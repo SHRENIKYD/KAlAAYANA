@@ -29,10 +29,17 @@ const position = String(current + 1).padStart(2, '0');
  * one field, so "Panel" and "Oversized" were being presented as sizes. A
  * project states whichever it has, labelled for what it is, and both once the
  * studio supplies the missing measurements.
+ *
+ * Year and client are empty on every project today — they live in the studio's
+ * memory, not in this repository. A blank one is omitted rather than rendered
+ * as an empty row, so filling docs/CONTENT-NEEDED.md in is the only step
+ * needed to make them appear.
  */
 const facts = [
   project.scale && { term: 'Scale', value: project.scale },
   project.form && { term: 'Form', value: project.form },
+  project.year && { term: 'Year', value: project.year },
+  project.client && { term: 'Client', value: project.client },
 ].filter(Boolean);
 const groupTotal = String(group.length).padStart(2, '0');
 const [lead, ...rest] = project.images;

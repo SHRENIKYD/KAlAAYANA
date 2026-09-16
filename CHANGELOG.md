@@ -26,6 +26,15 @@ is a holding page. `1.0.0` marks the launch of the full site.
   Apple touch icon.
 
 ### Changed
+- The homepage reads "Selected works" rather than "Selected works · 2012—2026".
+  No project carried a year, so the range rested on nobody's memory in
+  particular. Once any year is recorded the line derives its own range from the
+  earliest and latest, so it cannot drift out of step with the work again.
+- The project fact list wraps. It was a flex row of fixed 170px columns with an
+  8vw gap, which fits four entries at 1440px and no more; adding Year and Client
+  takes it to six, and the sixth ran 156px past the viewport where
+  `overflow-x: hidden` would have silently swallowed it. Verified at 390, 1440
+  and 2000px with all six filled.
 - `scale` holds a measurement and a new `form` holds a category. They were one
   field, so twelve projects presented "Oversized", "Panel", "Relief", "Series",
   "Life size" or "Architectural" under the heading Scale — a category dressed as
@@ -37,6 +46,11 @@ is a holding page. `1.0.0` marks the launch of the full site.
   the build the way malformed data does.
 
 ### Added
+- Projects carry `year` and `client`. Both are empty on all 37 — they live in
+  the studio's memory, not in this repository — and a blank one is omitted
+  rather than rendered as an empty row, so filling the content sheet in is the
+  only step needed to make them appear. Client shows in the project's fact list,
+  for the commissions the studio marks as nameable.
 - `docs/CONTENT-NEEDED.md` lists every blank the site cannot fill for itself:
   the twelve missing measurements, a year for all 37 projects, clients for the
   eight installations, locations for the 21 projects that name no place, the
