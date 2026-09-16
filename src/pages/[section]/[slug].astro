@@ -35,7 +35,7 @@ const fonts = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500
 
   <main>
     <section class="detail-hero">
-      <div class={`detail-image ${leadOrientation}`}><Image src={leadPhoto} alt={lead.alt} widths={[960, 1600, 2200]} formats={['avif', 'webp']} loading="eager" sizes="100vw" /></div>
+      <div class={`detail-image ${leadOrientation}`}><Image src={leadPhoto} alt={lead.alt} widths={[960, 1600, 2200]} formats={['avif', 'webp']} loading="eager" quality={92} sizes="100vw" /></div>
       <h1><span>{project.title}</span><i>{section.eyebrow}</i></h1>
       <div class="detail-scroll">SCROLL TO EXPLORE ↓</div>
     </section>
@@ -47,7 +47,7 @@ const fonts = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500
     </section>
 
     {gallery.length > 0 && <section class="detail-gallery" aria-label={`${project.title} photographs`}>
-      {gallery.map((image) => <figure class={`${image.large ? 'large ' : ''}${image.orientation}`}><Image src={image.source} alt={image.alt} widths={[640, 1000, 1600]} formats={['avif', 'webp']} loading="lazy" sizes={image.large ? '100vw' : '(max-width: 760px) 100vw, 50vw'} /><figcaption>{image.alt}</figcaption></figure>)}
+      {gallery.map((image) => <figure class={`${image.large ? 'large ' : ''}${image.orientation}`}><Image src={image.source} alt={image.alt} widths={[640, 1000, 1600]} formats={['avif', 'webp']} loading="lazy" quality={92} sizes={image.large ? '(max-width: 1600px) 100vw, 1600px' : '(max-width: 760px) 100vw, 50vw'} /><figcaption>{image.alt}</figcaption></figure>)}
     </section>}
 
     <section class="detail-next"><span>NEXT IN {section.eyebrow.toUpperCase()}</span><h2>{next.title}<i>awaits.</i></h2><a href={`/${key}/${next.slug}.html`}>VIEW NEXT PROJECT ↗</a></section>

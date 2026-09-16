@@ -16,6 +16,15 @@ is a holding page. `1.0.0` marks the launch of the full site.
   to 100 while nothing was being waited for — the count was driven by a timer,
   not by load progress, and the panel slid away on a fixed 1.8s delay whether
   the page was ready or not. The hero now renders at first paint.
+## [1.2.7] — 2026-09-16
+
+### Fixed
+- Project-detail images now render at higher quality and are never stretched
+  beyond their intrinsic width, preventing small archive photographs from being
+  enlarged into visibly soft full-width frames.
+- Smaller originals are centred within the gallery so their true resolution is
+  preserved rather than disguised by cropping or upscaling.
+
 ## [1.2.6] — 2026-09-16
 
 ### Fixed
