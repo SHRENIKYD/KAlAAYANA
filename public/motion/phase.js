@@ -1,5 +1,5 @@
 const menuButton=document.querySelector('.menu'),menuPanel=document.querySelector('.menu-panel'),menuClose=document.querySelector('.menu-close');
-const setMenu=open=>{menuPanel.classList.toggle('open',open);menuPanel.setAttribute('aria-hidden',String(!open));document.body.style.overflow=open?'hidden':''};
+const setMenu=open=>{menuPanel.classList.toggle('open',open);menuPanel.setAttribute('aria-hidden',String(!open));menuPanel.inert=!open;document.body.style.overflow=open?'hidden':''};setMenu(false);
 menuButton.addEventListener('click',()=>setMenu(true));menuClose.addEventListener('click',()=>setMenu(false));menuPanel.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>setMenu(false)));addEventListener('keydown',event=>{if(event.key==='Escape')setMenu(false)});
 const compare=document.querySelector('.compare');let dragging=false;
 const updateCompare=x=>{const box=compare.getBoundingClientRect();const value=Math.max(0,Math.min(100,(x-box.left)/box.width*100));compare.style.setProperty('--split',value+'%')};
