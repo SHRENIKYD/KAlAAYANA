@@ -16,6 +16,14 @@ is a holding page. `1.0.0` marks the launch of the full site.
   to 100 while nothing was being waited for — the count was driven by a timer,
   not by load progress, and the panel slid away on a fixed 1.8s delay whether
   the page was ready or not. The hero now renders at first paint.
+## [1.2.5] — 2026-09-16
+
+### Fixed
+- Added image-specific focal positions to all five homepage collection cards so
+  temple architecture, portrait groups, mural scenes, landmark sculptures, and
+  experiential installations remain properly framed on desktop and mobile.
+- Re-centred the craft-section background around the Samudra Manthana sculpture.
+
 ## [1.2.4] — 2026-09-16
 
 ### Fixed
