@@ -10,6 +10,324 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Fixed
+- The homepage no longer states its own contents from memory. Every collection
+  name, count, order and photograph on it is now derived from `site.json` and
+  `projects.json`, which is where the section and project pages have always read
+  them from. All four archive counts were wrong — Portraiture 18 against 9,
+  Murals 12 against 9, Landmarks 09 against 7, Sacred Spaces 24 against 4 — and
+  Experiential Installations, eight projects already built and routed, was
+  missing from the archive while the slider above it announced 05 COLLECTIONS.
+- Collections are named for what they are. The slider had invented a second
+  vocabulary, and two of its names misdescribed the material: "Stories in Stone"
+  over FRP panels and "Lives in Bronze" over silicone and FRP figures. The
+  factual names now carry the collections and the poetic lines are subtitles.
+- Collection numbering agrees between the homepage and the collection pages.
+  Temples was 01 on the slider and 02 on its own page; `site.json` is ordered to
+  the sequence the homepage presents, and both now read from that order.
+- Archive tiles are links. They were images in a figure with nothing to click.
+- Slider and archive photographs go through the image pipeline instead of being
+  served at one fixed size from `public/`, so each has AVIF and WebP variants at
+  640, 960, 1400 and 1800px.
+- The section counter no longer sticks. `motion.js` held a hand-written list of
+  five sections while the page has eight, so the meter read 03 for the whole
+  slider and never passed 05. It reads the sections from the document, and the
+  denominator is written from the same list.
+## [1.2.8] — 2026-09-16
+
+### Improved
+- Reprocessed all eleven Sri Siddaramaiah project photographs to a consistent
+  2K long edge using fidelity-safe Lanczos resampling, compression cleanup, and
+  controlled sharpening for clearer high-density display without generative
+  changes to faces, text, clothing, objects, or backgrounds.
+- Reprocessed all three Field Marshal Cariappa project photographs to the same
+  2K standard while preserving the statue, uniform details, workshop setting,
+  framing, and original color character.
+- Rebuilt homepage navigation and archive discovery so every collection tile,
+  archive call-to-action, and scroll prompt has a working destination.
+- Added a complete archive page with all five collections and accurate project
+  counts, and standardized collection naming across the homepage and listings.
+- Tightened the homepage scroll sequence, moved carousel captions clear of the
+  photographs, strengthened hero and overlay contrast, and expanded the footer
+  with the studio address, phone numbers, Instagram, and navigation.
+
+### Fixed
+- Removed the inactive cursor, incomplete gold image reveals, and hard-coded
+  side counter; corrected section numbering and process comparison labels.
+- Restored the process and archive interactions by removing obsolete sound code
+  that stopped the homepage script, and added descriptive alternative text.
+- Replaced the questionable portrait montage with a documented studio portrait
+  sculpture photograph.
+
+## [1.2.7] — 2026-09-16
+
+### Fixed
+- Project-detail images now render at higher quality and are never stretched
+  beyond their intrinsic width, preventing small archive photographs from being
+  enlarged into visibly soft full-width frames.
+- Smaller originals are centred within the gallery so their true resolution is
+  preserved rather than disguised by cropping or upscaling.
+
+## [1.2.6] — 2026-09-16
+
+### Fixed
+- Project-detail heroes now detect portrait photographs and show the complete
+  composition instead of cropping faces and figures into a landscape viewport.
+- Project galleries now preserve each photograph’s natural aspect ratio rather
+  than forcing every image into a fixed-height frame with vertical parallax.
+
+## [1.2.5] — 2026-09-16
+
+### Fixed
+- Added image-specific focal positions to all five homepage collection cards so
+  temple architecture, portrait groups, mural scenes, landmark sculptures, and
+  experiential installations remain properly framed on desktop and mobile.
+- Re-centred the craft-section background around the Samudra Manthana sculpture.
+
+## [1.2.4] — 2026-09-16
+
+### Fixed
+- Moved the desktop project status row below the fixed navigation so its labels
+  no longer overlap the logo, studio descriptor, collection count, or menu.
+
+### Removed
+- Removed the non-functional “SOUND OFF” control from the staging navigation.
+
+## [1.2.3] — 2026-09-16
+
+### Fixed
+- Replaced the corrupt public mural card asset with the valid 1800×1173 mural
+  image already used by the collection pages, restoring “Stories in Stone” on
+  the staging homepage.
+
+## [1.2.2] — 2026-09-16
+
+### Removed
+- Removed the oversized “FORM × FAITH × MEMORY” kinetic strip from the staging
+  homepage, including its scroll animation and responsive styling.
+
+## [1.2.1] — 2026-09-16
+
+### Changed
+- Collection and project routes now use the same editorial motion design system
+  as the staging homepage, including responsive mobile compositions, cinematic
+  image grids, project narratives, and next-project navigation.
+- The browser-tab icon now uses the black-and-gold Kalaayana title logo across
+  the homepage, collection pages, and project pages.
+
+## [1.2.0] — 2026-09-15
+
+### Added
+- A dedicated touch-responsive staging layout that preserves the horizontal
+  "Works of Presence" scroll sequence while stacking the process and archive
+  content cleanly on phones, including browsers that request a wide viewport.
+- Eight experiential installation projects from `New Works.zip`: Burger,
+  Face, Fries, Noodles, Pizza, Pori, Pot, and Sandwich, with all 40 supplied
+  photographs preserved in source order and added to the existing project
+  image pipeline.
+- A new Experiential Installations collection and motion-homepage card that
+  opens its data-driven gallery and project detail routes.
+- A fully motion-led staging experience with a Kannada `ಕ` loader mark,
+  cinematic navigation, pinned hero and project sequences, parallax materials,
+  animated archive, draggable process comparison, and an immersive project page.
+- The Kalaayana logo now appears in both the main navigation and full-screen
+  navigation while the loading screen keeps only the Kannada leading mark.
+
+### Changed
+- Removed the rotating circular hero ornament so it no longer obscures the
+  sculpture on desktop or mobile.
+- Landmarks and Murals open with different photographs, chosen for resolution
+  rather than because the PDF used them as divider pages. The Udupi image
+  carried only 292x261 pixels of real data in its figure and was soft at 1:1,
+  so no amount of resampling could hold it at banner scale; the seated Shiva at
+  Hubli carries 498x544 and is crisply resolved. Murals moves to the village
+  relief at 1600x1043 from 1119x629. Temples keeps its image, which is already
+  the sharpest temple photograph in the set. Portraits keeps its group of five
+  figures: the sharpest portrait available is a single centred bust, and a
+  centred section title lands straight across its face.
+- Section banner photographs are visibly sharper. Showing the subjects rather
+  than cropping past them exposed how soft these pictures were: they came out
+  of the company profile at 1119-1257px wide and a full-bleed banner asks for
+  2000 CSS px, which the browser was filling by upscaling 1.7x (3.4x on a
+  retina screen). The four sources are now resampled to 1800px with Lanczos
+  and an unsharp mask, and the srcset carries 1400 and 1800 variants, so the
+  browser has real pixels to work with instead of stretching. Measured on the
+  rendered page, gradient energy is up 24.5% and 19.9% on the two worst
+  banners at 2000px, and 15.6% and 12.4% at 1440px on a 2x screen. Encode
+  quality is 68 rather than the default, which holds all of that gain while
+  keeping the four banners to 1053KB from 1336KB. This adds no detail that was
+  never photographed — better source images remain the only real ceiling.
+- The banner veil is lighter through its middle again (0.36 rather than 0.46
+  at 64%). Darkening it had been part of moving the type off the subjects'
+  faces, but it also flattened contrast across exactly the part of the picture
+  the subject now occupies.
+- Section banners no longer cut the heads off their subjects. The frame is far
+  more panoramic than any of the four photographs — 2.6:1 on a 2000px screen
+  against sources from 1.06:1 to 1.89:1 — so 28-60% of each picture was being
+  discarded, taken from top and bottom around a single `object-position` of 45%
+  shared by all four. That removed the crown and head of the Udupi figure, the
+  entire gopuram from the Whitefield facade, and the raised torch from the
+  bronze group. Each section now carries its own vertical anchor, and the
+  height cap rises from 760px to 880px so there is less to throw away in the
+  first place. Banner type sits in the lower third rather than dead centre,
+  because moving the subjects up put centred type across their faces.
+- A loading screen: the mark arrives one cluster at a time over a dark ground,
+  each filling upward from its own baseline, with nothing on screen before its
+  turn — no ghost, no outline, no faint version waiting to be filled. The clip
+  boundaries are measured from the logo rather than guessed: the Kannada
+  resolves into four glyph clusters and the Latin line beneath is the fifth.
+  It runs once per browser session, at 72% of the viewport width on desktop
+  and 78% on a phone. Two guarantees: it clears within 2.6 seconds however
+  slowly the page loads, and where less movement is asked for the mark is
+  simply there, whole, and clears at once. Measured on a page held in a
+  permanent loading state, it cleared at 2957ms; on a page that loads, 1866ms.
+- Project pages are a third of their former length. The lead photograph filled
+  its column at natural aspect, so a tall one ran off the screen — the Kariappa
+  figure is 401x1026 and rendered nearly 2000px tall. It is capped by height
+  now: the tallest lead image is 702px on desktop, 523px on a phone.
+- Supporting photographs are a tidy grid of equal 4:3 frames rather than a stack
+  of raw pictures at their own sizes, each of which ran 841-936px tall on a
+  phone. Tapping one opens it full size in the existing lightbox, so nothing is
+  lost to the crop.
+- Galleries show two cards per row on a phone instead of one, and a project
+  lists four others from its section rather than all eight, with a link to the
+  rest. Phone pages went from 6400-7700px to 2500-3300px.
+- The scroll hint no longer collides with the hero buttons. It sits absolutely
+  at the bottom while the hero content is centred with no bottom padding, so on
+  a short viewport — an iOS window whose chrome eats the height — the two met.
+  It now has its own space, and is hidden below 680px where there is none.
+- Cards top-align their photograph instead of centring it. A standing figure
+  taller than the 3:4 frame was losing its head: Field Marshal Kariappa showed
+  52% of his image and General Siddhiah 57%. Only images taller than the frame
+  are affected — wider ones overflow sideways and are untouched.
+- The finished bronze now leads General Siddhiah rather than the grey clay.
+- Portraits and Murals use the photographs the PDF puts on its own divider
+  pages — five bronze figures, and a terracotta relief of village life. Neither
+  was anywhere on the site before.
+- Two photographs that had been left out: the Temple Architecture divider
+  image, a Ganesha niche on the Whitefield facade, which joins that project;
+  and a third Kariappa shot that fell just under the size threshold. 86 now.
+- **Every photograph in the company profile is now on the site — 84, up from 29.**
+  Each project carried between one and eleven pictures in the PDF and only the
+  first was ever used. Projects now hold a list of images: the card shows the
+  lead, the project page shows all of them with captions. Working drawings,
+  scaffolding and workshop stages are included, so a project reads as a process
+  rather than a single finished shot.
+- All four sections now open with a banner: Landmarks, Temple Architecture,
+  Portraits and Life Sculptures, and Murals. The home page carries no grids.
+- `/landmarks.html`, `/temples.html`, `/portraits.html`, `/murals.html` and a
+  page for all 29 projects beneath them, from two dynamic routes rather than
+  eight hand-written files.
+- **Sections can open with a banner instead of a grid.** Temple Architecture is
+  the first: the home page now shows the section name over a photograph of the
+  Whitefield facade at dusk, with a single **View All** button. It follows the
+  divider pages in the company profile PDF.
+- `/temples.html` — the section gallery, all four temple projects.
+- `/temples/<slug>.html` — each project on its own page, generated from the
+  data, with scale, description, breadcrumbs and the rest of the section
+  beneath. Adding a project to `projects.json` adds its page; no route is
+  written by hand.
+- `src/components/ProjectCard.astro` and `SectionBanner.astro`, plus
+  `src/lib/photos.ts`, so the home page, the gallery and the project pages
+  resolve and render photographs the same way rather than each keeping a copy.
+- The studio's own photographs of all 29 projects, replacing the generated
+  placeholder art. They were extracted from the company profile PDF supplied at
+  the start of the project, so every image is work Kalaayana made and owns.
+  Committed under `src/images/projects/` at up to 1600px, 4.7 MB in total.
+- Real alt text for every project, written from the photographs themselves
+  rather than from the project titles. No image now says "Placeholder".
+
+### Changed
+- Motion homepage project cards now link to their real collection routes; the
+  generic hard-coded project page has been removed so every selected-work click
+  resolves through the project metadata and displays its associated media.
+- Project photographs go through the image pipeline: AVIF and WebP at 400, 800
+  and 1200px with a `sizes` hint matching the grid, so a 385px card fetches the
+  400px variant rather than the 1200px one.
+- Card frame from 4:3 landscape to 3:4 portrait. The work is vertical — at 4:3
+  the 85-foot Hanuman at Hangluru had its head cropped off. Reliefs and murals
+  were checked separately and still read correctly.
+- The footer no longer claims all imagery is placeholder artwork, which stopped
+  being true with this change.
+- The two Our Story figures are now photographs from the studio's own archive:
+  Shilpi K. Narayana Rao's signed elevation for the Anjaneya Arch Mantapa at
+  Chikkanayakanahalli, and the team finishing the Bengaluru Buddha on bamboo
+  scaffolding. Both carry real alt text. **No placeholder artwork remains on
+  the site.**
+- The drawing is cropped above the handwritten mobile number beneath the
+  signature, so a personal phone number is not published. The signature itself
+  is kept — it is the provenance.
+- `img` now carries `height:auto` alongside `max-width:100%`. Astro emits real
+  `width`/`height` attributes, so without it the drawing was stretched to its
+  intrinsic height inside a narrower column. Hero and card images set their own
+  height and are unaffected.
+- The one wide card, Hanuman, Punjab, is now a normal card. `wide` spanned three
+  columns, which under the 3:4 frame rendered a 1218×1624 image; the flag was a
+  leftover from the 4:3 placeholder grid and every photograph is portrait. All
+  29 cards now share one frame.
+- The header carries one name. It showed the Kannada logo mark beside the
+  Latin wordmark — two readings of the same name in a 96px bar. The mark is
+  gone; `KALAAYANA / STUDIOS` remains. The Kannada logo still leads the hero
+  and the holding page, where it has room to be read.
+- Reloading a page no longer leaves you halfway down it. With no fragment in
+  the URL the browser's own scroll restoration put a reload somewhere the
+  address did not describe, so the site takes that over: a reload starts where
+  the URL says. Back and forward still restore position.
+- `scripts/check.py` validates the image list — every project needs at least one
+  photograph, and every photograph needs alt text and a file that exists.
+  Negative-tested by blanking one alt string.
+- `scripts/check.py` walks `dist/` rather than listing its top level, so pages
+  in subdirectories are checked too — the four new project pages were invisible
+  to it otherwise. Staged pages are now identified by exclusion: everything
+  except `index.html` must be noindex, so a route added later is covered
+  without anyone remembering to list it.
+- `scripts/check.py` also validates section banner data: a section that names a
+  banner must have the image, alt text and link to go with it.
+- `main.js` no longer assumes the home page's furniture. The footer year,
+  progress bar, nav toggle and lightbox are each optional, and the lightbox
+  skips any card that is itself a link, where the click belongs to the
+  navigation.
+- The logo is vector. `logo.png` was 736px wide but displayed at 560 CSS px,
+  which is 1120 device pixels at 2x — a 1.5x upscale, and it sat in `public/`
+  so it bypassed the image pipeline entirely. It is now `logo.svg`, traced from
+  that same file, so it cannot blur at any size. 30 curves, 29.5 KB gzipped
+  against the PNG's 43 KB.
+- Contact email is now `contact@kalaayanastudios.com`.
+- In-page navigation no longer writes `#section` into the address bar. Links
+  still work and still scroll to the right place; arriving on a deep link
+  scrolls and then drops the fragment, including on back/forward.
+- The favicon is a bone circle carrying the leading glyph of the Kannada
+  wordmark in ink, cut from `logo.png` itself rather than redrawn. It was a
+  dark square holding the whole wordmark, which is 2.2x wider than it is tall
+  and rendered as an unreadable smudge at the 16px browsers actually draw.
+  One glyph reads at every size, and a light mark stands out against dark
+  browser chrome.
+- The hero photograph is sharper. It was 876x1558 — the resolution of the file
+  originally supplied — stretched across 2880 device pixels on a 1440px screen
+  at 2x, a 3.3x upscale, which is what made it look soft. The company profile
+  PDF holds the same frame at 1590x1967, so the hero now runs from that: no
+  upscale at all on a phone, and 1.8x instead of 3.3x on desktop.
+- Hero framing follows from that. The PDF frame is tighter, so `object-position`
+  moves from `50% 30%` to `50% 0%` and the parallax overscan from 12% to 3%,
+  which brings the face back into view. The overscan was only ever a safety
+  margin — the parallax translates the layer down while the page scrolls up, so
+  it cannot open a gap; measured across the hero's whole scroll range at both
+  widths and at every overscan value down to 0, the gap is 0px.
+- The native scrollbar is hidden on both mobile and desktop. The 2px progress
+  bar at the top of the page already reports scroll position, so the two were
+  redundant. Scrolling is untouched — wheel, touch, keyboard and anchor links
+  all work, and the progress bar tracks position exactly (verified at 50% and
+  at the foot of the page, at 1440px and 390px).
+- `scripts/check.py` validates project images against `src/images/projects/`
+  rather than the build output, since they are build inputs that the pipeline
+  emits as hashed variants.
+
+### Removed
+- The 29 placeholder SVGs, now unreferenced.
+- `story-01.svg` and `story-02.svg`, the last two generated illustrations.
+- `logo-mark.png`, the header's Kannada mark, now unreferenced.
+- `logo.png`, superseded by `logo.svg` and no longer referenced.
+
 ## [1.1.0] — 2026-09-07
 
 Phase one of the architecture work. The site is now generated from data rather
@@ -139,7 +457,9 @@ site staged behind it.
   `#22333B` cards, `#5E503F` rules, `#C6AC8F` accent, `#EAE0D5` text — with
   headings in Cinzel and body in Jost.
 
-[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.2.1
+[1.2.0]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.2.0
 [1.1.0]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.1.0
 [1.0.2]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.0.2
 [1.0.1]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.0.1

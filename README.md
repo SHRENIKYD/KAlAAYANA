@@ -100,9 +100,12 @@ baked in: the checkerboard is perfectly neutral (R=G=B) while the artwork is
 warm, so alpha is derived from saturation and the artwork is flattened to its
 own brand gold, `#AC9D7E`.
 
-Every remaining image in `assets/img/` is a generated SVG **placeholder**.
-Replace each file with the real photograph of the same name (any web format)
-and update the `src` attribute in `index.html` if the extension changes.
+All 29 project photographs are the studio's own work, extracted from the
+company profile PDF and committed under `src/images/projects/`. The build emits
+AVIF and WebP at three widths for each.
+
+The two figures in the Our Story section are still generated placeholders and
+are marked decorative; they are the only placeholder artwork left on the site.
 
 ## Local preview
 

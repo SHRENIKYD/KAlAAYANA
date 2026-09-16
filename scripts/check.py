@@ -10,7 +10,13 @@ if not os.path.isdir(OUT):
     print('FAIL: %s/ not found — run the build first' % OUT)
     sys.exit(1)
 
-html = sorted(f for f in os.listdir(OUT) if f.endswith('.html'))
+# Walk, not listdir: routes such as temples/<slug>.html live in subdirectories
+# and must be checked too.
+html = sorted(
+    os.path.relpath(os.path.join(root, f), OUT)
+    for root, _dirs, files in os.walk(OUT)
+    for f in files if f.endswith('.html')
+)
 if not html:
     bad('no HTML files in %s/' % OUT)
 
@@ -39,15 +45,19 @@ if 'index.html' in html:
     if 'noindex' in home:
         bad('index.html is marked noindex — it is the public page')
 
-# 4. Staged pages must stay out of search.
-for page in ('preview.html', 'coming-soon.html', 'themes.html'):
-    if page in html and 'noindex' not in open(os.path.join(OUT, page), encoding='utf-8').read():
+# 4. Staged pages must stay out of search. Every page except the public entry
+#    point is staged, so this is checked by exclusion — a new route added later
+#    is covered without anyone remembering to list it here.
+for page in sorted(html):
+    if page == 'index.html':
+        continue
+    if 'noindex' not in open(os.path.join(OUT, page), encoding='utf-8').read():
         bad('%s is not marked noindex but is not the public page' % page)
 
 # 5. Content data must be well formed — a malformed project must fail the build,
 #    not reach a visitor. Presentation is not consulted; this checks data alone.
-REQUIRED = ('slug', 'group', 'title', 'scale', 'description', 'image', 'alt')
-GROUPS = {'landmarks', 'temples', 'portraits', 'murals'}
+REQUIRED = ('slug', 'group', 'title', 'scale', 'description')
+GROUPS = {'landmarks', 'temples', 'portraits', 'murals', 'installations'}
 try:
     projects = json.load(open('src/data/projects.json', encoding='utf-8'))
 except Exception as e:
@@ -65,9 +75,40 @@ for i, p in enumerate(projects):
     if p.get('slug') in seen:
         bad('duplicate project slug: %s' % p.get('slug'))
     seen.add(p.get('slug'))
-    img = os.path.join(OUT, 'assets', 'img', str(p.get('image', '')))
-    if p.get('image') and not os.path.exists(img):
-        bad('project %s references a missing image: %s' % (where, p.get('image')))
+    # Every project needs at least one photograph, each with alt text. The
+    # photographs are build inputs: the pipeline emits hashed variants into the
+    # output, so the invariant is that the source file exists.
+    images = p.get('images')
+    if not isinstance(images, list) or not images:
+        bad('project %s has no images' % where)
+        continue
+    for n, im in enumerate(images, 1):
+        if not str(im.get('alt', '')).strip():
+            bad('project %s image %d has no alt text' % (where, n))
+        f = str(im.get('file', ''))
+        if not f:
+            bad('project %s image %d has no file' % (where, n))
+            continue
+        path = os.path.join('src', 'images', 'projects', f)
+        if not os.path.exists(path):
+            bad('project %s references a missing source image: %s' % (where, path))
+
+# 5b. A section that opens with a banner must have the banner it names.
+try:
+    site = json.load(open('src/data/site.json', encoding='utf-8'))
+except Exception as e:
+    site = {}
+    bad('site.json is unreadable: %s' % e)
+
+for key, sec in (site.get('sections') or {}).items():
+    if 'banner' not in sec:
+        continue
+    for field in ('bannerAlt', 'href'):
+        if not str(sec.get(field, '')).strip():
+            bad('section %s has a banner but no %s' % (key, field))
+    img = os.path.join('src', 'images', 'sections', str(sec.get('banner', '')))
+    if not os.path.exists(img):
+        bad('section %s references a missing banner image: %s' % (key, img))
 
 # 6. Releasing to production requires a changelog entry for this version.
 if os.environ.get('REQUIRE_RELEASE_NOTES') == 'true' and version:
@@ -82,7 +123,8 @@ if os.environ.get('REQUIRE_RELEASE_NOTES') == 'true' and version:
     if base and base == version:
         bad('VERSION is still %s — bump it before merging to main' % version)
 
-print('checked %d page(s) and %d project(s) at version %s' % (len(html), len(projects), version or '?'))
+print('checked %d page(s), %d project(s) and %d photograph(s) at version %s'
+      % (len(html), len(projects), sum(len(p.get('images') or []) for p in projects), version or '?'))
 for f in FAIL:
     print('FAIL: %s' % f)
 sys.exit(1 if FAIL else 0)

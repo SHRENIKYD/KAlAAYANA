@@ -163,6 +163,17 @@ build ──► dist/
             version.json
 ```
 
+## Versioning policy
+
+A version describes what production is serving, not what is being worked on. It
+is bumped only when work reaches production; `develop` keeps the version
+currently live no matter how much has accumulated on it.
+
+Feature work adds notes under `## [Unreleased]`. A release is prepared by one PR
+that bumps `VERSION` and moves those notes under the new heading, and shipped by
+the `develop` → `main` PR that follows. CI requires the bump and the entry only
+on a PR into `main`.
+
 ## Delivery
 
 Phased, so each release ships through the existing pipeline and is verified on

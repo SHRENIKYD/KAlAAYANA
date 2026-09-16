@@ -2,7 +2,8 @@
   'use strict';
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  document.getElementById('year').textContent = new Date().getFullYear();
+  var yearEl = document.getElementById('year');
+  if (yearEl) { yearEl.textContent = new Date().getFullYear(); }
 
   /* ---------- hero title split ---------- */
   var title = document.querySelector('[data-split]');
@@ -83,8 +84,8 @@
   function onScroll() {
     var y = window.pageYOffset;
     var max = document.documentElement.scrollHeight - window.innerHeight;
-    progress.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
-    header.classList.toggle('solid', y > 60);
+    if (progress) { progress.style.width = (max > 0 ? (y / max) * 100 : 0) + '%'; }
+    if (header) { header.classList.toggle('solid', y > 60); }
 
     if (!reduced) {
       parallaxEls.forEach(function (el) {
@@ -109,18 +110,48 @@
   /* ---------- mobile nav ---------- */
   var toggle = document.getElementById('navToggle');
   var nav = document.getElementById('nav');
-  toggle.addEventListener('click', function () {
+  if (toggle && nav) { toggle.addEventListener('click', function () {
     var open = nav.classList.toggle('open');
     toggle.classList.toggle('open', open);
     toggle.setAttribute('aria-expanded', String(open));
-  });
+  }); }
   navLinks.forEach(function (a) {
     a.addEventListener('click', function () {
+      if (!nav || !toggle) { return; }
       nav.classList.remove('open');
       toggle.classList.remove('open');
       toggle.setAttribute('aria-expanded', 'false');
     });
   });
+
+  /* ---------- in-page links scroll without stamping a #hash on the URL ---------- */
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var id = a.getAttribute('href').slice(1);
+      var target = id ? document.getElementById(id) : null;
+      if (!target) { return; }            /* unresolved: leave it to the browser */
+      e.preventDefault();
+      target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    });
+  });
+  /* The URL carries no fragment, so the browser's own scroll restoration would
+     drop a reload halfway down a page whose address says the top. Take it over:
+     a reload starts where the URL says it does. Back and forward still restore
+     position, because those are popstate rather than a reload. */
+  if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
+  var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+  if (!location.hash && nav && nav.type === 'reload') { window.scrollTo(0, 0); }
+
+  /* A deep link still works: it scrolls, then the hash is dropped from the URL.
+     Covers a fresh load and any later fragment navigation, such as back/forward. */
+  function dropHash() {
+    if (!location.hash) { return; }
+    var target = document.getElementById(location.hash.slice(1));
+    if (target) { target.scrollIntoView({ behavior: 'auto', block: 'start' }); }
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+  window.addEventListener('hashchange', dropHash);
+  dropHash();
 
   /* ---------- pointer tilt on cards ---------- */
   if (!reduced && window.matchMedia('(hover: hover)').matches) {
@@ -139,11 +170,13 @@
   var lb = document.getElementById('lightbox');
   var lbImg = document.getElementById('lightboxImg');
   var lbCap = document.getElementById('lightboxCap');
+  if (lb && lbImg && lbCap) {
   function closeLb() { lb.classList.remove('open'); lb.setAttribute('aria-hidden', 'true'); }
-  document.querySelectorAll('.card-media').forEach(function (media) {
+  document.querySelectorAll('.card-media, .shot-media').forEach(function (media) {
+    if (media.closest('a')) { return; }   /* a linked card navigates instead */
     media.addEventListener('click', function () {
       var img = media.querySelector('img');
-      var body = media.parentElement.querySelector('.card-body h3');
+      var body = media.parentElement.querySelector('.card-body h3, figcaption');
       lbImg.src = img.src;
       lbImg.alt = img.alt;
       lbCap.textContent = body ? body.textContent : '';
@@ -151,7 +184,9 @@
       lb.setAttribute('aria-hidden', 'false');
     });
   });
-  document.getElementById('lightboxClose').addEventListener('click', closeLb);
+  var lbClose = document.getElementById('lightboxClose');
+  if (lbClose) { lbClose.addEventListener('click', closeLb); }
   lb.addEventListener('click', function (e) { if (e.target === lb) closeLb(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLb(); });
+  }
 })();
