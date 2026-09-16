@@ -24,6 +24,16 @@ const prev = group[(current - 1 + group.length) % group.length];
 const wrapsForward = current === group.length - 1;
 const wrapsBack = current === 0;
 const position = String(current + 1).padStart(2, '0');
+/**
+ * Scale holds a measurement and form holds a category; until Phase 5 they were
+ * one field, so "Panel" and "Oversized" were being presented as sizes. A
+ * project states whichever it has, labelled for what it is, and both once the
+ * studio supplies the missing measurements.
+ */
+const facts = [
+  project.scale && { term: 'Scale', value: project.scale },
+  project.form && { term: 'Form', value: project.form },
+].filter(Boolean);
 const groupTotal = String(group.length).padStart(2, '0');
 const [lead, ...rest] = project.images;
 const leadPhoto = photo(lead.file);
@@ -53,7 +63,7 @@ const fonts = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500
     <section class="detail-intro">
       <span>01 / THE WORK</span>
       <p>{project.description}</p>
-      <dl><div><dt>Scale</dt><dd>{project.scale}</dd></div><div><dt>Collection</dt><dd>{section.label} · {position} / {groupTotal}</dd></div><div><dt>Archive</dt><dd>{project.images.length} {project.images.length === 1 ? 'image' : 'images'}</dd></div></dl>
+      <dl>{facts.map((fact) => (<div><dt>{fact.term}</dt><dd>{fact.value}</dd></div>))}<div><dt>Collection</dt><dd>{section.label} · {position} / {groupTotal}</dd></div><div><dt>Archive</dt><dd>{project.images.length} {project.images.length === 1 ? 'image' : 'images'}</dd></div></dl>
     </section>
 
     {gallery.length > 0 && <section class="detail-gallery" aria-label={`${project.title} photographs`}>

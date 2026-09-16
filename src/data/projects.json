@@ -4,6 +4,7 @@
     "group": "landmarks",
     "title": "Hanuman, Hangluru",
     "scale": "85 ft",
+    "form": "",
     "description": "Concrete reinforced. Hangluru, Kundapura, Karnataka.",
     "images": [
       {
@@ -25,6 +26,7 @@
     "group": "landmarks",
     "title": "Hanuman, Tumkuru",
     "scale": "75 ft",
+    "form": "",
     "description": "Concrete reinforced. Tumkuru, Karnataka.",
     "images": [
       {
@@ -46,6 +48,7 @@
     "group": "landmarks",
     "title": "Panchamukhi Hanuman",
     "scale": "65 ft",
+    "form": "",
     "description": "Concrete reinforced. Surendrapuri, Hyderabad.",
     "images": [
       {
@@ -63,6 +66,7 @@
     "group": "landmarks",
     "title": "Samudra Manthana",
     "scale": "35 ft",
+    "form": "",
     "description": "Concrete reinforced installation. Udupi, Karnataka.",
     "images": [
       {
@@ -84,6 +88,7 @@
     "group": "landmarks",
     "title": "Shiva, Hubli",
     "scale": "35 ft",
+    "form": "",
     "description": "Concrete reinforced. Hubli, Karnataka.",
     "images": [
       {
@@ -105,6 +110,7 @@
     "group": "landmarks",
     "title": "Buddha, Bengaluru",
     "scale": "10 ft",
+    "form": "",
     "description": "Concrete reinforced. Bengaluru, Karnataka.",
     "images": [
       {
@@ -130,6 +136,7 @@
     "group": "landmarks",
     "title": "Hanuman, Punjab",
     "scale": "25 ft",
+    "form": "",
     "description": "Concrete reinforced. Punjab, India.",
     "images": [
       {
@@ -147,6 +154,7 @@
     "group": "temples",
     "title": "Shree Varasiddhi Vinayaka",
     "scale": "30 ft",
+    "form": "",
     "description": "Temple facade. Whitefield, Bengaluru, Karnataka.",
     "images": [
       {
@@ -184,6 +192,7 @@
     "group": "temples",
     "title": "Shree Anjaneya",
     "scale": "61 ft",
+    "form": "",
     "description": "Temple arch. Chikkanayakanahalli, Karnataka.",
     "images": [
       {
@@ -201,6 +210,7 @@
     "group": "temples",
     "title": "Shree Manjunatha",
     "scale": "25 ft",
+    "form": "",
     "description": "Temple arch. Shivamogga, Karnataka.",
     "images": [
       {
@@ -214,6 +224,7 @@
     "group": "temples",
     "title": "Shree Veeranjaneya",
     "scale": "25 ft",
+    "form": "",
     "description": "Temple arch. Moodigere, Karnataka.",
     "images": [
       {
@@ -226,7 +237,8 @@
     "slug": "sri-siddaramaiah",
     "group": "portraits",
     "title": "Sri Siddaramaiah",
-    "scale": "Life size",
+    "scale": "",
+    "form": "Life size",
     "description": "Silicone life statue. Chief Minister of Karnataka.",
     "images": [
       {
@@ -280,6 +292,7 @@
     "group": "portraits",
     "title": "Field Marshal Kariappa",
     "scale": "8 ft",
+    "form": "",
     "description": "FRP standing figure.",
     "images": [
       {
@@ -301,6 +314,7 @@
     "group": "portraits",
     "title": "Bronze Portrait I",
     "scale": "2 ft",
+    "form": "",
     "description": "Cast bronze bust.",
     "images": [
       {
@@ -326,6 +340,7 @@
     "group": "portraits",
     "title": "Bronze Portrait II",
     "scale": "2 ft",
+    "form": "",
     "description": "Cast bronze bust.",
     "images": [
       {
@@ -343,6 +358,7 @@
     "group": "portraits",
     "title": "Bronze Portrait III",
     "scale": "2 ft",
+    "form": "",
     "description": "Cast bronze bust.",
     "images": [
       {
@@ -364,6 +380,7 @@
     "group": "portraits",
     "title": "Padmapani",
     "scale": "4 ft",
+    "form": "",
     "description": "FRP figure.",
     "images": [
       {
@@ -384,7 +401,8 @@
     "slug": "saint-kanakadasa",
     "group": "portraits",
     "title": "Saint Kanakadasa",
-    "scale": "Series",
+    "scale": "",
+    "form": "Series",
     "description": "Installations from the life story of the saint. Bangalore University.",
     "images": [
       {
@@ -410,6 +428,7 @@
     "group": "portraits",
     "title": "Shekon",
     "scale": "7 ft",
+    "form": "",
     "description": "Installed at Air Force camp, Hyderabad.",
     "images": [
       {
@@ -435,6 +454,7 @@
     "group": "portraits",
     "title": "General Siddhiah",
     "scale": "7 ft",
+    "form": "",
     "description": "FRP standing figure.",
     "images": [
       {
@@ -456,6 +476,7 @@
     "group": "murals",
     "title": "Surya Mural",
     "scale": "10 ft dia",
+    "form": "",
     "description": "Circular relief.",
     "images": [
       {
@@ -473,6 +494,7 @@
     "group": "murals",
     "title": "Krishna",
     "scale": "6 × 4 ft",
+    "form": "",
     "description": "FRP relief.",
     "images": [
       {
@@ -489,7 +511,8 @@
     "slug": "village-scenes",
     "group": "murals",
     "title": "Village Scenes",
-    "scale": "Panel",
+    "scale": "",
+    "form": "Panel",
     "description": "Scenic views of a village, made in FRP.",
     "images": [
       {
@@ -510,7 +533,8 @@
     "slug": "mr-ananth-kumar",
     "group": "murals",
     "title": "Mr. Ananth Kumar",
-    "scale": "Relief",
+    "scale": "",
+    "form": "Relief",
     "description": "Former minister from Karnataka.",
     "images": [
       {
@@ -528,6 +552,7 @@
     "group": "murals",
     "title": "Yakshagana",
     "scale": "8 × 4 ft",
+    "form": "",
     "description": "FRP panel.",
     "images": [
       {
@@ -541,6 +566,7 @@
     "group": "murals",
     "title": "Radha Krishna",
     "scale": "8 × 6 ft",
+    "form": "",
     "description": "FRP panel.",
     "images": [
       {
@@ -558,6 +584,7 @@
     "group": "murals",
     "title": "Goddess Saraswathi",
     "scale": "8 × 8 ft",
+    "form": "",
     "description": "FRP panel.",
     "images": [
       {
@@ -575,6 +602,7 @@
     "group": "murals",
     "title": "Relief Panel",
     "scale": "8 × 4 ft",
+    "form": "",
     "description": "FRP panel.",
     "images": [
       {
@@ -592,6 +620,7 @@
     "group": "murals",
     "title": "Sri Siddaramaiah",
     "scale": "6 × 4 ft",
+    "form": "",
     "description": "Chief Minister of Karnataka. FRP relief.",
     "images": [
       {
@@ -608,7 +637,8 @@
     "slug": "burger",
     "group": "installations",
     "title": "Burger Installation",
-    "scale": "Oversized",
+    "scale": "",
+    "form": "Oversized",
     "description": "Oversized burger sculpture and branded restaurant installation.",
     "images": [
       {
@@ -633,7 +663,8 @@
     "slug": "face",
     "group": "installations",
     "title": "Monumental Face Facade",
-    "scale": "Architectural",
+    "scale": "",
+    "form": "Architectural",
     "description": "A monumental sculpted face integrated into an architectural facade.",
     "images": [
       {
@@ -662,7 +693,8 @@
     "slug": "fries",
     "group": "installations",
     "title": "Fries Installation",
-    "scale": "Oversized",
+    "scale": "",
+    "form": "Oversized",
     "description": "Oversized fries sculpture created as an immersive hospitality display.",
     "images": [
       {
@@ -687,7 +719,8 @@
     "slug": "noodles",
     "group": "installations",
     "title": "Noodles Installation",
-    "scale": "Oversized",
+    "scale": "",
+    "form": "Oversized",
     "description": "Oversized noodles sculpture developed from workshop form to finished display.",
     "images": [
       {
@@ -712,7 +745,8 @@
     "slug": "pizza",
     "group": "installations",
     "title": "Pizza Installation",
-    "scale": "Oversized",
+    "scale": "",
+    "form": "Oversized",
     "description": "A monumental pizza-slice sculpture created for a restaurant interior.",
     "images": [
       {
@@ -749,7 +783,8 @@
     "slug": "pori",
     "group": "installations",
     "title": "Pori Installation",
-    "scale": "Oversized",
+    "scale": "",
+    "form": "Oversized",
     "description": "Oversized pori-inspired food sculpture for a hospitality environment.",
     "images": [
       {
@@ -774,7 +809,8 @@
     "slug": "pot",
     "group": "installations",
     "title": "Culinary Pot Installation",
-    "scale": "Oversized",
+    "scale": "",
+    "form": "Oversized",
     "description": "A monumental culinary pot and food installation for a restaurant interior.",
     "images": [
       {
@@ -799,7 +835,8 @@
     "slug": "sandwich",
     "group": "installations",
     "title": "Sandwich Installation",
-    "scale": "Oversized",
+    "scale": "",
+    "form": "Oversized",
     "description": "Oversized sandwich sculpture developed through workshop and installation stages.",
     "images": [
       {
