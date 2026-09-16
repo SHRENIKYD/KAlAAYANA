@@ -179,3 +179,23 @@
 @media(max-width:760px){
   .loader-mark{width:78px;max-height:22vh}
 }
+
+
+/* Hero framing: keep the monument's upper form in view and reduce scaffold dominance. */
+.hero-image{inset:0;clip-path:inset(0)!important}
+.hero-image img{
+  object-position:50% 4%;
+  filter:saturate(.76) contrast(1.06) brightness(.94);
+}
+.hero-shade{
+  background:
+    linear-gradient(90deg,#070605dc 0,#0706059c 37%,transparent 70%),
+    linear-gradient(0deg,#080605d4 0,transparent 55%);
+}
+.hero-title{left:4.7vw;bottom:12vh;max-width:min(1020px,78vw)}
+.hero h1{font-size:clamp(5rem,9.6vw,10.7rem);line-height:.75}
+@media(max-width:1100px){
+  .hero-image img{object-position:50% 8%}
+  .hero-title{left:24px;right:24px;bottom:14svh;max-width:none}
+  .hero h1{font-size:clamp(4rem,18vw,6.2rem)}
+}
