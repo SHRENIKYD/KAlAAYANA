@@ -23,6 +23,17 @@ const collections = Object.entries(site.sections).map(([key, section], index) =>
   invert: index % 2 === 1,
 }));
 const total = String(collections.length).padStart(2, '0');
+
+/**
+ * The hero used to read "Selected works · 2012—2026". No project carried a
+ * year, so the range rested on nobody's memory in particular. It is derived
+ * from the data now: silent while no year is recorded, and correct by
+ * construction the moment they are.
+ */
+const years = projects.map((project) => parseInt(project.year, 10)).filter(Number.isFinite);
+const heroWorks = years.length
+  ? `Selected works · ${Math.min(...years)}—${Math.max(...years)}`
+  : 'Selected works';
 ---
 <!doctype html>
 <html lang="en">
@@ -57,7 +68,7 @@ const total = String(collections.length).padStart(2, '0');
     <section class="hero" id="home"><div class="hero-sticky">
       <div class="hero-image" data-zoom><img src="/motion/assets/hero-hanuman.jpg" alt="Monumental Hanuman sculpture being created"></div><div class="hero-shade"></div>
       <div class="hero-title"><div class="hero-kicker">ART · HERITAGE · DEVOTION</div><h1><span>WE SHAPE</span><span>THE <i>TIMELESS.</i></span></h1></div>
-      <div class="hero-foot"><span>Selected works · 2012—2026</span><a href="#approach">Scroll to enter ↓</a></div>
+      <div class="hero-foot"><span>{heroWorks}</span><a href="#approach">Scroll to enter ↓</a></div>
     </div></section>
     <section class="statement" id="approach"><div class="statement-index">01 / APPROACH</div><p class="word-reveal">We transform earth, metal and memory into monumental works that belong to a place — and outlive a moment.</p><div class="statement-aside"><span>From first line</span><span>to final presence</span></div></section>
     <section class="projects" id="works"><div class="projects-sticky">
