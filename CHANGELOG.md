@@ -35,6 +35,8 @@ is a holding page. `1.0.0` marks the launch of the full site.
   that stopped the homepage script, and added descriptive alternative text.
 - Replaced the questionable portrait montage with a documented studio portrait
   sculpture photograph.
+- Removed both staging loading sequences while preserving the homepage and its
+  horizontal “Works of Presence” scroll experience. Production is unchanged.
 
 ## [1.2.7] — 2026-09-16
 

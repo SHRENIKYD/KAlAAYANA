@@ -21,14 +21,13 @@ short="${commit:0:8}"
 built="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 [[ -n "$version" ]] || { echo "VERSION is empty"; exit 1; }
 
-# Staging is where the site is built and reviewed, so it serves the site under
-# development at its root. Production keeps the holding page there until a
-# release deliberately swaps them. Guarded on the environment name: only
-# "staging" swaps, so production and rollback builds are untouched.
+# Staging serves the site under development at its root. Production keeps the
+# holding page until a release deliberately swaps it.
 if [[ "$environment" == "staging" && -f "$out/preview.html" && -f "$out/index.html" ]]; then
-  mv "$out/index.html" "$out/coming-soon.html"
+  rm "$out/index.html"
   mv "$out/preview.html" "$out/index.html"
-  echo "staging: serving the site under development at / (holding page at /coming-soon.html)"
+  rm -f "$out/coming-soon.html"
+  echo "staging: serving the site under development at /"
 fi
 
 for f in "$out"/*.html; do
