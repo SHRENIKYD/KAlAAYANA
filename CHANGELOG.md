@@ -10,6 +10,30 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Fixed
+- The homepage no longer states its own contents from memory. Every collection
+  name, count, order and photograph on it is now derived from `site.json` and
+  `projects.json`, which is where the section and project pages have always read
+  them from. All four archive counts were wrong — Portraiture 18 against 9,
+  Murals 12 against 9, Landmarks 09 against 7, Sacred Spaces 24 against 4 — and
+  Experiential Installations, eight projects already built and routed, was
+  missing from the archive while the slider above it announced 05 COLLECTIONS.
+- Collections are named for what they are. The slider had invented a second
+  vocabulary, and two of its names misdescribed the material: "Stories in Stone"
+  over FRP panels and "Lives in Bronze" over silicone and FRP figures. The
+  factual names now carry the collections and the poetic lines are subtitles.
+- Collection numbering agrees between the homepage and the collection pages.
+  Temples was 01 on the slider and 02 on its own page; `site.json` is ordered to
+  the sequence the homepage presents, and both now read from that order.
+- Archive tiles are links. They were images in a figure with nothing to click.
+- Slider and archive photographs go through the image pipeline instead of being
+  served at one fixed size from `public/`, so each has AVIF and WebP variants at
+  640, 960, 1400 and 1800px.
+- The section counter no longer sticks. `motion.js` held a hand-written list of
+  five sections while the page has eight, so the meter read 03 for the whole
+  slider and never passed 05. It reads the sections from the document, and the
+  denominator is written from the same list.
+
 ## [1.2.7] — 2026-09-16
 
 ### Fixed

@@ -36,7 +36,7 @@ const statementCopy = $('.word-reveal');
 const wordList = statementCopy.textContent.trim().split(/\s+/);
 statementCopy.innerHTML = wordList.map(word => `<span class="word">${word}</span> `).join('');
 const words = $$('.word');
-const sections = [$('.hero'), $('.statement'), $('.projects'), $('.material'), $('.process')];
+const sections = Array.from(document.querySelectorAll('main > section'))  /* every section, not a hand-listed five: the list stopped at .process, so the meter read 03 for the whole slider and never passed 05 */;
 let previousScroll = scrollY;
 let velocity = 0;
 
@@ -53,6 +53,8 @@ const render = () => {
   sections.forEach((section, index) => { if (section.getBoundingClientRect().top < innerHeight * 0.52) activeSection = index; });
   $('.section-meter b').textContent = String(activeSection + 1).padStart(2, '0');
   $('.section-meter').style.setProperty('--meter', `${(activeSection + 1) / sections.length * 100}%`);
+  const meterTotal = $('.section-meter span');
+  if (meterTotal) meterTotal.textContent = String(sections.length).padStart(2, '0');
 
   const hero = $('.hero');
   const heroProgress = clamp(-hero.getBoundingClientRect().top / (hero.offsetHeight - innerHeight));

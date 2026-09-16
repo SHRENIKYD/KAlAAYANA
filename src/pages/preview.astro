@@ -1,3 +1,31 @@
+---
+/**
+ * Homepage. Everything a visitor reads about the collections — their names,
+ * their counts, their order and their photographs — is derived here from
+ * site.json and projects.json. Nothing about a collection is typed into the
+ * markup, because the four archive counts that shipped were all wrong and the
+ * fifth collection was missing entirely: 8 projects, built and routed, absent
+ * from a page that announced "05 COLLECTIONS" above four tiles.
+ *
+ * The markup, class names and order below are unchanged. /motion/*.css and
+ * motion.js key off both, and the design is not in scope.
+ */
+import { Image } from 'astro:assets';
+import { banner } from '../lib/photos';
+import site from '../data/site.json';
+import projects from '../data/projects.json';
+
+const collections = Object.entries(site.sections).map(([key, section], index) => ({
+  key,
+  ...section,
+  /** Padded ordinal, shared with the collection pages so the numbering agrees. */
+  n: String(index + 1).padStart(2, '0'),
+  count: projects.filter((p) => p.group === key).length,
+  /** The slider alternates ground colour; keep that alternation by position. */
+  invert: index % 2 === 1,
+}));
+const total = String(collections.length).padStart(2, '0');
+---
 <!doctype html>
 <html lang="en">
 <head>
@@ -17,7 +45,7 @@
 </head>
 <body>
   <div class="loader" aria-hidden="true"><div class="loader-mark" lang="kn">ಕ</div><div class="loader-copy"><span>Shaping stories</span><b>000</b></div><div class="loader-line"></div></div>
-  <div class="cursor"><span>VIEW</span></div><div class="scroll-progress"></div><div class="section-meter" aria-hidden="true"><b>01</b><i></i><span>05</span></div>
+  <div class="cursor"><span>VIEW</span></div><div class="scroll-progress"></div><div class="section-meter" aria-hidden="true"><b>01</b><i></i><span></span></div>
   <header class="nav">
     <a class="logo" href="#home"><img src="/motion/assets/logo.svg" alt="Kalaayana Studios"></a>
     <p>SCULPTURE STUDIO<br>BENGALURU, INDIA</p>
@@ -32,14 +60,24 @@
     </div></section>
     <section class="statement"><div class="statement-index">01 / APPROACH</div><p class="word-reveal">We transform earth, metal and memory into monumental works that belong to a place — and outlive a moment.</p><div class="statement-aside"><span>From first line</span><span>to final presence</span></div></section>
     <section class="projects" id="works"><div class="projects-sticky">
-      <div class="projects-top"><span>SELECTED WORKS</span><b>DRAG / SCROLL</b><em>05 COLLECTIONS</em></div>
+      <div class="projects-top"><span>SELECTED WORKS</span><b>DRAG / SCROLL</b><em>{total} COLLECTIONS</em></div>
       <div class="track">
         <article class="slide slide-intro"><div><span>EXPLORE</span><h2>Works<br>of <i>presence.</i></h2></div><p>Each commission begins with context, scale and story.</p></article>
-        <a class="slide project-card" href="/temples.html"><div class="media"><img src="/motion/assets/temples.jpg" alt="Kalaayana temple sculpture"></div><div class="caption"><span>01 / SACRED SPACES</span><h3>Temple<br>Commissions</h3><p>Architecture and devotion<br>formed as one.</p></div></a>
-        <a class="slide project-card invert" href="/portraits.html"><div class="media"><img src="/motion/assets/portraits.jpg" alt="Kalaayana sculpted portrait"></div><div class="caption"><span>02 / PORTRAITURE</span><h3>Lives in<br>Bronze</h3><p>Presence preserved<br>through proportion.</p></div></a>
-        <a class="slide project-card" href="/murals.html"><div class="media"><img src="/motion/assets/murals.jpg" alt="Kalaayana relief mural"></div><div class="caption"><span>03 / NARRATIVE RELIEF</span><h3>Stories<br>in Stone</h3><p>History unfolded<br>across a surface.</p></div></a>
-        <a class="slide project-card invert" href="/landmarks.html"><div class="media"><img src="/motion/assets/landmarks.jpg" alt="Kalaayana monumental public sculpture"></div><div class="caption"><span>04 / LANDMARKS</span><h3>Scale with<br>Purpose</h3><p>Public form, collective<br>memory.</p></div></a>
-        <a class="slide project-card" href="/installations.html"><div class="media"><img src="/motion/assets/installations.jpg" alt="Oversized burger installation by Kalaayana"></div><div class="caption"><span>05 / EXPERIENTIAL</span><h3>New<br>Works</h3><p>Hospitality sculpture<br>at immersive scale.</p></div></a>
+        {collections.map((c) => (
+          <a class={`slide project-card${c.invert ? ' invert' : ''}`} href={c.href}>
+            <div class="media">
+              <Image src={banner(c.banner)} alt={c.bannerAlt}
+                     widths={[640, 960, 1400, 1800]} formats={['avif', 'webp']}
+                     sizes="(max-width: 760px) 100vw, 62vw" quality={78}
+                     loading={c.n === '01' ? 'eager' : 'lazy'} />
+            </div>
+            <div class="caption">
+              <span>{c.n} / {c.eyebrow.toUpperCase()}</span>
+              <h3>{c.cardName.map((line, i) => (i === 0 ? line : <><br />{line}</>))}</h3>
+              <p>{c.cardSub.map((line, i) => (i === 0 ? line : <><br />{line}</>))}</p>
+            </div>
+          </a>
+        ))}
         <article class="slide slide-end"><span>DISCOVER THE ARCHIVE</span><h2>All works <b>↗</b></h2></article>
       </div><div class="track-line"><i></i></div>
     </div></section>
@@ -49,7 +87,16 @@
       <div class="process-visual"><div class="process-images"><img src="/motion/assets/yakshagana.jpg" alt="Yakshagana sculpture in progress"><img src="/motion/assets/shiva-hubli.jpg" alt="Shiva sculpture in progress"></div>
       <div class="process-steps"><article><b>01</b><h3>DRAW</h3><p>Define the rhythm and emotional centre.</p></article><article><b>02</b><h3>MODEL</h3><p>Build the form through clay and touch.</p></article><article><b>03</b><h3>CAST</h3><p>Carry every gesture into lasting material.</p></article><article><b>04</b><h3>PLACE</h3><p>Complete the work in its intended world.</p></article></div></div>
     </section>
-    <section class="archive" id="archive"><div class="archive-head"><span>04 / ARCHIVE</span><h2>A LIVING<br><i>BODY OF WORK.</i></h2></div><div class="archive-grid"><figure><img src="/motion/assets/portraits.jpg" alt="Portrait sculpture"><figcaption>PORTRAITURE · 18 WORKS</figcaption></figure><figure><img src="/motion/assets/murals.jpg" alt="Mural sculpture"><figcaption>MURALS · 12 WORKS</figcaption></figure><figure><img src="/motion/assets/landmarks.jpg" alt="Landmark sculpture"><figcaption>LANDMARKS · 09 WORKS</figcaption></figure><figure><img src="/motion/assets/temples.jpg" alt="Temple sculpture"><figcaption>SACRED SPACES · 24 WORKS</figcaption></figure></div></section>
+    <section class="archive" id="archive"><div class="archive-head"><span>04 / ARCHIVE</span><h2>A LIVING<br><i>BODY OF WORK.</i></h2></div><div class="archive-grid">{collections.map((c) => (
+      <figure>
+        <a href={c.href} style="display:block">
+          <Image src={banner(c.banner)} alt={c.bannerAlt} widths={[640, 960, 1400]}
+                 formats={['avif', 'webp']} sizes="(max-width: 760px) 100vw, 48vw"
+                 quality={78} loading="lazy" />
+        </a>
+        <figcaption>{c.eyebrow.toUpperCase()} · {c.count} {c.count === 1 ? 'WORK' : 'WORKS'}</figcaption>
+      </figure>
+    ))}</div></section>
     <section class="scrubber"><div class="scrub-copy"><span>FROM CLAY TO PRESENCE</span><h2>Drag through<br>the process.</h2></div><div class="compare"><img src="/motion/assets/shiva-hubli.jpg" alt="Finished sculpture"><div class="compare-before"><img src="/motion/assets/yakshagana.jpg" alt="Sculpture in progress"></div><button class="compare-handle" aria-label="Compare process stages"><i></i></button><span class="label-before">PROCESS</span><span class="label-after">PRESENCE</span></div></section>
     <section class="closing" id="contact"><div class="closing-ring"></div><p>HAVE A STORY WORTH SHAPING?</p><h2>LET IT TAKE<br><i>FORM.</i></h2><a class="magnetic" href="mailto:hello@kalaayanastudios.com">BEGIN A COMMISSION <span>↗</span></a><div class="closing-foot"><span>KALAAYANA STUDIOS</span><span>BENGALURU · INDIA</span><span>© 2026</span></div></section>
   </main>
