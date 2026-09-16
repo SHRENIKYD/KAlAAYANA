@@ -92,7 +92,9 @@ Real assets now in place:
 | --- | --- |
 | `logo.png` | Full lockup — Kannada mark over KALAAYANA STUDIOS. Hero centrepiece. |
 | `logo-mark.png` | Kannada mark alone. Header, beside the wordmark. |
-| `favicon.png` | The mark on the ink ground, 96px. |
+| `favicon.svg` | Browser-tab icon — the glyph ka on a light disc, drawn from `logo.svg`. |
+| `favicon-16.png`, `favicon-32.png` | PNG fallbacks of the same mark. |
+| `apple-touch-icon.png` | The same mark at 180px for iOS home screens. |
 | `hero-hanuman.jpg` | Hanuman under bamboo scaffolding. Full-bleed hero. |
 
 Both logo files were keyed out of a JPEG that had a transparency checkerboard

@@ -10,6 +10,29 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Added
+- Project pages navigate in both directions. There was only Next, and it wrapped
+  from the last project to the first in silence. Both neighbours are offered now,
+  the wrap says what it is — "FIRST IN LANDMARKS" rather than "NEXT IN" when you
+  are at the end, "LAST PROJECT" rather than "PREVIOUS" when you are at the
+  start — and a third link goes to the whole collection.
+- Every project states where it sits: "Landmarks · 04 / 07", in the row of facts
+  that already carried Scale and Archive.
+- Every project page carries a way to commission work, using the studio address
+  from site.json rather than a second copy of it.
+- A browser-tab icon drawn from the studio logo: the first Kannada glyph of the
+  wordmark, ಕ, lifted from the real path data in `logo.svg` and set on a light
+  disc. Served as `favicon.svg` with 16px and 32px PNG fallbacks and a 180px
+  Apple touch icon.
+
+### Fixed
+- The closing panel centres its grid items to their content, so a long label or
+  title had nothing to wrap against. Its span, title, pager and commission line
+  are held to the viewport now.
+- The project crumb and hero read "Landmarks", the same name used on the
+  homepage, the collection pages and the archive. They were the only two places
+  still saying "Our Major Projects".
+
 ### Fixed
 - The homepage no longer states its own contents from memory. Every collection
   name, count, order and photograph on it is now derived from `site.json` and
@@ -26,6 +49,10 @@ is a holding page. `1.0.0` marks the launch of the full site.
   Temples was 01 on the slider and 02 on its own page; `site.json` is ordered to
   the sequence the homepage presents, and both now read from that order.
 - Archive tiles are links. They were images in a figure with nothing to click.
+- The tab icon is legible at 16px. It was the whole wordmark — five Kannada
+  glyphs plus KALAAYANA STUDIOS — rasterised into a 256px near-black square,
+  which reduced to a dark smudge in the tab strip and vanished against dark
+  browser chrome.
 - Slider and archive photographs go through the image pipeline instead of being
   served at one fixed size from `public/`, so each has AVIF and WebP variants at
   640, 960, 1400 and 1800px.
