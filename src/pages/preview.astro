@@ -68,8 +68,9 @@ const total = String(collections.length).padStart(2, '0');
             </div>
             <div class="caption">
               <span>COLLECTION {c.n} / {total} · {c.short}</span>
-              <h3>{c.cardName.join(' ')}</h3>
-              <p>{c.cardSub.join(' ')}</p>
+              <h3>{c.cardName.map((line, index) => <>{index > 0 && <br />}{line}</>)}</h3>
+              <p>{c.cardSub.map((line, index) => <>{index > 0 && <br />}{line}</>)}</p>
+              <span class="view-disc" aria-hidden="true">VIEW</span>
             </div>
           </a>
         ))}
