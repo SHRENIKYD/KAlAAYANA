@@ -10,6 +10,13 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.3] — 2026-09-16
+
+### Fixed
+- Replaced the corrupt public mural card asset with the valid 1800×1173 mural
+  image already used by the collection pages, restoring “Stories in Stone” on
+  the staging homepage.
+
 ## [1.2.2] — 2026-09-16
 
 ### Removed
