@@ -10,6 +10,15 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.7] — 2026-09-16
+
+### Fixed
+- Project-detail images now render at higher quality and are never stretched
+  beyond their intrinsic width, preventing small archive photographs from being
+  enlarged into visibly soft full-width frames.
+- Smaller originals are centred within the gallery so their true resolution is
+  preserved rather than disguised by cropping or upscaling.
+
 ## [1.2.6] — 2026-09-16
 
 ### Fixed
