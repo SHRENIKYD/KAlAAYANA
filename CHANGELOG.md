@@ -16,6 +16,14 @@ is a holding page. `1.0.0` marks the launch of the full site.
   to 100 while nothing was being waited for — the count was driven by a timer,
   not by load progress, and the panel slid away on a fixed 1.8s delay whether
   the page was ready or not. The hero now renders at first paint.
+## [1.2.6] — 2026-09-16
+
+### Fixed
+- Project-detail heroes now detect portrait photographs and show the complete
+  composition instead of cropping faces and figures into a landscape viewport.
+- Project galleries now preserve each photograph’s natural aspect ratio rather
+  than forcing every image into a fixed-height frame with vertical parallax.
+
 ## [1.2.5] — 2026-09-16
 
 ### Fixed
