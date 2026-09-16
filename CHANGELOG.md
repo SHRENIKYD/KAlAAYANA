@@ -10,6 +10,14 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.6] — 2026-09-16
+
+### Fixed
+- Project-detail heroes now detect portrait photographs and show the complete
+  composition instead of cropping faces and figures into a landscape viewport.
+- Project galleries now preserve each photograph’s natural aspect ratio rather
+  than forcing every image into a fixed-height frame with vertical parallax.
+
 ## [1.2.5] — 2026-09-16
 
 ### Fixed
