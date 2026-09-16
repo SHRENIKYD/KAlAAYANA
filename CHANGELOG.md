@@ -10,6 +10,25 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Added
+- Project pages navigate in both directions. There was only Next, and it wrapped
+  from the last project to the first in silence. Both neighbours are offered now,
+  the wrap says what it is — "FIRST IN LANDMARKS" rather than "NEXT IN" when you
+  are at the end, "LAST PROJECT" rather than "PREVIOUS" when you are at the
+  start — and a third link goes to the whole collection.
+- Every project states where it sits: "Landmarks · 04 / 07", in the row of facts
+  that already carried Scale and Archive.
+- Every project page carries a way to commission work, using the studio address
+  from site.json rather than a second copy of it.
+
+### Fixed
+- The closing panel centres its grid items to their content, so a long label or
+  title had nothing to wrap against. Its span, title, pager and commission line
+  are held to the viewport now.
+- The project crumb and hero read "Landmarks", the same name used on the
+  homepage, the collection pages and the archive. They were the only two places
+  still saying "Our Major Projects".
+
 ### Fixed
 - The homepage no longer states its own contents from memory. Every collection
   name, count, order and photograph on it is now derived from `site.json` and
