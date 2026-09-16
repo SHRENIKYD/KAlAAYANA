@@ -10,6 +10,14 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.5] — 2026-09-16
+
+### Fixed
+- Added image-specific focal positions to all five homepage collection cards so
+  temple architecture, portrait groups, mural scenes, landmark sculptures, and
+  experiential installations remain properly framed on desktop and mobile.
+- Re-centred the craft-section background around the Samudra Manthana sculpture.
+
 ## [1.2.4] — 2026-09-16
 
 ### Fixed
