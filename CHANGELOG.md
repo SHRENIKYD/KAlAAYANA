@@ -10,6 +10,15 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.4] — 2026-09-16
+
+### Fixed
+- Moved the desktop project status row below the fixed navigation so its labels
+  no longer overlap the logo, studio descriptor, collection count, or menu.
+
+### Removed
+- Removed the non-functional “SOUND OFF” control from the staging navigation.
+
 ## [1.2.3] — 2026-09-16
 
 ### Fixed
