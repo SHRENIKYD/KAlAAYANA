@@ -12,7 +12,7 @@ export function getStaticPaths() {
 
 const { section: key } = Astro.params;
 const section = site.sections[key];
-const sectionLabel = key === 'landmarks' ? 'Landmarks' : section.eyebrow;
+const sectionLabel = section.label;
 const items = projects.filter((p) => p.group === key);
 const sectionNumber = String(Object.keys(site.sections).indexOf(key) + 1).padStart(2, '0');
 const fonts = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap';

@@ -1,3 +1,29 @@
+---
+/**
+ * Homepage. The slider and the archive strip derive every collection fact —
+ * name, count, order, photograph — from site.json and projects.json, which is
+ * where the collection pages and archive.astro already read them from.
+ *
+ * Before this, the counts were typed into the markup and all four were wrong
+ * (18/12/09/24 against 9/9/7/4) with the fifth collection missing entirely.
+ * They are correct in the markup today; deriving them is what stops that
+ * recurring. The structure, class names and order are unchanged.
+ */
+import { Image } from 'astro:assets';
+import { banner } from '../lib/photos';
+import site from '../data/site.json';
+import projects from '../data/projects.json';
+
+const collections = Object.entries(site.sections).map(([key, section], index) => ({
+  key,
+  ...section,
+  n: String(index + 1).padStart(2, '0'),
+  count: projects.filter((project) => project.group === key).length,
+  /** The slider alternates ground colour; hold that by position, not by hand. */
+  invert: index % 2 === 1,
+}));
+const total = String(collections.length).padStart(2, '0');
+---
 <!doctype html>
 <html lang="en">
 <head>
@@ -34,11 +60,20 @@
     <section class="projects" id="works"><div class="projects-sticky">
       <div class="projects-top"><span>02 / SELECTED WORKS</span><b>SCROLL TO EXPLORE</b><a href="/archive.html">ALL WORKS ↗</a></div>
       <div class="track">
-        <a class="slide project-card" href="/temples.html"><div class="media"><img src="/motion/assets/temples.jpg" alt="Kalaayana temple sculpture"></div><div class="caption"><span>COLLECTION 01 / 05 · TEMPLES</span><h3>Temple<br>Commissions</h3><p>Architecture and devotion<br>formed as one.</p></div></a>
-        <a class="slide project-card invert" href="/portraits.html"><div class="media"><img src="/motion/assets/portraits.jpg" alt="Bronze portrait sculpture created by Kalaayana Studios"></div><div class="caption"><span>COLLECTION 02 / 05 · PORTRAITS</span><h3>Lives in<br>Bronze</h3><p>Presence preserved<br>through proportion.</p></div></a>
-        <a class="slide project-card" href="/murals.html"><div class="media"><img src="/motion/assets/murals.jpg" alt="Kalaayana relief mural"></div><div class="caption"><span>COLLECTION 03 / 05 · MURALS</span><h3>Stories<br>in Relief</h3><p>History unfolded<br>across a surface.</p></div></a>
-        <a class="slide project-card invert" href="/landmarks.html"><div class="media"><img src="/motion/assets/landmarks.jpg" alt="Kalaayana monumental public sculpture"></div><div class="caption"><span>COLLECTION 04 / 05 · LANDMARKS</span><h3>Scale with<br>Purpose</h3><p>Public form, collective<br>memory.</p></div></a>
-        <a class="slide project-card" href="/installations.html"><div class="media"><img src="/motion/assets/installations.jpg" alt="Oversized burger installation by Kalaayana"></div><div class="caption"><span>COLLECTION 05 / 05 · INSTALLATIONS</span><h3>Experiential<br>Works</h3><p>Hospitality sculpture<br>at immersive scale.</p></div></a>
+        {collections.map((c) => (
+          <a class={`slide project-card${c.invert ? ' invert' : ''}`} href={c.href}>
+            <div class="media">
+              <Image src={banner(c.banner)} alt={c.bannerAlt} widths={[640, 960, 1400, 1800]}
+                     formats={['avif', 'webp']} sizes="(max-width: 760px) 100vw, 62vw"
+                     quality={78} loading={c.n === '01' ? 'eager' : 'lazy'} />
+            </div>
+            <div class="caption">
+              <span>COLLECTION {c.n} / {total} · {c.short}</span>
+              <h3>{c.cardName.map((line, i) => (i === 0 ? line : <><br />{line}</>))}</h3>
+              <p>{c.cardSub.map((line, i) => (i === 0 ? line : <><br />{line}</>))}</p>
+            </div>
+          </a>
+        ))}
       </div><div class="track-line"><i></i></div>
     </div></section>
     <section class="material"><div class="material-bg"><img src="/motion/assets/samudra-manthana.jpg" alt="Samudra Manthana sculpture detail"></div><div class="material-copy"><span>03 / CRAFT</span><h2>EVERY<br><i>DETAIL</i><br>MATTERS.</h2></div><div class="material-notes"><p>Gesture</p><p>Surface</p><p>Scale</p><p>Silhouette</p></div></section>
@@ -47,7 +82,14 @@
       <div class="process-visual"><div class="process-images"><img src="/motion/assets/yakshagana.jpg" alt="Yakshagana sculpture in progress"><img src="/motion/assets/shiva-hubli.jpg" alt="Shiva sculpture in progress"></div>
       <div class="process-steps"><article class="active"><b>01</b><h3>DRAW</h3><p>Define the rhythm and emotional centre.</p></article><article><b>02</b><h3>MODEL</h3><p>Build the form through clay and touch.</p></article><article><b>03</b><h3>CAST</h3><p>Carry every gesture into lasting material.</p></article><article><b>04</b><h3>PLACE</h3><p>Complete the work in its intended world.</p></article></div></div>
     </section>
-    <section class="archive" id="archive"><div class="archive-head"><span>05 / ARCHIVE</span><h2>A LIVING<br><i>BODY OF WORK.</i></h2></div><div class="archive-grid"><a href="/portraits.html"><img src="/motion/assets/portraits.jpg" alt="Bronze portrait sculpture"><span>PORTRAITS · 9 PROJECTS</span></a><a href="/murals.html"><img src="/motion/assets/murals.jpg" alt="Relief mural sculpture"><span>MURALS · 9 PROJECTS</span></a><a href="/landmarks.html"><img src="/motion/assets/landmarks.jpg" alt="Monumental landmark sculpture"><span>LANDMARKS · 7 PROJECTS</span></a><a href="/temples.html"><img src="/motion/assets/temples.jpg" alt="Temple architecture sculpture"><span>TEMPLES · 4 PROJECTS</span></a><a href="/installations.html"><img src="/motion/assets/installations.jpg" alt="Experiential installation sculpture"><span>INSTALLATIONS · 8 PROJECTS</span></a></div><a class="archive-all" href="/archive.html">VIEW COMPLETE ARCHIVE ↗</a></section>
+    <section class="archive" id="archive"><div class="archive-head"><span>05 / ARCHIVE</span><h2>A LIVING<br><i>BODY OF WORK.</i></h2></div><div class="archive-grid">{collections.map((c) => (
+      <a href={c.href}>
+        <Image src={banner(c.banner)} alt={c.bannerAlt} widths={[640, 960, 1400]}
+               formats={['avif', 'webp']} sizes="(max-width: 760px) 100vw, 48vw"
+               quality={78} loading="lazy" />
+        <span>{c.short} · {c.count} {c.count === 1 ? 'PROJECT' : 'PROJECTS'}</span>
+      </a>
+    ))}</div><a class="archive-all" href="/archive.html">VIEW COMPLETE ARCHIVE ↗</a></section>
     <section class="scrubber"><div class="scrub-copy"><span>06 / FROM CLAY TO PRESENCE</span><h2>Drag through<br>the process.</h2></div><div class="compare"><img src="/motion/assets/shiva-hubli.jpg" alt="Finished Shiva sculpture"><div class="compare-before"><img src="/motion/assets/yakshagana.jpg" alt="Yakshagana sculpture in progress"></div><button class="compare-handle" aria-label="Drag to compare the sculpture in progress with the finished sculpture"><i></i></button><span class="label-before">IN PROGRESS</span><span class="label-after">FINISHED</span></div></section>
     <section class="closing" id="contact"><div class="closing-ring"></div><p>07 / HAVE A STORY WORTH SHAPING?</p><h2>LET IT TAKE<br><i>FORM.</i></h2><a class="magnetic" href="mailto:contact@kalaayanastudios.com">BEGIN A COMMISSION <span>↗</span></a><div class="footer-links"><div><strong>KALAAYANA STUDIOS LLP</strong><span>Bengaluru, Karnataka<br>Monumental sculpture and sacred art</span></div><div><a href="mailto:contact@kalaayanastudios.com">Email the studio ↗</a><a href="https://instagram.com/kalaayana_studios" target="_blank" rel="noopener">Instagram ↗</a></div><nav aria-label="Footer navigation"><a href="/#works">Collections</a><a href="/archive.html">Archive</a><a href="/#approach">Approach</a></nav></div><div class="closing-foot"><span>KALAAYANA STUDIOS</span><span>BENGALURU · INDIA</span><span>© 2026</span></div></section>
   </main>

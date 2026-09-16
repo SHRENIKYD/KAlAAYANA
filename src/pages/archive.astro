@@ -7,7 +7,7 @@ const fonts = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500
 const groups = Object.entries(site.sections).map(([key, section], index) => ({
   key,
   section,
-  label: key === 'landmarks' ? 'Landmarks' : section.eyebrow,
+  label: section.label,
   index: String(index + 1).padStart(2, '0'),
   count: projects.filter((project) => project.group === key).length,
 }));
