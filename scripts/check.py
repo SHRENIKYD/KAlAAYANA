@@ -56,11 +56,7 @@ for page in sorted(html):
 
 # 5. Content data must be well formed — a malformed project must fail the build,
 #    not reach a visitor. Presentation is not consulted; this checks data alone.
-REQUIRED = ('slug', 'group', 'title', 'description')
-# scale holds a measurement, form a category such as Panel or Oversized. A
-# project must state one of them; 12 still await a measurement from the studio,
-# so requiring scale alone would fail the build on data that is merely incomplete.
-SIZE_FIELDS = ('scale', 'form')
+REQUIRED = ('slug', 'group', 'title', 'scale', 'description')
 GROUPS = {'landmarks', 'temples', 'portraits', 'murals', 'installations'}
 try:
     projects = json.load(open('src/data/projects.json', encoding='utf-8'))
@@ -74,8 +70,6 @@ for i, p in enumerate(projects):
     for field in REQUIRED:
         if not str(p.get(field, '')).strip():
             bad('project %s is missing %s' % (where, field))
-    if not any(str(p.get(f, '')).strip() for f in SIZE_FIELDS):
-        bad('project %s states neither scale nor form' % where)
     if p.get('group') not in GROUPS:
         bad('project %s has unknown group %r' % (where, p.get('group')))
     if p.get('slug') in seen:
