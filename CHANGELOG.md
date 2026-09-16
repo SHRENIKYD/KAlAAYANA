@@ -10,6 +10,14 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.8] — 2026-09-16
+
+### Improved
+- Reprocessed the four primary Sri Siddaramaiah project photographs at twice
+  their source dimensions using fidelity-safe Lanczos resampling, compression
+  cleanup, and controlled sharpening for clearer high-density display without
+  generative changes to faces, text, clothing, objects, or backgrounds.
+
 ## [1.2.7] — 2026-09-16
 
 ### Fixed
