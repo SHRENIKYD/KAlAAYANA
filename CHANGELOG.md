@@ -10,6 +10,15 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.1] — 2026-09-16
+
+### Changed
+- Collection and project routes now use the same editorial motion design system
+  as the staging homepage, including responsive mobile compositions, cinematic
+  image grids, project narratives, and next-project navigation.
+- The browser-tab icon now uses the black-and-gold Kalaayana title logo across
+  the homepage, collection pages, and project pages.
+
 ## [1.2.0] — 2026-09-15
 
 ### Added
@@ -352,7 +361,8 @@ site staged behind it.
   `#22333B` cards, `#5E503F` rules, `#C6AC8F` accent, `#EAE0D5` text — with
   headings in Cinzel and body in Jost.
 
-[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/SHRENIKYD/KAlAAYANA/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.2.1
 [1.2.0]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.2.0
 [1.1.0]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.1.0
 [1.0.2]: https://github.com/SHRENIKYD/KAlAAYANA/releases/tag/v1.0.2

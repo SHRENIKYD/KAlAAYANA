@@ -1,8 +1,4 @@
 ---
-/**
- * One project, with every photograph the studio has of it. One route serves
- * all four sections; adding a project to the data adds its page.
- */
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import { photo } from '../../lib/photos';
@@ -10,109 +6,45 @@ import site from '../../data/site.json';
 import projects from '../../data/projects.json';
 
 export function getStaticPaths() {
-  /* Evaluated in isolation by Astro, so the data is read here. */
-  return projects.map((p) => ({
-    params: { section: p.group, slug: p.slug },
-    props: { project: p },
-  }));
+  return projects.map((project) => ({ params: { section: project.group, slug: project.slug }, props: { project } }));
 }
 
 const { project } = Astro.props;
 const key = project.group;
 const section = site.sections[key];
-const siblings = projects
-  .filter((p) => p.group === key && p.slug !== project.slug)
-  .slice(0, 4);   /* a single row; the section page carries the rest */
+const group = projects.filter((item) => item.group === key);
+const current = group.findIndex((item) => item.slug === project.slug);
+const next = group[(current + 1) % group.length];
 const [lead, ...rest] = project.images;
-const fonts = 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Jost:wght@200;300;400;500&display=swap';
+const fonts = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap';
 ---
-<Base title={`${project.title} — ${site.name}`} description={project.description} fonts={fonts}>
-  <link slot="head" rel="stylesheet" href="/assets/css/style.css?v=dev">
+<Base title={`${project.title} — ${site.name}`} description={project.description} fonts={fonts} bodyClass="motion-inner detail-page">
+  <link slot="head" rel="stylesheet" href="/motion/inner.css?v=1.2.1">
+  <link slot="head" rel="stylesheet" href="/motion/project.css?v=1.2.1">
 
-  <div class="scroll-progress" id="scrollProgress"></div>
-  <header class="site-header solid" id="siteHeader">
-    <a class="brand" href="/"><span class="brand-text">Kalaayana<em>Studios</em></span></a>
-    <nav class="nav" id="nav">
-      {site.nav.map((n) => <a href={`/${n.href}`}>{n.label}</a>)}
-    </nav>
-    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
+  <header class="detail-nav">
+    <a class="detail-brand" href="/"><img src="/motion/assets/logo.svg" alt="Kalaayana Studios"></a>
+    <a class="detail-back" href={`/${key}.html`}>← {section.eyebrow}</a>
   </header>
 
-  <main class="section subpage">
-    <div class="wrap">
-      <nav class="crumbs" aria-label="Breadcrumb">
-        <a href="/">Home</a><span aria-hidden="true">/</span>
-        <a href={`/${key}.html`}>{section.eyebrow}</a><span aria-hidden="true">/</span>
-        <span>{project.title}</span>
-      </nav>
+  <main>
+    <section class="detail-hero">
+      <div class="detail-image"><Image src={photo(lead.file)} alt={lead.alt} widths={[960, 1600, 2200]} formats={['avif', 'webp']} loading="eager" sizes="100vw" /></div>
+      <h1><span>{project.title}</span><i>{section.eyebrow}</i></h1>
+      <div class="detail-scroll">SCROLL TO EXPLORE ↓</div>
+    </section>
 
-      <div class="project">
-        <figure class="project-media" data-reveal>
-          <Image src={photo(lead.file)} alt={lead.alt}
-                 widths={[640, 960, 1400]} formats={['avif', 'webp']} loading="eager"
-                 sizes="(max-width: 900px) 92vw, 60vw" />
-        </figure>
-        <div class="project-body" data-reveal data-delay="120">
-          <h1 class="section-title">{project.title}</h1>
-          <dl class="project-facts">
-            <div><dt>Scale</dt><dd>{project.scale}</dd></div>
-            <div><dt>Section</dt><dd>{section.eyebrow}</dd></div>
-          </dl>
-          <p class="project-note">{project.description}</p>
-          <a class="btn btn-ghost" href={`/${key}.html`}>Back to {section.eyebrow}</a>
-        </div>
-      </div>
+    <section class="detail-intro">
+      <span>01 / THE WORK</span>
+      <p>{project.description}</p>
+      <dl><div><dt>Scale</dt><dd>{project.scale}</dd></div><div><dt>Collection</dt><dd>{section.eyebrow}</dd></div><div><dt>Archive</dt><dd>{project.images.length} {project.images.length === 1 ? 'image' : 'images'}</dd></div></dl>
+    </section>
 
-      {rest.length > 0 && (
-        <section class="shots">
-          <h2 class="more-title">{rest.length === 1 ? 'One more photograph' : `${rest.length} more photographs`}</h2>
-          <div class="shot-grid">
-            {rest.map((img, i) => (
-              <figure class="shot" data-reveal data-delay={(i % 3) * 80}>
-                <div class="shot-media">
-                  <Image src={photo(img.file)} alt={img.alt}
-                         widths={[400, 800]} formats={['avif', 'webp']} loading="lazy"
-                         sizes="(max-width: 620px) 46vw, 31vw" />
-                </div>
-                <figcaption>{img.alt}</figcaption>
-              </figure>
-            ))}
-          </div>
-        </section>
-      )}
+    {rest.length > 0 && <section class="detail-gallery" aria-label={`${project.title} photographs`}>
+      {rest.map((image, index) => <figure class={index % 3 === 0 ? 'large' : undefined}><Image src={photo(image.file)} alt={image.alt} widths={[640, 1000, 1600]} formats={['avif', 'webp']} loading="lazy" sizes={index % 3 === 0 ? '100vw' : '(max-width: 760px) 100vw, 50vw'} /><figcaption>{image.alt}</figcaption></figure>)}
+    </section>}
 
-      {siblings.length > 0 && (
-        <section class="more">
-          <h2 class="more-title">More in {section.eyebrow}</h2>
-          <a class="more-all" href={`/${key}.html`}>See all {projects.filter((p) => p.group === key).length}</a>
-          <div class="grid four">
-            {siblings.map((p, i) => (
-              <a class="card" href={`/${key}/${p.slug}.html`} data-reveal data-delay={(i % 4) * 80} data-tilt>
-                <div class="card-media">
-                  <Image src={photo(p.images[0].file)} alt={p.images[0].alt}
-                         widths={[400, 800]} formats={['avif', 'webp']} loading="lazy"
-                         sizes="(max-width: 620px) 92vw, 30vw" />
-                </div>
-                <div class="card-body">
-                  <span class="card-scale">{p.scale}</span>
-                  <h3>{p.title}</h3>
-                </div>
-              </a>
-            ))}
-          </div>
-        </section>
-      )}
-    </div>
+    <section class="detail-next"><span>NEXT IN {section.eyebrow.toUpperCase()}</span><h2>{next.title}<i>awaits.</i></h2><a href={`/${key}/${next.slug}.html`}>VIEW NEXT PROJECT ↗</a></section>
   </main>
-
-  <footer class="site-footer">
-    <div class="wrap footer-inner">
-      <span>© <span id="year"></span> Kalaayana Studios LLP</span>
-      <span class="footer-note">Photography of the studio's own work.</span>
-    </div>
-  </footer>
-
-  <script is:inline src="/assets/js/main.js?v=dev"></script>
+  <script is:inline src="/motion/project.js"></script>
 </Base>
