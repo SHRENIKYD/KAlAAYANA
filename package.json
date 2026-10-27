@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "build:staging": "npm run build && bash scripts/stamp.sh staging",
     "preview": "astro preview",
     "check": "python3 scripts/check.py"
   },

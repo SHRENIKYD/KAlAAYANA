@@ -1,0 +1,46 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import { photo } from '../lib/photos';
+import site from '../data/site.json';
+import projects from '../data/projects.json';
+
+export function getStaticPaths() {
+  const groups = [...new Set(projects.map((p) => p.group))];
+  return groups.map((section) => ({ params: { section } }));
+}
+
+const { section: key } = Astro.params;
+const section = site.sections[key];
+const sectionLabel = section.label;
+const items = projects.filter((p) => p.group === key);
+const sectionNumber = String(Object.keys(site.sections).indexOf(key) + 1).padStart(2, '0');
+const fonts = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap';
+---
+<Base title={`${sectionLabel} — ${site.name}`} description={section.lede} fonts={fonts} bodyClass="motion-inner">
+  <link slot="head" rel="stylesheet" href="/motion/inner.css?v=1.2.1">
+
+  <header class="inner-nav">
+    <a class="logo" href="/"><img src="/motion/assets/logo.svg" alt="Kalaayana Studios"></a>
+    <p>SCULPTURE STUDIO<br>BENGALURU, INDIA</p>
+    <nav class="inner-links" aria-label="Page navigation"><a href="/#works">Collections</a><a href="/#contact">Contact</a></nav>
+  </header>
+
+  <main>
+    <section class="collection-hero">
+      <div class="collection-index">{sectionNumber} / COLLECTION</div>
+      <div class="collection-heading"><small>Kalaayana archive</small><h1>{sectionLabel}</h1><p>{section.lede}</p></div>
+    </section>
+
+    <section class="collection-grid" aria-label={`${sectionLabel} projects`}>
+      {items.map((project, index) => (
+        <a class="work-tile" href={`/${key}/${project.slug}.html`}>
+          <div class="work-image"><Image src={photo(project.images[0].file)} alt={project.images[0].alt} widths={[640, 960, 1400]} formats={['avif', 'webp']} loading={index < 2 ? 'eager' : 'lazy'} sizes="(max-width: 760px) 100vw, 48vw" /></div>
+          <div class="work-meta"><span>{String(index + 1).padStart(2, '0')}</span><h2>{project.title}</h2><p>{project.scale}<br>{project.images.length} {project.images.length === 1 ? 'photograph' : 'photographs'}</p></div>
+        </a>
+      ))}
+    </section>
+
+    <section class="collection-end"><span>END OF COLLECTION</span><h2>Explore<br><i>more work.</i></h2><a href="/#works">ALL COLLECTIONS ↗</a></section>
+  </main>
+</Base>

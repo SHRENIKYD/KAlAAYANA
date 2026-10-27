@@ -90,25 +90,98 @@
     "GFRC"
   ],
   "sections": {
-    "landmarks": {
-      "eyebrow": "Our Major Projects",
-      "title": "Monumental Landmarks",
-      "lede": "Concrete reinforced icons raised across Karnataka, Telangana and Punjab."
-    },
     "temples": {
       "eyebrow": "Temple Architecture",
       "title": "Facades & arches",
-      "lede": "Traditional temple form executed in reinforced concrete at architectural scale."
+      "lede": "Traditional temple form executed in reinforced concrete at architectural scale.",
+      "banner": "temples.jpg",
+      "bannerAlt": "The Shree Varasiddhi Vinayaka temple facade at Whitefield lit at dusk, its carved tiers picked out in gold",
+      "href": "/temples.html",
+      "bannerFocus": "50% 8%",
+      "cardName": [
+        "Temple",
+        "Architecture"
+      ],
+      "cardSub": [
+        "Architecture and devotion",
+        "formed as one."
+      ],
+      "label": "Temple Architecture",
+      "short": "TEMPLES"
     },
     "portraits": {
       "eyebrow": "Portraits and Life Sculptures",
       "title": "Likeness at every scale",
-      "lede": "Silicone, bronze and FRP portraiture — from two-foot busts to eight-foot standing figures."
+      "lede": "Silicone, bronze and FRP portraiture — from two-foot busts to eight-foot standing figures.",
+      "banner": "portraits.jpg",
+      "bannerAlt": "Five bronze figures in turbans and dhotis standing as a group, from the studio's portrait work",
+      "href": "/portraits.html",
+      "bannerFocus": "50% 25%",
+      "cardName": [
+        "Life",
+        "Sculptures"
+      ],
+      "cardSub": [
+        "Presence preserved",
+        "through proportion."
+      ],
+      "label": "Portraits and Life Sculptures",
+      "short": "PORTRAITS"
     },
     "murals": {
       "eyebrow": "Murals",
       "title": "Relief & panel work",
-      "lede": "Wall-mounted narrative panels and reliefs, principally in FRP."
+      "lede": "Wall-mounted narrative panels and reliefs, principally in FRP.",
+      "banner": "murals.jpg",
+      "bannerAlt": "An FRP relief panel of village life — elephants at the plough, figures at work, palms and a thatched hut",
+      "href": "/murals.html",
+      "bannerFocus": "50% 24%",
+      "cardName": [
+        "Murals"
+      ],
+      "cardSub": [
+        "History unfolded",
+        "across a surface."
+      ],
+      "label": "Murals",
+      "short": "MURALS"
+    },
+    "landmarks": {
+      "eyebrow": "Our Major Projects",
+      "title": "Monumental Landmarks",
+      "lede": "Concrete reinforced icons raised across Karnataka, Telangana and Punjab.",
+      "banner": "landmarks.jpg",
+      "bannerAlt": "The seated Shiva at Hubli, trident in one hand and a cobra at the throat, cross-legged on a dark plinth against cloud",
+      "href": "/landmarks.html",
+      "bannerFocus": "50% 16%",
+      "cardName": [
+        "Landmarks"
+      ],
+      "cardSub": [
+        "Public form, collective",
+        "memory."
+      ],
+      "label": "Landmarks",
+      "short": "LANDMARKS"
+    },
+    "installations": {
+      "eyebrow": "Experiential Installations",
+      "title": "Sculpture at the scale of experience",
+      "lede": "Oversized hospitality and architectural installations shaped from workshop studies through final placement.",
+      "banner": "installations.jpg",
+      "bannerAlt": "An oversized burger sculpture installed inside a restaurant",
+      "href": "/installations.html",
+      "bannerFocus": "50% 55%",
+      "cardName": [
+        "Experiential",
+        "Installations"
+      ],
+      "cardSub": [
+        "Hospitality sculpture",
+        "at immersive scale."
+      ],
+      "label": "Experiential Installations",
+      "short": "INSTALLATIONS"
     }
   },
   "story": [
@@ -117,7 +190,7 @@
     "Carrying the torch of inspiration ignited by these revered masters, <strong>Vishal Kavatekar</strong>, alongside a devoted team of artists, founded Kalaayana Studios. Here, the confluence of tradition and innovation unfolds, embodying a commitment to artistic excellence and a profound connection with our storied artistic legacy."
   ],
   "contact": {
-    "email": "kalaayanastudios@gmail.com",
+    "email": "contact@kalaayanastudios.com",
     "phones": [
       "+918886870796",
       "+918310660720"

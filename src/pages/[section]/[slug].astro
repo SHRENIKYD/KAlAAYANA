@@ -1,0 +1,56 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import { photo } from '../../lib/photos';
+import site from '../../data/site.json';
+import projects from '../../data/projects.json';
+
+export function getStaticPaths() {
+  return projects.map((project) => ({ params: { section: project.group, slug: project.slug }, props: { project } }));
+}
+
+const { project } = Astro.props;
+const key = project.group;
+const section = site.sections[key];
+const group = projects.filter((item) => item.group === key);
+const current = group.findIndex((item) => item.slug === project.slug);
+const next = group[(current + 1) % group.length];
+const [lead, ...rest] = project.images;
+const leadPhoto = photo(lead.file);
+const leadOrientation = leadPhoto.height > leadPhoto.width ? 'portrait' : 'landscape';
+const gallery = rest.map((image, index) => {
+  const source = photo(image.file);
+  return { ...image, source, large: index % 3 === 0, orientation: source.height > source.width ? 'portrait' : 'landscape' };
+});
+const fonts = 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap';
+---
+<Base title={`${project.title} — ${site.name}`} description={project.description} fonts={fonts} bodyClass="motion-inner detail-page">
+  <link slot="head" rel="stylesheet" href="/motion/inner.css?v=1.2.1">
+  <link slot="head" rel="stylesheet" href="/motion/project.css?v=1.2.1">
+
+  <header class="detail-nav">
+    <a class="detail-brand" href="/"><img src="/motion/assets/logo.svg" alt="Kalaayana Studios"></a>
+    <a class="detail-back" href={`/${key}.html`}>← {section.eyebrow}</a>
+  </header>
+
+  <main>
+    <section class="detail-hero">
+      <div class={`detail-image ${leadOrientation}`}><Image src={leadPhoto} alt={lead.alt} widths={[960, 1600, 2200]} formats={['avif', 'webp']} loading="eager" quality={92} sizes="100vw" /></div>
+      <h1><span>{project.title}</span><i>{section.eyebrow}</i></h1>
+      <div class="detail-scroll">SCROLL TO EXPLORE ↓</div>
+    </section>
+
+    <section class="detail-intro">
+      <span>01 / THE WORK</span>
+      <p>{project.description}</p>
+      <dl><div><dt>Scale</dt><dd>{project.scale}</dd></div><div><dt>Collection</dt><dd>{section.eyebrow}</dd></div><div><dt>Archive</dt><dd>{project.images.length} {project.images.length === 1 ? 'image' : 'images'}</dd></div></dl>
+    </section>
+
+    {gallery.length > 0 && <section class="detail-gallery" aria-label={`${project.title} photographs`}>
+      {gallery.map((image) => <figure class={`${image.large ? 'large ' : ''}${image.orientation}`}><Image src={image.source} alt={image.alt} widths={[640, 1000, 1600]} formats={['avif', 'webp']} loading="lazy" quality={92} sizes={image.large ? '(max-width: 1600px) 100vw, 1600px' : '(max-width: 760px) 100vw, 50vw'} /><figcaption>{image.alt}</figcaption></figure>)}
+    </section>}
+
+    <section class="detail-next"><span>NEXT IN {section.eyebrow.toUpperCase()}</span><h2>{next.title}<i>awaits.</i></h2><a href={`/${key}/${next.slug}.html`}>VIEW NEXT PROJECT ↗</a></section>
+  </main>
+  <script is:inline src="/motion/project.js"></script>
+</Base>
