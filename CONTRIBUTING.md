@@ -92,23 +92,37 @@ Content lives in `src/data`. Adding a project is one object in `projects.json`.
 [Semantic Versioning](https://semver.org). `VERSION` at the repo root is the
 single source of truth — no version numbers are derived from commit messages.
 
-**A version is bumped only when the work reaches production.** Everything on
-`develop` keeps the version currently in production, however many changes have
-accumulated. The number describes what the public is being served, not what is
-being worked on.
+### Staging carries `x.y.99`
 
-So a feature PR into `develop` does **not** touch `VERSION`. It adds its notes
-under `## [Unreleased]` in the changelog. When a release is due, one preparation
-PR into `develop` bumps `VERSION` and moves the accumulated `[Unreleased]` notes
-under the new version heading. The `develop` → `main` PR then ships it.
+`develop` runs **`1.2.99`**. The next production release is **`1.3.0`**.
 
-CI enforces this in the right place: the bump and the changelog entry are
-required only on a PR into `main`, never on a PR into `develop`.
+The rule used to be that `develop` kept whatever production was serving, so the
+number always described the public site. That failed in practice. Production went
+to `1.2.8` through a pull request that bypassed `develop`, and a revert then put
+`develop` on `1.2.7` — so staging was numbered *below* production while carrying
+far more work, and no number on either branch said which was newer.
 
-    feature/*  ──▶  develop        VERSION untouched, notes under [Unreleased]
-    feature/*  ──▶  develop        the release preparation: bump VERSION,
-                                   move [Unreleased] under the new heading
-    develop    ──▶  main           ships, tags, releases
+`99` as the patch fixes that without spending the release number. It sorts above
+any real patch in the line, so staging always reads as ahead of production, and
+it is obviously not a release: nobody ships a `.99`. The release PR replaces it
+with the real number.
+
+    feature/*  ──▶  develop        VERSION untouched at x.y.99,
+                                   notes under [Unreleased]
+    develop    ──▶  main           the release: VERSION becomes the real number
+                                   (1.3.0), [Unreleased] and [1.2.99] fold into
+                                   a [1.3.0] heading, then it ships and tags
+
+So a feature PR into `develop` still does **not** touch `VERSION` — it adds its
+notes under `## [Unreleased]`. When a release is due, the preparation PR sets
+`VERSION` to the release number and gathers the notes under that heading.
+
+CI enforces this where it belongs: the bump and the changelog entry are required
+only on a PR into `main`, never on a PR into `develop`. `check.py` requires a
+`## [<VERSION>]` heading to exist, so a release cannot ship as `1.3.0` without
+`## [1.3.0]` notes.
+
+After the next release the staging line becomes `1.3.99`, and so on.
 
 | Bump | When |
 | --- | --- |
