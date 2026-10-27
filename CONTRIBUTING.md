@@ -89,8 +89,8 @@ Content lives in `src/data`. Adding a project is one object in `projects.json`.
 
 ## Versioning
 
-Current staging series: **1.2.8**. Increment the final component for each
-subsequent staging update: **1.2.9, 1.2.10, ... through 1.2.99**. Do not advance
+Current staging update: **1.2.9**; **1.2.8** is already released. Increment the final component for each
+subsequent staging update: **1.2.10, 1.2.11, ... through 1.2.99**. Do not advance
 to 1.3.0 automatically for feature or layout work during this series. The next
 series after 1.2.99 needs an explicit decision. Each version gets a dated
 CHANGELOG entry. Staging version changes do not create production releases.
@@ -167,7 +167,7 @@ While the freeze holds:
 - Do not merge `develop` into `main`. That merge is the only thing that
   deploys production. CI will refuse it.
 - Staging milestones may bump `VERSION` with a dated changelog entry, without
-  creating a production tag or GitHub Release. Version 1.2.8 is a staging-only
+  creating a production tag or GitHub Release. Version 1.2.9 is a staging-only
   milestone; production retains its deployed version until an approved release.
 - Feature work continues as normal — `feature/*` into `develop`, reviewed on
   staging.
