@@ -11,6 +11,21 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Changed
+- The production freeze now blocks the deploys, not just the pull requests.
+  **Deploy production** and **Rollback production** each begin with a `freeze`
+  job that every other job depends on, so a manual `workflow_dispatch` is
+  refused along with an automatic deploy — including a rollback that redeploys
+  an old tag, since the job reads the date from `origin/develop` rather than
+  from the ref being deployed.
+- `CONTRIBUTING.md` no longer claims the freeze "cannot be merged even
+  deliberately". A pull request's checks run from the merge commit, so
+  `check.py` only carries the gate when the head or the base does; a branch cut
+  from `main` while `main` lacks the gate is not stopped, which is the route PR
+  #52 took into production. The document now says which routes are covered,
+  which are not, and that closing the rest needs a GitHub setting rather than a
+  file.
+
+### Changed
 - The Our Story section is the studio's story and its expertise, side by side.
   The display line "We transform earth, metal and memory…" is gone, and with it
   the "From first line / to final presence" caption that belonged to it. In its

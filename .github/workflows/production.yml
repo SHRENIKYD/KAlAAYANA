@@ -15,8 +15,43 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  freeze:
+    name: Production freeze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # The freeze is declared on develop, so read it from there rather than from
+      # whatever ref this run checked out — a tag or an old branch would not carry
+      # it. Falls back to the checked-out copy if develop cannot be reached.
+      - name: Honour the production freeze
+        run: |
+          set -euo pipefail
+          git fetch --quiet --depth=1 origin develop 2>/dev/null || true
+          freeze="$(git show origin/develop:FREEZE 2>/dev/null | tr -d '[:space:]' || true)"
+          if [ -z "$freeze" ] && [ -f FREEZE ]; then
+            freeze="$(tr -d '[:space:]' < FREEZE)"
+          fi
+          if [ -z "$freeze" ]; then
+            echo "No FREEZE file. Production is open."
+            exit 0
+          fi
+          case "$freeze" in
+            [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;;
+            *) echo "::error::FREEZE is not an ISO date (YYYY-MM-DD): $freeze"; exit 1 ;;
+          esac
+          today="$(date -u +%F)"
+          if [ "$today" \< "$freeze" ]; then
+            echo "::error::Production is frozen until $freeze (today is $today). Every route to production is blocked, including a manual run of this workflow. Delete the FREEZE file on develop to release."
+            exit 1
+          fi
+          echo "Freeze lapsed on $freeze — delete the FREEZE file on develop."
+
   deploy:
     name: Deploy to kalaayanastudios.com
+    needs: freeze
     runs-on: ubuntu-latest
     environment:
       name: github-pages

@@ -143,11 +143,29 @@ Actions → **Rollback production** → Run workflow → enter a tag such as
 
 **No merge to `main` before 2026-11-07.**
 
-The date lives in the `FREEZE` file at the repository root, and it is enforced
-rather than advised. `scripts/check.py` reads it and fails any pull request
-whose base is `main` while the date is in the future. That check runs as the
-`Checks` job, which the repository ruleset requires on `main`, so a frozen
-release cannot be merged even deliberately.
+The date lives in the `FREEZE` file at the repository root, read in three places:
+
+- `scripts/check.py` fails any pull request whose base is `main` while the date
+  is in the future. That runs as the `Checks` job, which the ruleset requires on
+  `main`.
+- **Deploy production** and **Rollback production** each begin with a `freeze`
+  job that every other job depends on, so a manual `workflow_dispatch` is
+  refused as well as an automatic deploy. Those jobs read the date from
+  `origin/develop`, not from the ref being deployed, so redeploying an old tag
+  does not escape the freeze.
+
+**What this does not cover.** A pull request's checks run from the merge commit —
+the head merged into the base — so `check.py` only carries the gate when one of
+those two sides does. A branch taken from `main` while `main` lacks the gate,
+merged into `main`, runs the old `check.py` and is not stopped. That is exactly
+the route PR #52 took into production. The workflow gate closes the deploy end
+of it, but only once these workflow files are themselves on `main`, and they
+cannot get there during a freeze without being waved through by hand.
+
+A freeze that must hold against every route, immediately, needs one thing set
+outside this repository: require a reviewer on the `github-pages` environment,
+or raise the ruleset's required approvals above zero. Both are GitHub settings,
+not code, and both cover paths no file in this repository can see.
 
 This replaces a freeze that was advisory. The previous one said
 `No merge to main before 2026-09-13`, nothing enforced it, and a pull request
@@ -157,8 +175,9 @@ date stands, and it stops holding by itself the day after, with no edit needed.
 
 While the freeze holds:
 
-- Do not merge `develop` into `main`. That merge is the only thing that
-  deploys production. CI will refuse it.
+- Do not merge `develop` into `main`. CI will refuse it.
+- Do not run **Deploy production** or **Rollback production** by hand. Their
+  `freeze` job refuses both while the date stands.
 - Do not bump `VERSION`. It moves only when work reaches production, so the
   next release stays in `[Unreleased]` until the freeze lifts.
 - Feature work continues as normal — `feature/*` into `develop`, reviewed on
