@@ -12,7 +12,7 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 Nothing yet.
 
-## [1.2.99] — 2026-10-27
+## [1.2.10] — 2026-10-27
 
 ### Added
 - A production freeze that is enforced rather than advised. The date lives in a
@@ -80,6 +80,76 @@ Nothing yet.
   to 100 while nothing was being waited for — the count was driven by a timer,
   not by load progress, and the panel slid away on a fixed 1.8s delay whether
   the page was ready or not. The hero now renders at first paint.
+
+## [1.2.9] - 2026-10-27
+
+Staging update only. Production remains on its existing commit; the production
+release freeze in `FREEZE` remains 2026-11-07. No production tag or release is
+created by merging this update into `develop`.
+
+### Added
+- Seven portrait projects: Bronze Portrait IV, V, VI, an unnumbered bronze
+  portrait of a woman, Sri Madhvacharya, Dr. B. R. Ambedkar and Ananth Kumar.
+- 22 additional gallery photographs, bringing the catalog to 44 projects and
+  148 photographs. Ananth Kumar follows Sri Siddaramaiah; Kanakadasa leads the
+  portrait collection, followed by named figures, then grouped unnamed portraits.
+- A transparent hero logo PNG, with a smaller studio subtitle in opaque cream.
+- Responsive image variants up to 3840 pixels where the original source permits,
+  with quality 95 for project images and no artificial upscaling.
+
+### Changed
+- Replaced the horizontal Works slider with five large vertically stacked,
+  linked collection images. Enlarged WORKS and removed the empty introduction.
+- Unified homepage surfaces in warm cream; refined hero logo placement, reduced
+  headline size, increased tagline size and darkened the background photograph.
+- Preserved the latest upstream Our Story, expertise and navigation updates.
+- Simplified collection pages to a compact heading on black, followed directly
+  by project images. Renamed Our Major Projects to Monumental and reduced titles.
+- Rebuilt project pages as image-first galleries: two natural-height columns on
+  desktop and a compact single column on mobile. Preserved complete photographs
+  without fixed-height cropping or large vertical gaps.
+- Updated Bronze Portrait III's cover and replaced the woman's portrait photos
+  with the supplied tighter crops. Added the painted Siddaramaiah relief.
+- Ambedkar uses the user-supplied finished portrait as its cover alongside the
+  original clay photographs; the discarded generated visualization is excluded.
+
+### Removed
+- Header logos, scroll prompts, collection numbering and Kalaayana archive labels.
+- Project intro and metadata panels, image-count labels, photograph captions,
+  oversized project heroes, next-project panels and end-of-collection panels.
+
+### Validation
+- Astro production build and repository catalog/asset checks.
+- Production-freeze rejection verified for a simulated PR targeting main.
+- Changes are local/staging only; no production deployment or release requested.
+
+
+### Changed
+- The Our Story section is the studio's story and its expertise, side by side.
+  The display line "We transform earth, metal and memory…" is gone, and with it
+  the "From first line / to final presence" caption that belonged to it. In its
+  place: the five-generation lineage, the five areas of practice, the four
+  materials and the studio's sign-off — all read from `site.json`, which already
+  held every one of them. The reference artwork used a warm brown on cream; this
+  keeps the site's own palette instead, cream ground and ink text on the same
+  hairline rule the process steps use.
+- The menu is Our Story, Gallery and Contact. Index became Our Story, Selected
+  works is gone, Archive became Gallery. Removing Selected works leaves the
+  collections slider at `#works` with no link anywhere on the page — it is
+  reachable by scrolling and through the collection cards, but nothing
+  navigates to it.
+- The Our Story section carries the studio's actual story. The five-generation
+  lineage — Sri Tippaji, Shilpi K. Narayana Rao, Vishal Kavatekar — sat in
+  `site.json` and was rendered nowhere; the section held one line of approach
+  copy under the label "01 / APPROACH". It reads the paragraphs from `site.json`
+  rather than repeating them in the markup, and it now sits last among the
+  content sections, before the closing panel.
+- `motion.js` reads the page's sections from the document instead of a
+  hand-written list of five. The list drove the section meter by taking the last
+  section past 52% of the viewport, which needs document order to be correct, so
+  moving a section would have desynchronised it — on top of five names being
+  unable to measure eight sections. The meter now runs the full length of the
+  page.
 
 ## [1.2.8] — 2026-09-16
 

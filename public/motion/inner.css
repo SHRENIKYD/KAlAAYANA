@@ -10,3 +10,25 @@
 .detail-gallery figcaption{margin-top:14px;font:.8rem/1.45 var(--serif);color:#aaa196}.detail-next h2{max-width:900px}.detail-next h2 i{display:block}.detail-next a{display:inline-block;padding-bottom:10px;border-bottom:1px solid #1116}
 @media(max-width:760px){.inner-nav{height:72px;padding:0 20px;grid-template-columns:1fr auto}.inner-nav .logo img{width:132px;height:42px}.inner-nav p{display:none}.inner-nav .inner-links a:not(:last-child){display:none}.collection-hero{min-height:82svh;padding:115px 24px 58px;display:block}.collection-index{margin-bottom:24vw}.collection-heading h1{font-size:20vw}.collection-heading p{margin:42px 0 0;font-size:1.05rem}.collection-grid{padding:18vw 20px 28vw;grid-template-columns:1fr;gap:22vw}.work-tile:nth-child(even){margin-top:0}.work-image{height:128vw;max-height:none}.work-meta{grid-template-columns:48px 1fr}.work-meta h2{font-size:13vw}.work-meta p{grid-column:2;margin-top:12px}.collection-end{min-height:75svh;padding:20px}.collection-end h2{font-size:19vw}.detail-nav{padding:18px 20px}.detail-nav .detail-brand img{width:126px;height:40px}.detail-hero{height:165vh}.detail-hero h1{left:24px;right:20px;bottom:10vh}.detail-intro dl{gap:0}.detail-gallery{padding:18vw 20px;gap:18vw}.detail-gallery figure:not(.large),.detail-gallery .large{height:125vw}.detail-next{min-height:75svh;padding:24px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.work-image img{transition:none}.detail-hero{height:auto}.detail-image{position:relative}.detail-hero h1{position:absolute}}
+
+/* Keep collection titles and photographs on one continuous dark surface. */
+body.motion-inner:not(.detail-page){background:#0b0a09}
+.collection-hero{min-height:0;background:#0b0a09;color:var(--cream);padding:140px 5vw 0;align-items:start}
+.collection-hero .collection-index{margin:0}
+.collection-heading small{margin-bottom:24px;color:var(--gold)}
+.collection-heading h1{line-height:.95}
+.collection-grid{background:#0b0a09;padding-top:4.5rem}
+@media(max-width:760px){.collection-hero{min-height:0;padding:110px 24px 0}.collection-hero .collection-index{margin-bottom:28px}.collection-heading small{margin-bottom:20px}.collection-grid{padding-top:4.5rem}}
+
+.collection-hero-monumental h1{font-size:clamp(3.25rem,7.5vw,8rem)}
+@media(max-width:760px){.collection-hero-monumental h1{font-size:clamp(2.5rem,13vw,5rem)}}
+
+/* Compact project captions across every collection. */
+.work-meta{grid-template-columns:minmax(0,1fr) auto;gap:20px}
+.work-meta h2{font-size:clamp(1.4rem,2.2vw,2.5rem);line-height:1.05;overflow-wrap:break-word}
+@media(max-width:760px){.work-meta{grid-template-columns:1fr;gap:12px}.work-meta h2{font-size:clamp(1.25rem,5.8vw,1.9rem)}.work-meta p{grid-column:1;margin-top:0}}
+
+.inner-nav>p{grid-column:2}.inner-nav .inner-links{grid-column:3}
+@media(max-width:760px){.inner-nav .inner-links{grid-column:2}}
+
+.collection-hero{display:block}

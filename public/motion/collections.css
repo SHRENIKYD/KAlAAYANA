@@ -1,0 +1,18 @@
+/* Collection features share a vertical image-led layout. */
+.collection-index{height:auto;background:#d0b07c;color:#0d0c0a;padding:48px 5vw 72px;scroll-margin-top:80px}
+.collections-inner{max-width:1440px;margin:0 auto}
+.collections-label{font:400 clamp(2.5rem,5vw,5rem)/1 var(--serif);letter-spacing:-.025em;margin:0 0 32px}
+.collection-feature{position:relative;display:block;color:var(--cream);text-decoration:none;overflow:hidden;background:#29251f}
+.collection-feature>img{display:block;width:100%;height:clamp(380px,48vw,680px);object-fit:cover;object-position:50% 48%;transition:transform .4s ease}
+.collection-feature-copy{position:absolute;inset:auto 0 0;padding:100px 4% 36px;background:linear-gradient(transparent,#090806eb)}
+.collection-feature-copy>span:first-child{font-size:.68rem;letter-spacing:.18em}
+.collection-feature h3{font:400 clamp(2.8rem,5.5vw,6rem)/1 var(--serif);letter-spacing:-.035em;margin:20px 0 24px}
+.collection-link{display:inline-flex;align-items:center;gap:32px;color:inherit;text-decoration:none;border-bottom:1px solid currentColor;padding:12px 0;font-size:.78rem;line-height:1.5}
+.collection-feature:hover>img{transform:scale(1.025)}
+.collection-feature+.collection-feature{margin-top:40px}
+.collection-feature[href="/murals.html"]>img{object-position:45% 58%}
+.collection-feature[href="/landmarks.html"]>img{object-position:50% 32%}
+.collection-feature[href="/installations.html"]>img{object-position:50% 72%}
+.collection-index a:focus-visible{outline:2px solid currentColor;outline-offset:6px}
+@media(max-width:760px){.collection-index{padding:32px 20px 48px}.collections-label{margin-bottom:24px}.collection-feature>img{height:420px}.collection-feature-copy{padding:90px 22px 26px}.collection-feature h3{font-size:clamp(2.3rem,8vw,4rem);overflow-wrap:break-word}.collection-feature+.collection-feature{margin-top:24px}}
+@media(prefers-reduced-motion:reduce){.collection-feature>img{transition:none}.collection-feature:hover>img{transform:none}}

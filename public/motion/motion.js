@@ -11,7 +11,7 @@ if (!reduced) {
     mouseX = event.clientX;
     mouseY = event.clientY;
   });
-  $$('.project-card, .slide-end').forEach(element => {
+  $$('.collection-feature').forEach(element => {
     element.addEventListener('mouseenter', () => cursor.classList.add('view'));
     element.addEventListener('mouseleave', () => cursor.classList.remove('view'));
   });
@@ -56,20 +56,6 @@ const render = () => {
   const heroOrbit = $('.hero-orbit');
   if (heroOrbit) heroOrbit.style.transform = `rotate(${heroProgress * 240}deg)`;
 
-  const projects = $('.projects');
-  const projectProgress = clamp(-projects.getBoundingClientRect().top / (projects.offsetHeight - innerHeight));
-  const track = $('.track');
-  const travel = track.scrollWidth - innerWidth;
-  track.style.transform = `translate3d(${-travel * projectProgress}px,0,0)`;
-  $('.track-line i').style.width = `${12 + projectProgress * 88}%`;
-  $$('.project-card').forEach(card => {
-    const offset = card.getBoundingClientRect().left / innerWidth;
-    $('.media img', card).style.transform = `scale(1.15) translateX(${-offset * 4}%)`;
-    const focus = 1 - Math.min(1, Math.abs(offset));
-    $('.media', card).style.setProperty('--focus', 0.94 + focus * 0.06);
-    $('.media', card).style.setProperty('--tilt', `${offset * -3}deg`);
-    $('.media', card).style.setProperty('--wipe', clamp(Math.abs(offset) - 0.12, 0, 1));
-  });
   const material = $('.material');
   const materialProgress = clamp((innerHeight - material.getBoundingClientRect().top) / (material.offsetHeight + innerHeight));
   $('.material-bg').style.transform = `translateY(${(materialProgress - 0.5) * 12}%) scale(${1.03 + materialProgress * 0.12})`;
