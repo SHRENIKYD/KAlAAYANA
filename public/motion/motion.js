@@ -24,10 +24,6 @@ if (!reduced) {
   moveCursor();
 }
 
-const statementCopy = $('.word-reveal');
-const wordList = statementCopy.textContent.trim().split(/\s+/);
-statementCopy.innerHTML = wordList.map(word => `<span class="word">${word}</span> `).join('');
-const words = $$('.word');
 // Derived from the document, not hand-listed: the meter reads the last section
 // whose top has passed 52% of the viewport, which only works if the array is in
 // document order. A fixed list broke on both counts — it named five of the eight
@@ -59,12 +55,6 @@ const render = () => {
   $('.hero-title').style.opacity = 1 - heroProgress;
   const heroOrbit = $('.hero-orbit');
   if (heroOrbit) heroOrbit.style.transform = `rotate(${heroProgress * 240}deg)`;
-
-  const statement = $('.statement');
-  const statementProgress = clamp((innerHeight - statement.getBoundingClientRect().top) / (statement.offsetHeight * 0.85));
-  words.forEach((word, index) => {
-    word.style.opacity = clamp(statementProgress * 1.5 - index / words.length * 0.75, 0.16, 1);
-  });
 
   const projects = $('.projects');
   const projectProgress = clamp(-projects.getBoundingClientRect().top / (projects.offsetHeight - innerHeight));

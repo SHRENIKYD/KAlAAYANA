@@ -11,6 +11,14 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Changed
+- The Our Story section is the studio's story and its expertise, side by side.
+  The display line "We transform earth, metal and memory…" is gone, and with it
+  the "From first line / to final presence" caption that belonged to it. In its
+  place: the five-generation lineage, the five areas of practice, the four
+  materials and the studio's sign-off — all read from `site.json`, which already
+  held every one of them. The reference artwork used a warm brown on cream; this
+  keeps the site's own palette instead, cream ground and ink text on the same
+  hairline rule the process steps use.
 - The menu is Our Story, Gallery and Contact. Index became Our Story, Selected
   works is gone, Archive became Gallery. Removing Selected works leaves the
   collections slider at `#works` with no link anywhere on the page — it is
