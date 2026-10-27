@@ -10,12 +10,72 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Changed
+- The hero is the gopuram niche carrying Ganesha with a child figure, and it is
+  art-directed rather than one file stretched to fit. The source is
+  1159 x 2000 — a tall portrait — and a hero box is wider than it is tall on
+  every device but a phone. At 1920 x 1080 the box is 2112 x 1188, so cover
+  scales a 0.58-aspect source by 1.82x to reach that width and leaves 32.6% of
+  the image height on screen, against the 47% the figures occupy. No
+  object-position fixes that, so the hero now serves five purpose-cut crops
+  through a `<picture>`: phone and portrait tablet carry the whole group,
+  laptop, desktop and ultrawide frame crown-to-body. Each is pre-framed, so the
+  offset is neutral at every width.
+
+### Added
+- A production freeze that is enforced rather than advised. The date lives in a
+  `FREEZE` file at the repository root; `check.py` fails any pull request based
+  on `main` while that date is in the future, and the check runs as the `Checks`
+  job that the repository ruleset requires on `main`. Production is closed until
+  2026-11-07.
+
+  The previous freeze was a paragraph in `CONTRIBUTING.md` saying "No merge to
+  main before 2026-09-13". Nothing read it, a pull request went into production
+  past it, and the expired text stayed in the file for six weeks after the date.
+  This version holds while the date stands, lapses by itself the day after with
+  no edit, and prints a reminder to delete the file once it has.
+
 ### Removed
 - The loading screen. The homepage opened behind a full-screen cream panel
   carrying the Kannada mark, a "Shaping stories" caption and a counter that ran
   to 100 while nothing was being waited for — the count was driven by a timer,
   not by load progress, and the panel slid away on a fixed 1.8s delay whether
   the page was ready or not. The hero now renders at first paint.
+## [1.2.7] — 2026-09-16
+
+### Fixed
+- Project-detail images now render at higher quality and are never stretched
+  beyond their intrinsic width, preventing small archive photographs from being
+  enlarged into visibly soft full-width frames.
+- Smaller originals are centred within the gallery so their true resolution is
+  preserved rather than disguised by cropping or upscaling.
+
+## [1.2.6] — 2026-09-16
+
+### Fixed
+- Project-detail heroes now detect portrait photographs and show the complete
+  composition instead of cropping faces and figures into a landscape viewport.
+- Project galleries now preserve each photograph’s natural aspect ratio rather
+  than forcing every image into a fixed-height frame with vertical parallax.
+
+## [1.2.5] — 2026-09-16
+
+### Fixed
+- Added image-specific focal positions to all five homepage collection cards so
+  temple architecture, portrait groups, mural scenes, landmark sculptures, and
+  experiential installations remain properly framed on desktop and mobile.
+- Re-centred the craft-section background around the Samudra Manthana sculpture.
+
+## [1.2.4] — 2026-09-16
+
+### Fixed
+- Moved the desktop project status row below the fixed navigation so its labels
+  no longer overlap the logo, studio descriptor, collection count, or menu.
+
+### Removed
+- Removed the non-functional “SOUND OFF” control from the staging navigation.
+
+## [1.2.3] — 2026-09-16
 
   Removed with it: `loader.css`, the `.loader`, `.loader-mark`, `.loader-copy`
   and `.loader-line` rules in `styles.css` and `responsive.css`, the

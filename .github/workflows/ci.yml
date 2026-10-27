@@ -39,6 +39,9 @@ jobs:
           # Only a merge into main is a release, so only that requires notes.
           REQUIRE_RELEASE_NOTES: ${{ github.base_ref == 'main' }}
           BASE_VERSION: ${{ steps.base.outputs.version }}
+          # Lets check.py tell a release apart from a staging merge, for the
+          # production freeze in the FREEZE file.
+          BASE_REF: ${{ github.base_ref }}
         run: python3 scripts/check.py
 
       - name: Verify the stamp script produces a deployable build
