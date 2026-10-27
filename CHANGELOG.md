@@ -11,6 +11,33 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 ### Changed
+- The Our Story section is the studio's story and its expertise, side by side.
+  The display line "We transform earth, metal and memory…" is gone, and with it
+  the "From first line / to final presence" caption that belonged to it. In its
+  place: the five-generation lineage, the five areas of practice, the four
+  materials and the studio's sign-off — all read from `site.json`, which already
+  held every one of them. The reference artwork used a warm brown on cream; this
+  keeps the site's own palette instead, cream ground and ink text on the same
+  hairline rule the process steps use.
+- The menu is Our Story, Gallery and Contact. Index became Our Story, Selected
+  works is gone, Archive became Gallery. Removing Selected works leaves the
+  collections slider at `#works` with no link anywhere on the page — it is
+  reachable by scrolling and through the collection cards, but nothing
+  navigates to it.
+- The Our Story section carries the studio's actual story. The five-generation
+  lineage — Sri Tippaji, Shilpi K. Narayana Rao, Vishal Kavatekar — sat in
+  `site.json` and was rendered nowhere; the section held one line of approach
+  copy under the label "01 / APPROACH". It reads the paragraphs from `site.json`
+  rather than repeating them in the markup, and it now sits last among the
+  content sections, before the closing panel.
+- `motion.js` reads the page's sections from the document instead of a
+  hand-written list of five. The list drove the section meter by taking the last
+  section past 52% of the viewport, which needs document order to be correct, so
+  moving a section would have desynchronised it — on top of five names being
+  unable to measure eight sections. The meter now runs the full length of the
+  page.
+
+### Changed
 - The hero is the gopuram niche carrying Ganesha with a child figure, and it is
   art-directed rather than one file stretched to fit. The source is
   1159 x 2000 — a tall portrait — and a hero box is wider than it is tall on
