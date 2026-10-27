@@ -1,0 +1,34 @@
+/* Warm cream across homepage surfaces; image overlays retain light lettering. */
+body.homepage{--home-paper:#e9e4da;--home-ink:#171512;--home-muted:#655e54;--cream:var(--home-paper);--gold:var(--home-ink);background:var(--home-paper);color:var(--home-ink)}
+.homepage .collection-index,.homepage .archive,.homepage .statement,.homepage .process,.homepage .scrubber,.homepage .closing,.homepage .menu-panel{background:var(--home-paper);color:var(--home-ink)}
+.homepage .menu-panel a,.homepage .menu-close{color:var(--home-ink)}
+.homepage .menu-logo{filter:brightness(0)}
+.homepage .hero,.homepage .material{background:var(--home-paper);color:var(--home-paper)}
+.homepage .hero h1 i,.homepage .material h2 i{color:var(--home-paper)}
+.homepage .collection-feature{color:var(--home-paper)}
+.homepage .archive-head i,.homepage .process-head h2 i,.homepage .closing h2 i{color:var(--home-muted)}
+.homepage .process-steps b{color:var(--home-muted)}
+.homepage .closing-ring{border-color:#17151224}
+.homepage .closing-foot{border-top-color:#17151240}
+.homepage .closing>a{border-bottom-color:var(--home-muted)}
+/* Difference blending keeps the fixed navigation readable over both photos and cream. */
+.homepage .nav,.homepage .section-meter{color:#fff}
+.homepage .scroll-progress{background:var(--home-ink)}
+
+/* Independent logo placement leaves the hero statement unchanged. */
+.homepage .hero-brand{inset:auto 5vw 8%;display:block;padding:0;text-align:left;pointer-events:none}
+.homepage .hero-brand-logo{position:absolute;z-index:2;top:11%;left:50%;transform:translateX(-50%);display:block;width:min(32.76vw,400.4px);height:auto;pointer-events:none}
+.homepage .hero-brand h1{margin:0;font-size:clamp(2.24rem,4.48vw,5.04rem);line-height:.78;letter-spacing:-.045em}
+.homepage .hero-brand h1 i{color:var(--home-paper);font-weight:400}
+.homepage .hero-brand .hero-kicker{font-size:clamp(.69069rem,.92092vw,.86333rem);letter-spacing:.28em;margin-bottom:24px}
+.homepage .hero-foot{left:5vw;bottom:3.2vw;display:block;font-size:.6rem}
+.homepage .hero-foot span:first-child{display:inline}
+@media(max-width:760px){.homepage .hero-brand{inset:auto 20px 8%;}.homepage .hero-brand-logo{top:11%;width:min(65.52vw,309.4px)}.homepage .hero-brand h1{font-size:10.64vw;line-height:.9}.homepage .hero-brand .hero-kicker{font-size:.69069rem;letter-spacing:.25em;margin-bottom:20px}.homepage .hero-foot{left:20px;bottom:22px;font-size:.55rem}}
+
+.homepage .nav>p{grid-column:2}.homepage .nav-actions{grid-column:3}
+@media(max-width:1100px),(hover:none) and (pointer:coarse){.homepage .nav-actions{grid-column:2}}
+
+.homepage .hero-image{filter:brightness(.72)}
+
+
+.homepage .hero-brand-copy{color:var(--home-paper)}

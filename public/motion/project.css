@@ -1,1 +1,30 @@
 .detail-page{background:#0b0a09}.detail-nav{position:fixed;z-index:10;left:0;right:0;top:0;padding:30px 4vw;display:flex;justify-content:space-between;color:#fff;font-size:.6rem;letter-spacing:.18em;mix-blend-mode:difference}.detail-nav a{color:inherit;text-decoration:none}.detail-hero{height:200vh;position:relative}.detail-image{position:sticky;top:0;height:100vh;overflow:hidden}.detail-image:after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,#080706c9,transparent 55%)}.detail-image img{width:100%;height:100%;object-fit:cover;filter:saturate(.65);transform:scale(var(--hero-scale,1.08))}.detail-image.portrait{background:#0b0a09;padding:4vh max(4vw,32px)}.detail-image.portrait img{object-fit:contain;object-position:center;transform:none}.detail-hero h1{position:fixed;z-index:2;left:5vw;bottom:9vh;font:400 clamp(5rem,12vw,13rem)/.7 var(--serif);margin:0;letter-spacing:-.05em;opacity:var(--hero-opacity,1);transform:translateY(var(--hero-y,0))}.detail-hero h1 span,.detail-hero h1 i{display:block}.detail-hero h1 i{color:var(--gold);font-weight:400}.detail-scroll{position:absolute;right:4vw;top:85vh;font-size:.58rem;letter-spacing:.18em}.detail-intro{background:var(--cream);color:#111;padding:13vw 6vw;display:grid;grid-template-columns:1fr 3fr}.detail-intro>span{font-size:.6rem;letter-spacing:.18em}.detail-intro>p{font:400 clamp(3rem,6vw,7rem)/.95 var(--serif);margin:0}.detail-intro dl{grid-column:2;display:flex;gap:8vw;margin-top:8vw}.detail-intro dl div{border-top:1px solid #aaa;width:170px;padding-top:14px}.detail-intro dt{font-size:.55rem;text-transform:uppercase;letter-spacing:.15em}.detail-intro dd{font:1rem var(--serif);margin:14px 0}.detail-gallery{padding:9vw 5vw;background:#14110e;display:grid;grid-template-columns:1fr 1fr;gap:10vw 5vw}.detail-gallery figure{margin:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center}.detail-gallery .large{grid-column:1/-1}.detail-gallery img{display:block;width:auto;max-width:100%;height:auto;object-fit:contain;filter:saturate(.85)}.detail-next{min-height:100vh;background:#d0ab71;color:#111;display:grid;place-content:center;text-align:center}.detail-next span{font-size:.6rem;letter-spacing:.18em}.detail-next h2{font:400 clamp(5rem,11vw,12rem)/.72 var(--serif);margin:35px}.detail-next h2 i{font-weight:400;color:#f1e6d5}.detail-next a{color:#111;text-decoration:none;font-size:.62rem;letter-spacing:.18em}@media(max-width:760px){.detail-hero h1{font-size:19vw}.detail-intro{grid-template-columns:1fr;padding:24vw 7vw}.detail-intro>p{font-size:13vw;margin-top:14vw}.detail-intro dl{grid-column:1;display:block}.detail-intro dl div{width:100%}.detail-gallery{grid-template-columns:1fr}.detail-image.portrait{padding:72px 18px 18px}.detail-gallery .large{height:auto}}
+
+/* Natural image heights avoid empty space inside and between gallery rows. */
+.detail-gallery{display:flex;flex-direction:column;gap:16px;padding:16px 5vw;background:#0b0a09}
+.detail-gallery figure,.detail-gallery figure:not(.large),.detail-gallery .large{display:block;height:auto;min-height:0}
+.detail-gallery img{width:100%;height:auto;max-width:100%;object-fit:contain}
+@media(max-width:760px){.detail-gallery{gap:12px;padding:12px 20px}}
+
+/* Full-screen project photography, without portrait letterboxing or extra zoom. */
+.detail-image,.detail-image.portrait{height:100svh;padding:0}
+.detail-image img,.detail-image.portrait img{display:block;width:100%;height:100%;object-fit:cover;object-position:center;transform:none;filter:none}
+
+/* Desktop gallery: two natural-height columns instead of oversized stacked images. */
+@media(min-width:761px){
+  .detail-gallery{display:block;columns:2;column-gap:24px;max-width:1600px;margin:0 auto;padding:32px 4vw}
+  .detail-gallery figure,.detail-gallery figure:not(.large),.detail-gallery .large{break-inside:avoid;margin:0 0 24px;grid-column:auto}
+  .detail-gallery img{width:100%;height:auto;filter:none}
+}
+
+/* Keep portrait subjects fully visible and long project titles readable. */
+.detail-image.portrait img{object-fit:contain;object-position:center top}
+.detail-hero h1{right:5vw;max-width:1000px;font-size:clamp(2.5rem,5.5vw,6rem);line-height:.95}
+.detail-hero h1 i{font-size:.55em;line-height:1.1;margin-top:.35em;max-width:24ch}
+@media(max-width:760px){.detail-hero h1{font-size:clamp(2.2rem,11vw,4rem)}}
+
+/* Project pages begin directly with their complete image gallery. */
+.detail-page main{padding-top:80px}
+@media(max-width:760px){.detail-page main{padding-top:72px}}
+
+.detail-gallery .finish-visualization{font:400 .75rem/1.5 var(--sans);color:var(--cream);margin:10px 0 0}

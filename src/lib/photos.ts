@@ -24,3 +24,9 @@ export function banner(file: string): ImageMetadata {
   if (!found) throw new Error(`No banner image for ${file} — check src/data/site.json`);
   return found.default;
 }
+
+/** Responsive variants up to 4K, never larger than the original photograph. */
+export function photoWidths(source: ImageMetadata): number[] {
+  const limit = Math.min(source.width, 3840);
+  return [...new Set([640, 960, 1600, 2200, 2880, 3840, limit].filter((width) => width <= limit))].sort((a, b) => a - b);
+}
