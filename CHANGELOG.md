@@ -10,6 +10,20 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Removed
+- The loading screen. The homepage opened behind a full-screen cream panel
+  carrying the Kannada mark, a "Shaping stories" caption and a counter that ran
+  to 100 while nothing was being waited for — the count was driven by a timer,
+  not by load progress, and the panel slid away on a fixed 1.8s delay whether
+  the page was ready or not. The hero now renders at first paint.
+
+  Removed with it: `loader.css`, the `.loader`, `.loader-mark`, `.loader-copy`
+  and `.loader-line` rules in `styles.css` and `responsive.css`, the
+  `loaderOut`, `markIn` and `loading` keyframes, the reduced-motion override
+  that hid the panel, and the counter driver in `motion.js` — which had to go
+  with the markup, since `$('.loader-copy b')` would otherwise be null and
+  throw on every homepage load.
+
 ## [1.2.2] — 2026-09-16
 
 ### Removed
