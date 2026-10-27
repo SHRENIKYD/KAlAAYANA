@@ -10,6 +10,18 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Changed
+- The hero is the gopuram niche carrying Ganesha with a child figure, and it is
+  art-directed rather than one file stretched to fit. The source is
+  1159 x 2000 — a tall portrait — and a hero box is wider than it is tall on
+  every device but a phone. At 1920 x 1080 the box is 2112 x 1188, so cover
+  scales a 0.58-aspect source by 1.82x to reach that width and leaves 32.6% of
+  the image height on screen, against the 47% the figures occupy. No
+  object-position fixes that, so the hero now serves five purpose-cut crops
+  through a `<picture>`: phone and portrait tablet carry the whole group,
+  laptop, desktop and ultrawide frame crown-to-body. Each is pre-framed, so the
+  offset is neutral at every width.
+
 ### Added
 - A production freeze that is enforced rather than advised. The date lives in a
   `FREEZE` file at the repository root; `check.py` fails any pull request based
