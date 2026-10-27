@@ -10,6 +10,77 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [1.2.10] — 2026-10-27
+
+### Added
+- A production freeze that is enforced rather than advised. The date lives in a
+  `FREEZE` file at the repository root; `check.py` fails any pull request based
+  on `main` while that date is in the future, and the check runs as the `Checks`
+  job that the repository ruleset requires on `main`. Production is closed until
+  2026-11-07.
+
+  The previous freeze was a paragraph in `CONTRIBUTING.md` saying "No merge to
+  main before 2026-09-13". Nothing read it, a pull request went into production
+  past it, and the expired text stayed in the file for six weeks after the date.
+  This version holds while the date stands, lapses by itself the day after with
+  no edit, and prints a reminder to delete the file once it has.
+
+### Changed
+- The production freeze now blocks the deploys, not just the pull requests.
+  **Deploy production** and **Rollback production** each begin with a `freeze`
+  job that every other job depends on, so a manual `workflow_dispatch` is
+  refused along with an automatic deploy — including a rollback that redeploys
+  an old tag, since the job reads the date from `origin/develop` rather than
+  from the ref being deployed.
+- `CONTRIBUTING.md` no longer claims the freeze "cannot be merged even
+  deliberately". A pull request's checks run from the merge commit, so
+  `check.py` only carries the gate when the head or the base does; a branch cut
+  from `main` while `main` lacks the gate is not stopped, which is the route PR
+  #52 took into production. The document now says which routes are covered,
+  which are not, and that closing the rest needs a GitHub setting rather than a
+  file.
+- The Our Story section is the studio's story and its expertise, side by side,
+  and it sits last among the content sections. It held one display line — "We
+  transform earth, metal and memory…" — under the label "01 / APPROACH"; that
+  line is gone, and with it the "From first line / to final presence" caption
+  that belonged to it. In its place: the five-generation lineage of Sri Tippaji,
+  Shilpi K. Narayana Rao and Vishal Kavatekar, the five areas of practice, the
+  four materials and the studio's sign-off. Every word of it already sat in
+  `site.json` and was rendered nowhere, so it is read from there rather than
+  repeated in the markup. The reference artwork used a warm brown on cream; this
+  keeps the site's own palette, cream ground and ink text on the same hairline
+  rule the process steps use.
+- The menu is Our Story, Gallery and Contact. Index became Our Story, Selected
+  works is gone, Archive became Gallery. Removing Selected works leaves the
+  collections slider at `#works` with no link anywhere on the page — it is
+  reachable by scrolling and through the collection cards, but nothing
+  navigates to it.
+- `motion.js` reads the page's sections from the document instead of a
+  hand-written list of five. The list drove the section meter by taking the last
+  section past 52% of the viewport, which needs document order to be correct, so
+  moving a section would have desynchronised it — on top of five names being
+  unable to measure eight sections. The meter now runs the full length of the
+  page.
+- The hero is the gopuram niche carrying Ganesha with a child figure, and it is
+  art-directed rather than one file stretched to fit. The source is
+  1159 x 2000 — a tall portrait — and a hero box is wider than it is tall on
+  every device but a phone. At 1920 x 1080 the box is 2112 x 1188, so cover
+  scales a 0.58-aspect source by 1.82x to reach that width and leaves 32.6% of
+  the image height on screen, against the 47% the figures occupy. No
+  object-position fixes that, so the hero now serves five purpose-cut crops
+  through a `<picture>`: phone and portrait tablet carry the whole group,
+  laptop, desktop and ultrawide frame crown-to-body. Each is pre-framed, so the
+  offset is neutral at every width.
+
+### Removed
+- The loading screen. The homepage opened behind a full-screen cream panel
+  carrying the Kannada mark, a "Shaping stories" caption and a counter that ran
+  to 100 while nothing was being waited for — the count was driven by a timer,
+  not by load progress, and the panel slid away on a fixed 1.8s delay whether
+  the page was ready or not. The hero now renders at first paint.
+
 ## [1.2.9] - 2026-10-27
 
 Staging update only. Production remains on its existing commit; the production
@@ -80,37 +151,32 @@ created by merging this update into `develop`.
   unable to measure eight sections. The meter now runs the full length of the
   page.
 
-### Changed
-- The hero is the gopuram niche carrying Ganesha with a child figure, and it is
-  art-directed rather than one file stretched to fit. The source is
-  1159 x 2000 — a tall portrait — and a hero box is wider than it is tall on
-  every device but a phone. At 1920 x 1080 the box is 2112 x 1188, so cover
-  scales a 0.58-aspect source by 1.82x to reach that width and leaves 32.6% of
-  the image height on screen, against the 47% the figures occupy. No
-  object-position fixes that, so the hero now serves five purpose-cut crops
-  through a `<picture>`: phone and portrait tablet carry the whole group,
-  laptop, desktop and ultrawide frame crown-to-body. Each is pre-framed, so the
-  offset is neutral at every width.
+## [1.2.8] — 2026-09-16
 
-### Added
-- A production freeze that is enforced rather than advised. The date lives in a
-  `FREEZE` file at the repository root; `check.py` fails any pull request based
-  on `main` while that date is in the future, and the check runs as the `Checks`
-  job that the repository ruleset requires on `main`. Production is closed until
-  2026-11-07.
+### Improved
+- Reprocessed all eleven Sri Siddaramaiah project photographs to a consistent
+  2K long edge using fidelity-safe Lanczos resampling, compression cleanup, and
+  controlled sharpening for clearer high-density display without generative
+  changes to faces, text, clothing, objects, or backgrounds.
+- Reprocessed all three Field Marshal Cariappa project photographs to the same
+  2K standard while preserving the statue, uniform details, workshop setting,
+  framing, and original color character.
+- Rebuilt homepage navigation and archive discovery so every collection tile,
+  archive call-to-action, and scroll prompt has a working destination.
+- Added a complete archive page with all five collections and accurate project
+  counts, and standardized collection naming across the homepage and listings.
+- Tightened the homepage scroll sequence, moved carousel captions clear of the
+  photographs, strengthened hero and overlay contrast, and expanded the footer
+  with the studio address, phone numbers, Instagram, and navigation.
 
-  The previous freeze was a paragraph in `CONTRIBUTING.md` saying "No merge to
-  main before 2026-09-13". Nothing read it, a pull request went into production
-  past it, and the expired text stayed in the file for six weeks after the date.
-  This version holds while the date stands, lapses by itself the day after with
-  no edit, and prints a reminder to delete the file once it has.
+### Fixed
+- Removed the inactive cursor, incomplete gold image reveals, and hard-coded
+  side counter; corrected section numbering and process comparison labels.
+- Restored the process and archive interactions by removing obsolete sound code
+  that stopped the homepage script, and added descriptive alternative text.
+- Replaced the questionable portrait montage with a documented studio portrait
+  sculpture photograph.
 
-### Removed
-- The loading screen. The homepage opened behind a full-screen cream panel
-  carrying the Kannada mark, a "Shaping stories" caption and a counter that ran
-  to 100 while nothing was being waited for — the count was driven by a timer,
-  not by load progress, and the panel slid away on a fixed 1.8s delay whether
-  the page was ready or not. The hero now renders at first paint.
 ## [1.2.7] — 2026-09-16
 
 ### Fixed
