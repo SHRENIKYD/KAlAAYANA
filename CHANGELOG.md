@@ -10,6 +10,49 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-27
+
+Staging update only. Production remains on its existing commit; the production
+release freeze in `FREEZE` remains 2026-11-07. No production tag or release is
+created by merging this update into `develop`.
+
+### Added
+- Seven portrait projects: Bronze Portrait IV, V, VI, an unnumbered bronze
+  portrait of a woman, Sri Madhvacharya, Dr. B. R. Ambedkar and Ananth Kumar.
+- 22 additional gallery photographs, bringing the catalog to 44 projects and
+  148 photographs. Ananth Kumar follows Sri Siddaramaiah; Kanakadasa leads the
+  portrait collection, followed by named figures, then grouped unnamed portraits.
+- A transparent hero logo PNG, with a smaller studio subtitle in opaque cream.
+- Responsive image variants up to 3840 pixels where the original source permits,
+  with quality 95 for project images and no artificial upscaling.
+
+### Changed
+- Replaced the horizontal Works slider with five large vertically stacked,
+  linked collection images. Enlarged WORKS and removed the empty introduction.
+- Unified homepage surfaces in warm cream; refined hero logo placement, reduced
+  headline size, increased tagline size and darkened the background photograph.
+- Preserved the latest upstream Our Story, expertise and navigation updates.
+- Simplified collection pages to a compact heading on black, followed directly
+  by project images. Renamed Our Major Projects to Monumental and reduced titles.
+- Rebuilt project pages as image-first galleries: two natural-height columns on
+  desktop and a compact single column on mobile. Preserved complete photographs
+  without fixed-height cropping or large vertical gaps.
+- Updated Bronze Portrait III's cover and replaced the woman's portrait photos
+  with the supplied tighter crops. Added the painted Siddaramaiah relief.
+- Ambedkar uses the user-supplied finished portrait as its cover alongside the
+  original clay photographs; the discarded generated visualization is excluded.
+
+### Removed
+- Header logos, scroll prompts, collection numbering and Kalaayana archive labels.
+- Project intro and metadata panels, image-count labels, photograph captions,
+  oversized project heroes, next-project panels and end-of-collection panels.
+
+### Validation
+- Astro production build and repository catalog/asset checks.
+- Production-freeze rejection verified for a simulated PR targeting main.
+- Changes are local/staging only; no production deployment or release requested.
+
+
 ### Changed
 - The Our Story section is the studio's story and its expertise, side by side.
   The display line "We transform earth, metal and memory…" is gone, and with it

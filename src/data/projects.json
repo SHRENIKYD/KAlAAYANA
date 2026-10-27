@@ -223,6 +223,148 @@
     ]
   },
   {
+    "slug": "saint-kanakadasa",
+    "group": "portraits",
+    "title": "Saint Kanakadasa",
+    "scale": "Series",
+    "description": "Installations from the life story of the saint. Bangalore University.",
+    "images": [
+      {
+        "file": "saint-kanakadasa-1.jpg",
+        "alt": "Saint Kanakadasa with his tambura, from the sculpture series at Bangalore University"
+      },
+      {
+        "file": "saint-kanakadasa-2.jpg",
+        "alt": "Two figures from the Kanakadasa series set out on the lawn at Bangalore University"
+      },
+      {
+        "file": "saint-kanakadasa-3.jpg",
+        "alt": "The seated Kanakadasa figure among trees at Bangalore University"
+      },
+      {
+        "file": "saint-kanakadasa-4.jpg",
+        "alt": "The standing Kanakadasa figure in white, arm outstretched, on the university grounds"
+      }
+    ]
+  },
+  {
+    "slug": "sri-madhvacharya",
+    "group": "portraits",
+    "title": "Sri Madhvacharya",
+    "scale": "Seated sculpture",
+    "description": "Seated sculpture of Sri Madhvacharya, with a raised hand and prayer beads.",
+    "images": [
+      {
+        "file": "sri-madhvacharya-1.jpg",
+        "alt": "Three-quarter view of Sri Madhvacharya seated on a sculpted chair with his right hand raised"
+      },
+      {
+        "file": "sri-madhvacharya-2.jpg",
+        "alt": "Wide three-quarter view of the seated Sri Madhvacharya sculpture on a black plinth"
+      },
+      {
+        "file": "sri-madhvacharya-3.jpg",
+        "alt": "Front view of Sri Madhvacharya with prayer beads and a raised hand"
+      },
+      {
+        "file": "sri-madhvacharya-4.jpg",
+        "alt": "Wide front view of the seated Sri Madhvacharya sculpture and its plinth"
+      }
+    ]
+  },
+  {
+    "slug": "dr-br-ambedkar",
+    "group": "portraits",
+    "title": "Dr. B. R. Ambedkar",
+    "scale": "Portrait bust",
+    "description": "Portrait bust of Dr. B. R. Ambedkar, with finished and clay-model views.",
+    "images": [
+      {
+        "file": "dr-br-ambedkar-cover.jpg",
+        "alt": "Bronze portrait bust of Dr. B. R. Ambedkar on a wooden base with a commemorative plaque"
+      },
+      {
+        "file": "dr-br-ambedkar-1.jpg",
+        "alt": "Front view of the original Dr. B. R. Ambedkar clay portrait bust"
+      },
+      {
+        "file": "dr-br-ambedkar-2.jpg",
+        "alt": "Three-quarter view of the original Ambedkar clay bust with glasses and suit"
+      },
+      {
+        "file": "dr-br-ambedkar-3.jpg",
+        "alt": "Side view of the original Ambedkar clay portrait bust"
+      }
+    ]
+  },
+  {
+    "slug": "field-marshal-kariappa",
+    "group": "portraits",
+    "title": "Field Marshal Kariappa",
+    "scale": "8 ft",
+    "description": "FRP standing figure.",
+    "images": [
+      {
+        "file": "field-marshal-kariappa-1.jpg",
+        "alt": "The eight-foot FRP figure of Field Marshal Kariappa in uniform, in the studio"
+      },
+      {
+        "file": "field-marshal-kariappa-2.jpg",
+        "alt": "The Kariappa figure in the workshop, cap in hand, before its finish was applied"
+      },
+      {
+        "file": "field-marshal-kariappa-3.jpg",
+        "alt": "A detail of the Kariappa figure's uniform, the belt and tunic pockets modelled in FRP"
+      }
+    ]
+  },
+  {
+    "slug": "shekon",
+    "group": "portraits",
+    "title": "Flying Officer Nirmal Jit Singh Sekhon",
+    "scale": "7 ft",
+    "description": "Installed at Air Force camp, Hyderabad.",
+    "images": [
+      {
+        "file": "shekon-1.jpg",
+        "alt": "The seven-foot figure of Shekon in bronze finish, cap in hand"
+      },
+      {
+        "file": "shekon-2.jpg",
+        "alt": "The Shekon figure from behind, showing the turban and the fall of the uniform"
+      },
+      {
+        "file": "shekon-3.jpg",
+        "alt": "The Shekon figure from the front, standing on a rocky base"
+      },
+      {
+        "file": "shekon-4.jpg",
+        "alt": "The bronze portrait bust of Shekon in uniform and turban, on a dark plinth"
+      }
+    ]
+  },
+  {
+    "slug": "general-siddhiah",
+    "group": "portraits",
+    "title": "General Siddhiah",
+    "scale": "7 ft",
+    "description": "FRP standing figure.",
+    "images": [
+      {
+        "file": "general-siddhiah-3.jpg",
+        "alt": "The finished bronze Siddhiah figure saluting, in the workshop"
+      },
+      {
+        "file": "general-siddhiah-1.jpg",
+        "alt": "The seven-foot FRP figure of General Siddhiah, saluting, photographed in the workshop"
+      },
+      {
+        "file": "general-siddhiah-2.jpg",
+        "alt": "The Siddhiah figure in grey clay in the studio, before casting"
+      }
+    ]
+  },
+  {
     "slug": "sri-siddaramaiah",
     "group": "portraits",
     "title": "Sri Siddaramaiah",
@@ -272,90 +414,27 @@
       {
         "file": "sri-siddaramaiah-11.jpg",
         "alt": "The digital sculpt of the head in profile, glasses modelled in"
+      },
+      {
+        "file": "sri-siddaramaiah-12.jpg",
+        "alt": "Painted portrait relief of Sri Siddaramaiah wearing glasses and a white shawl, with folded arms"
       }
     ]
   },
   {
-    "slug": "field-marshal-kariappa",
+    "slug": "ananth-kumar",
     "group": "portraits",
-    "title": "Field Marshal Kariappa",
-    "scale": "8 ft",
-    "description": "FRP standing figure.",
+    "title": "Ananth Kumar",
+    "scale": "Portrait relief",
+    "description": "Standing portrait relief of Ananth Kumar in a buttoned jacket and traditional clothing.",
     "images": [
       {
-        "file": "field-marshal-kariappa-1.jpg",
-        "alt": "The eight-foot FRP figure of Field Marshal Kariappa in uniform, in the studio"
+        "file": "ananth-kumar-1.jpg",
+        "alt": "Close view of the Ananth Kumar portrait relief, showing his face and buttoned jacket"
       },
       {
-        "file": "field-marshal-kariappa-2.jpg",
-        "alt": "The Kariappa figure in the workshop, cap in hand, before its finish was applied"
-      },
-      {
-        "file": "field-marshal-kariappa-3.jpg",
-        "alt": "A detail of the Kariappa figure's uniform, the belt and tunic pockets modelled in FRP"
-      }
-    ]
-  },
-  {
-    "slug": "bronze-portrait-i",
-    "group": "portraits",
-    "title": "Bronze Portrait I",
-    "scale": "2 ft",
-    "description": "Cast bronze bust.",
-    "images": [
-      {
-        "file": "bronze-portrait-i-1.jpg",
-        "alt": "A cast bronze portrait bust of a man in a suit and glasses"
-      },
-      {
-        "file": "bronze-portrait-i-2.jpg",
-        "alt": "The same bronze bust lit from the side, showing the modelling of the face"
-      },
-      {
-        "file": "bronze-portrait-i-3.jpg",
-        "alt": "The bust in unfinished clay, before casting"
-      },
-      {
-        "file": "bronze-portrait-i-4.jpg",
-        "alt": "The bust in the foundry after casting, still carrying its runners"
-      }
-    ]
-  },
-  {
-    "slug": "bronze-portrait-ii",
-    "group": "portraits",
-    "title": "Bronze Portrait II",
-    "scale": "2 ft",
-    "description": "Cast bronze bust.",
-    "images": [
-      {
-        "file": "bronze-portrait-ii-1.jpg",
-        "alt": "A clay portrait bust of an elderly woman in a draped sari"
-      },
-      {
-        "file": "bronze-portrait-ii-2.jpg",
-        "alt": "The same bust finished in clay against a dark ground"
-      }
-    ]
-  },
-  {
-    "slug": "bronze-portrait-iii",
-    "group": "portraits",
-    "title": "Bronze Portrait III",
-    "scale": "2 ft",
-    "description": "Cast bronze bust.",
-    "images": [
-      {
-        "file": "bronze-portrait-iii-1.jpg",
-        "alt": "A portrait bust of a woman wearing a necklace, in pale clay"
-      },
-      {
-        "file": "bronze-portrait-iii-2.jpg",
-        "alt": "The finished bronze bust of the woman on a polished granite plinth"
-      },
-      {
-        "file": "bronze-portrait-iii-3.jpg",
-        "alt": "The bronze bust from the front, the sari edge falling across one shoulder"
+        "file": "ananth-kumar-2.jpg",
+        "alt": "Full-length view of the standing Ananth Kumar portrait relief"
       }
     ]
   },
@@ -381,73 +460,145 @@
     ]
   },
   {
-    "slug": "saint-kanakadasa",
+    "slug": "bronze-portrait-i",
     "group": "portraits",
-    "title": "Saint Kanakadasa",
-    "scale": "Series",
-    "description": "Installations from the life story of the saint. Bangalore University.",
+    "title": "Bronze Portrait",
+    "scale": "2 ft",
+    "description": "Cast bronze bust.",
     "images": [
       {
-        "file": "saint-kanakadasa-1.jpg",
-        "alt": "Saint Kanakadasa with his tambura, from the sculpture series at Bangalore University"
+        "file": "bronze-portrait-i-1.jpg",
+        "alt": "A cast bronze portrait bust of a man in a suit and glasses"
       },
       {
-        "file": "saint-kanakadasa-2.jpg",
-        "alt": "Two figures from the Kanakadasa series set out on the lawn at Bangalore University"
+        "file": "bronze-portrait-i-2.jpg",
+        "alt": "The same bronze bust lit from the side, showing the modelling of the face"
       },
       {
-        "file": "saint-kanakadasa-3.jpg",
-        "alt": "The seated Kanakadasa figure among trees at Bangalore University"
+        "file": "bronze-portrait-i-3.jpg",
+        "alt": "The bust in unfinished clay, before casting"
       },
       {
-        "file": "saint-kanakadasa-4.jpg",
-        "alt": "The standing Kanakadasa figure in white, arm outstretched, on the university grounds"
+        "file": "bronze-portrait-i-4.jpg",
+        "alt": "The bust in the foundry after casting, still carrying its runners"
       }
     ]
   },
   {
-    "slug": "shekon",
+    "slug": "bronze-portrait-ii",
     "group": "portraits",
-    "title": "Shekon",
-    "scale": "7 ft",
-    "description": "Installed at Air Force camp, Hyderabad.",
+    "title": "Bronze Portrait",
+    "scale": "2 ft",
+    "description": "Cast bronze bust.",
     "images": [
       {
-        "file": "shekon-1.jpg",
-        "alt": "The seven-foot figure of Shekon in bronze finish, cap in hand"
+        "file": "bronze-portrait-ii-1.jpg",
+        "alt": "A clay portrait bust of an elderly woman in a draped sari"
       },
       {
-        "file": "shekon-2.jpg",
-        "alt": "The Shekon figure from behind, showing the turban and the fall of the uniform"
-      },
-      {
-        "file": "shekon-3.jpg",
-        "alt": "The Shekon figure from the front, standing on a rocky base"
-      },
-      {
-        "file": "shekon-4.jpg",
-        "alt": "The bronze portrait bust of Shekon in uniform and turban, on a dark plinth"
+        "file": "bronze-portrait-ii-2.jpg",
+        "alt": "The same bust finished in clay against a dark ground"
       }
     ]
   },
   {
-    "slug": "general-siddhiah",
+    "slug": "bronze-portrait-iii",
     "group": "portraits",
-    "title": "General Siddhiah",
-    "scale": "7 ft",
-    "description": "FRP standing figure.",
+    "title": "Bronze Portrait",
+    "scale": "2 ft",
+    "description": "Cast bronze bust.",
     "images": [
       {
-        "file": "general-siddhiah-3.jpg",
-        "alt": "The finished bronze Siddhiah figure saluting, in the workshop"
+        "file": "bronze-portrait-iii-3.jpg",
+        "alt": "The bronze bust from the front, the sari edge falling across one shoulder"
       },
       {
-        "file": "general-siddhiah-1.jpg",
-        "alt": "The seven-foot FRP figure of General Siddhiah, saluting, photographed in the workshop"
+        "file": "bronze-portrait-iii-1.jpg",
+        "alt": "A portrait bust of a woman wearing a necklace, in pale clay"
       },
       {
-        "file": "general-siddhiah-2.jpg",
-        "alt": "The Siddhiah figure in grey clay in the studio, before casting"
+        "file": "bronze-portrait-iii-2.jpg",
+        "alt": "The finished bronze bust of the woman on a polished granite plinth"
+      }
+    ]
+  },
+  {
+    "slug": "bronze-portrait-iv",
+    "group": "portraits",
+    "title": "Bronze Portrait",
+    "scale": "Bronze bust",
+    "description": "Portrait bust of a man wearing a turban, shown in bronze and clay.",
+    "images": [
+      {
+        "file": "bronze-portrait-iv-1.jpg",
+        "alt": "Three-quarter view of a bronze portrait bust of a man wearing a turban and collared shirt"
+      },
+      {
+        "file": "bronze-portrait-iv-2.jpg",
+        "alt": "Front view of the bronze portrait bust on a stone plinth"
+      },
+      {
+        "file": "bronze-portrait-iv-3.jpg",
+        "alt": "Clay model of the turbaned portrait bust, with detailed facial features and shirt"
+      }
+    ]
+  },
+  {
+    "slug": "bronze-portrait-v",
+    "group": "portraits",
+    "title": "Bronze Portrait",
+    "scale": "Portrait bust",
+    "description": "Turbaned portrait bust documented during the clay modelling stage.",
+    "images": [
+      {
+        "file": "bronze-portrait-v-1.jpg",
+        "alt": "Three-quarter view of a turbaned portrait bust in clay"
+      },
+      {
+        "file": "bronze-portrait-v-2.jpg",
+        "alt": "Opposite view of the turbaned clay portrait with a sculpted beard"
+      },
+      {
+        "file": "bronze-portrait-v-3.jpg",
+        "alt": "Front view of the turbaned clay portrait bust"
+      }
+    ]
+  },
+  {
+    "slug": "bronze-portrait-vi",
+    "group": "portraits",
+    "title": "Bronze Portrait",
+    "scale": "Portrait bust",
+    "description": "Bronze-finished portrait bust with folded hands and a turban.",
+    "images": [
+      {
+        "file": "bronze-portrait-vi-1.jpg",
+        "alt": "Bronze-finished portrait bust with folded hands installed in an architectural pavilion"
+      },
+      {
+        "file": "bronze-portrait-vi-2.jpg",
+        "alt": "Front view of the turbaned bronze-finished portrait bust with folded hands"
+      }
+    ]
+  },
+  {
+    "slug": "bronze-portrait-woman",
+    "group": "portraits",
+    "title": "Bronze Portrait",
+    "scale": "Bronze bust",
+    "description": "Bronze portrait bust of a woman in a sari with layered necklaces.",
+    "images": [
+      {
+        "file": "bronze-portrait-woman-1.jpg",
+        "alt": "Front view of a bronze portrait bust of an elderly woman wearing a sari and necklaces"
+      },
+      {
+        "file": "bronze-portrait-woman-2.jpg",
+        "alt": "Right three-quarter view of the bronze portrait bust"
+      },
+      {
+        "file": "bronze-portrait-woman-3.jpg",
+        "alt": "Left three-quarter view of the bronze portrait bust"
       }
     ]
   },

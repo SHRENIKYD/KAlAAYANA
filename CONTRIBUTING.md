@@ -159,8 +159,9 @@ While the freeze holds:
 
 - Do not merge `develop` into `main`. That merge is the only thing that
   deploys production. CI will refuse it.
-- Do not bump `VERSION`. It moves only when work reaches production, so the
-  next release stays in `[Unreleased]` until the freeze lifts.
+- Staging milestones may bump `VERSION` with a dated changelog entry, without
+  creating a production tag or GitHub Release. Version 1.3.0 is a staging-only
+  milestone; production retains its deployed version until an approved release.
 - Feature work continues as normal — `feature/*` into `develop`, reviewed on
   staging.
 
