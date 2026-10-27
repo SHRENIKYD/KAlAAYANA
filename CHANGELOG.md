@@ -10,7 +10,7 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
-## [1.3.0] - 2026-10-27
+## [1.2.8] - 2026-10-27
 
 Staging update only. Production remains on its existing commit; the production
 release freeze in `FREEZE` remains 2026-11-07. No production tag or release is
