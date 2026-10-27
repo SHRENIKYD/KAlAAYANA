@@ -28,7 +28,12 @@ const statementCopy = $('.word-reveal');
 const wordList = statementCopy.textContent.trim().split(/\s+/);
 statementCopy.innerHTML = wordList.map(word => `<span class="word">${word}</span> `).join('');
 const words = $$('.word');
-const sections = [$('.hero'), $('.statement'), $('.projects'), $('.material'), $('.process')];
+// Derived from the document, not hand-listed: the meter reads the last section
+// whose top has passed 52% of the viewport, which only works if the array is in
+// document order. A fixed list broke on both counts — it named five of the eight
+// sections, so the meter never passed 05, and moving a section would have put it
+// out of order.
+const sections = [...document.querySelectorAll('main > section')];
 let previousScroll = scrollY;
 let velocity = 0;
 
