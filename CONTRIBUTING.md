@@ -141,23 +141,33 @@ Actions → **Rollback production** → Run workflow → enter a tag such as
 
 ## Production freeze
 
-**No merge to `main` before 2026-09-13.**
+**No merge to `main` before 2026-11-07.**
 
-Everything ships to `develop` and is reviewed on the staging URL until that
-date. `kalaayanastudios.com` continues to serve the Coming Soon page for the
-whole freeze.
+The date lives in the `FREEZE` file at the repository root, and it is enforced
+rather than advised. `scripts/check.py` reads it and fails any pull request
+whose base is `main` while the date is in the future. That check runs as the
+`Checks` job, which the repository ruleset requires on `main`, so a frozen
+release cannot be merged even deliberately.
+
+This replaces a freeze that was advisory. The previous one said
+`No merge to main before 2026-09-13`, nothing enforced it, and a pull request
+went into production past it while the expired text sat in this file for six
+weeks. A date in a file avoids both halves of that: the gate holds while the
+date stands, and it stops holding by itself the day after, with no edit needed.
 
 While the freeze holds:
 
 - Do not merge `develop` into `main`. That merge is the only thing that
-  deploys production.
+  deploys production. CI will refuse it.
 - Do not bump `VERSION`. It moves only when work reaches production, so the
   next release stays in `[Unreleased]` until the freeze lifts.
 - Feature work continues as normal — `feature/*` into `develop`, reviewed on
   staging.
 
-Lifting the freeze is a decision, not a date passing. Delete this section in
-the release PR that ends it.
+To lift it, delete the `FREEZE` file in the release PR that ends the freeze.
+Changing the date extends or shortens it. Until then CI prints
+`freeze lapsed on <date> — delete the FREEZE file` once the date passes, so a
+stale file is visible in every run instead of going quiet.
 
 ## Releasing
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Pre-merge checks. Runs against the build output, since that is what ships."""
-import os, re, sys, json
+import os, re, sys, json, datetime
 
 OUT = os.environ.get('OUT_DIR', 'dist')
 FAIL = []
@@ -109,6 +109,29 @@ for key, sec in (site.get('sections') or {}).items():
     img = os.path.join('src', 'images', 'sections', str(sec.get('banner', '')))
     if not os.path.exists(img):
         bad('section %s references a missing banner image: %s' % (key, img))
+
+# 5c. Production freeze. A date in the FREEZE file blocks merges into main until
+#     it passes. This runs in the "Checks" job, which the repository ruleset makes
+#     a required status check on main, so the gate is enforced rather than advisory
+#     — the last freeze lived only in CONTRIBUTING.md and a PR went straight past it.
+#     It also expires by itself: no edit is needed on the day, and the file can then
+#     be deleted.
+base_ref = os.environ.get('BASE_REF', '').strip()
+try:
+    freeze_until = open('FREEZE', encoding='utf-8').read().strip()
+except FileNotFoundError:
+    freeze_until = ''
+if freeze_until:
+    if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', freeze_until):
+        bad('FREEZE is not an ISO date (YYYY-MM-DD): %r' % freeze_until)
+    elif base_ref == 'main':
+        today = datetime.date.today().isoformat()
+        if today < freeze_until:
+            bad('production is frozen until %s (today is %s) — this PR targets main. '
+                'Merge into develop and review on staging; see CONTRIBUTING.md.'
+                % (freeze_until, today))
+        else:
+            print('freeze lapsed on %s — delete the FREEZE file' % freeze_until)
 
 # 6. Releasing to production requires a changelog entry for this version.
 if os.environ.get('REQUIRE_RELEASE_NOTES') == 'true' and version:

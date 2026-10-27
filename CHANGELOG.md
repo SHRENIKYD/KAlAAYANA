@@ -10,6 +10,19 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Added
+- A production freeze that is enforced rather than advised. The date lives in a
+  `FREEZE` file at the repository root; `check.py` fails any pull request based
+  on `main` while that date is in the future, and the check runs as the `Checks`
+  job that the repository ruleset requires on `main`. Production is closed until
+  2026-11-07.
+
+  The previous freeze was a paragraph in `CONTRIBUTING.md` saying "No merge to
+  main before 2026-09-13". Nothing read it, a pull request went into production
+  past it, and the expired text stayed in the file for six weeks after the date.
+  This version holds while the date stands, lapses by itself the day after with
+  no edit, and prints a reminder to delete the file once it has.
+
 ### Removed
 - The loading screen. The homepage opened behind a full-screen cream panel
   carrying the Kannada mark, a "Shaping stories" caption and a counter that ran
