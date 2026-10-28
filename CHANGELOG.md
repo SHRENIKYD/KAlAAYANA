@@ -12,6 +12,25 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 Nothing yet.
 
+## [1.2.11] - 2026-10-28
+
+Staging image update. Published as a GitHub prerelease; production remains
+unchanged and frozen until 2026-11-07.
+
+### Changed
+- Replaced the Ganesha homepage hero with AI-enhanced imagery, using separate
+  portrait and landscape restorations instead of enlarging the phone crop on desktop.
+- Added optimized WebP variants for phone, tablet, laptop, desktop and ultrawide
+  layouts, preserving the original image assets for comparison and rollback.
+- Kept the existing hero logo, text, darkening and page layout unchanged.
+- Restoration reconstructs fine texture; these assets are not native 4K documentary
+  photographs. Desktop source is 1672 x 941 and phone source is 852 x 1846.
+
+### Validation
+- Astro build and repository asset/catalog checks pass.
+- Production branch and FREEZE are unchanged. This prerelease targets staging only.
+
+
 ## [1.2.10] — 2026-10-27
 
 ### Added
