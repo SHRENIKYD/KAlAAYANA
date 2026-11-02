@@ -1,0 +1,74 @@
+---
+import Base from './Base.astro';
+const { frontmatter } = Astro.props;
+const fonts =
+  'https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap';
+---
+
+<Base title={`${frontmatter.title} — Kalaayana Studios`} {fonts} bodyClass="policy-page">
+  <main class="policy-document">
+    <a class="back" href="/preview.html#contact">
+      &larr; Back to the studio
+    </a>
+    {!frontmatter.informational && (
+      <aside class="draft-notice" aria-label="Policy status">
+        <strong>Review draft — not yet effective.</strong> Prepared 2 November 2026. Contact
+        designations remain to be completed before final publication. Enquiries:{' '}
+        <a href="mailto:contact@kalaayanastudios.com">contact@kalaayanastudios.com</a>.
+      </aside>
+    )}
+    <article>
+      <slot />
+    </article>
+  </main>
+</Base>
+
+<style is:global>
+  body.policy-page {
+    margin: 0;
+    background: #e9e4da;
+    color: #191816;
+    font:
+      400 1rem/1.8 'DM Sans',
+      Arial,
+      sans-serif;
+  }
+  .policy-document {
+    max-width: 860px;
+    margin: auto;
+    padding: 40px 24px 72px;
+  }
+  .policy-document a {
+    color: inherit;
+    text-underline-offset: 4px;
+    overflow-wrap: anywhere;
+  }
+  .policy-document .back {
+    font-size: 0.85rem;
+  }
+  .draft-notice {
+    padding: 18px 0;
+    margin: 28px 0 40px;
+    border-block: 1px solid #afa697;
+    font-size: 0.85rem;
+  }
+  .policy-document h1 {
+    font:
+      400 clamp(2.5rem, 6vw, 4rem)/1.1 'Instrument Serif',
+      Georgia,
+      serif;
+    margin: 0 0 32px;
+  }
+  .policy-document h2 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    line-height: 1.4;
+    margin: 36px 0 12px;
+  }
+  .policy-document p {
+    margin: 0 0 18px;
+  }
+  .policy-document strong {
+    font-weight: 500;
+  }
+</style>

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to redeploy, e.g. v0.1.0"
+        description: 'Tag to redeploy, e.g. v0.1.0'
         required: true
         type: string
 
@@ -74,7 +74,6 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
-
 
       - name: Stamp the build
         run: ./scripts/stamp.sh production "$GITHUB_SHA" "${{ inputs.tag }}"

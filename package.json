@@ -2,16 +2,24 @@
   "name": "kalaayana-studios",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
+    "test:version": "node --test scripts/version.test.mjs",
+    "version:next": "node scripts/bump-version.mjs",
     "dev": "astro dev",
     "build": "astro build",
     "build:staging": "npm run build && bash scripts/stamp.sh staging",
     "preview": "astro preview",
-    "check": "python3 scripts/check.py"
+    "check": "python3 scripts/check.py",
+    "format": "prettier --write \"**/*.{astro,ts,js,css,html,json,jsonc,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{astro,ts,js,css,html,json,jsonc,yml,yaml}\""
   },
   "devDependencies": {
     "astro": "^7.3.1",
+    "prettier": "^3.9.10",
+    "prettier-plugin-astro": "^1.1.2",
     "sharp": "^0.34.2"
   }
 }

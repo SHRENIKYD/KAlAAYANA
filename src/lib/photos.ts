@@ -7,8 +7,9 @@
  */
 import type { ImageMetadata } from 'astro';
 
-const photos = import.meta.glob<{ default: ImageMetadata }>(
-  '../images/projects/*.jpg', { eager: true });
+const photos = import.meta.glob<{ default: ImageMetadata }>('../images/projects/*.jpg', {
+  eager: true,
+});
 
 export function photo(file: string): ImageMetadata {
   const found = photos[`../images/projects/${file}`];
@@ -16,8 +17,9 @@ export function photo(file: string): ImageMetadata {
   return found.default;
 }
 
-const banners = import.meta.glob<{ default: ImageMetadata }>(
-  '../images/sections/*.jpg', { eager: true });
+const banners = import.meta.glob<{ default: ImageMetadata }>('../images/sections/*.jpg', {
+  eager: true,
+});
 
 export function banner(file: string): ImageMetadata {
   const found = banners[`../images/sections/${file}`];
@@ -28,5 +30,7 @@ export function banner(file: string): ImageMetadata {
 /** Responsive variants up to 4K, never larger than the original photograph. */
 export function photoWidths(source: ImageMetadata): number[] {
   const limit = Math.min(source.width, 3840);
-  return [...new Set([640, 960, 1600, 2200, 2880, 3840, limit].filter((width) => width <= limit))].sort((a, b) => a - b);
+  return [
+    ...new Set([640, 960, 1600, 2200, 2880, 3840, limit].filter((width) => width <= limit)),
+  ].sort((a, b) => a - b);
 }

@@ -3,7 +3,7 @@
 All notable changes to this project are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and release numbering follows the custom rules in [VERSIONING.md](VERSIONING.md).
 
 Versions below `1.0.0` cover the pre-launch period, during which the public site
 is a holding page. `1.0.0` marks the launch of the full site.
@@ -11,6 +11,37 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [Unreleased]
 
 Nothing yet.
+
+## [1.2.12] - 2026-11-02
+
+Staging prerelease. Production remains unchanged. Deployment verification is
+recorded separately in the GitHub Release; publishing a tag is not proof of deployment.
+
+### Changed
+- Implemented the approved immersive architecture menu for desktop and mobile,
+  with keyboard focus handling, Escape to close and working navigation.
+- Converted homepage Works to a desktop grid, retaining stacked mobile cards.
+- Centered full collection images without cropping or hover zoom, removed
+  staggered offsets, and standardized collection title sizes and spacing.
+- Corrected Works and Contact return links for local preview and staging roots.
+- Added the dark contact design, studio details, Instagram and map links.
+- Removed redundant labels, scroll prompts, page indexes and contact masthead.
+- Updated hero accent colours and the circular browser-tab icon.
+- Added compact shared policy links, copyright and licences, and a footer
+  version read directly from VERSION at build time.
+- Added code-formatting configuration and commands.
+
+### Added
+- Privacy, terms and commission/refund drafts, visibly pending final review and
+  completion of grievance-contact designations.
+- Original font licence texts and installed software licence notices.
+- Separate AI-enhanced branded wallpaper asset; the website hero is unchanged.
+- Version rollover command, historical release ledger and launch checklist.
+
+### Release status
+- Staging prerelease: v1.2.12. The GitHub Release records its exact merged commit
+  and actual CI/deployment status.
+- Production freeze limitations and launch blockers are in RELEASE_READINESS.md.
 
 ## [1.2.11] - 2026-10-28
 
