@@ -5,76 +5,384 @@
  * the approach line alone. Read, not retyped.
  */
 import site from '../data/site.json';
+import PolicyLinks from '../components/PolicyLinks.astro';
 ---
+
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <meta name="description" content="Kalaayana Studios — monumental sculpture and sacred art shaped in Bengaluru.">
-  <title>Kalaayana Studios — Art in Motion</title>
-  <link rel="icon" type="image/png" href="/assets/img/favicon-title.png">
-  <link rel="stylesheet" href="/motion/styles.css">
-  <link rel="stylesheet" href="/motion/effects.css">
-  <link rel="stylesheet" href="/motion/phase.css">
-  <link rel="stylesheet" href="/motion/logo.css">
-  <link rel="stylesheet" href="/motion/routing.css">
-  <link rel="stylesheet" href="/motion/responsive.css">
-  <link rel="stylesheet" href="/motion/collections.css">
-  <link rel="stylesheet" href="/motion/home-theme.css">
-</head>
-<body class="homepage">
-  <div class="cursor"><span>VIEW</span></div><div class="scroll-progress"></div><div class="section-meter" aria-hidden="true"><b>01</b><i></i><span>05</span></div>
-  <header class="nav">
-    <p>SCULPTURE STUDIO<br>BENGALURU, INDIA</p>
-    <div class="nav-actions"><button class="menu" aria-label="Open navigation"><span>MENU</span><i></i></button></div>
-  </header>
-  <aside class="menu-panel" aria-hidden="true"><img class="menu-logo" src="/motion/assets/logo.svg" alt="Kalaayana Studios"><button class="menu-close">CLOSE ×</button><div class="menu-preview"><img src="/motion/assets/hero-hanuman.jpg" alt=""></div><nav><a href="#story"><b>01</b>Our story</a><a href="#archive"><b>02</b>Gallery</a><a href="#contact"><b>03</b>Contact</a></nav><div class="menu-meta">KALAAYANA STUDIOS · BENGALURU</div></aside>
-  <main>
-    <section class="hero" id="home"><div class="hero-sticky">
-      <div class="hero-image" data-zoom><picture><source media="(max-width: 760px)" srcset="/motion/assets/gopuram-phone-enhanced.webp"><source media="(orientation: portrait)" srcset="/motion/assets/gopuram-tablet-enhanced.webp"><source media="(min-aspect-ratio: 2/1)" srcset="/motion/assets/gopuram-ultrawide-enhanced.webp"><source media="(min-width: 1700px)" srcset="/motion/assets/gopuram-desktop-enhanced.webp"><img src="/motion/assets/gopuram-laptop-enhanced.webp" alt="A gopuram niche carrying Ganesha with a child figure, cream stucco against blue-grey temple stone"></picture></div><div class="hero-shade"></div>
-      <img class="hero-brand-logo" src="/motion/assets/hero-logo.png" alt="Kalaayana Studios" width="1472" height="762" fetchpriority="high">
-      <div class="hero-title hero-brand">
-        <div class="hero-brand-copy"><div class="hero-kicker">ART · DESIGN · LEGACY</div><h1><span>BESPOKE BY VISION.</span><span></span>TIMELESS<span><i>BY VISION.</i></span></h1></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta
+      name="description"
+      content="Kalaayana Studios — monumental sculpture and sacred art shaped in Bengaluru."
+    />
+    <title>Kalaayana Studios — Art in Motion</title>
+    <link rel="icon" type="image/png" href="/assets/img/favicon.png?v=2" />
+    <link rel="stylesheet" href="/motion/styles.css" />
+    <link rel="stylesheet" href="/motion/effects.css" />
+    <link rel="stylesheet" href="/motion/phase.css" />
+    <link rel="stylesheet" href="/motion/logo.css" />
+    <link rel="stylesheet" href="/motion/routing.css" />
+    <link rel="stylesheet" href="/motion/responsive.css" />
+    <link rel="stylesheet" href="/motion/collections.css" />
+    <link rel="stylesheet" href="/motion/home-theme.css" />
+    <link rel="stylesheet" href="/motion/contact.css" />
+    <link rel="stylesheet" href="/motion/menu.css" />
+  </head>
+  <body class="homepage">
+    <div class="cursor">
+      <span>VIEW</span>
+    </div>
+    <header class="nav">
+      <div class="nav-actions">
+        <button
+          class="menu"
+          aria-label="Open navigation"
+          aria-controls="site-menu"
+          aria-expanded="false"
+        >
+          <span>MENU</span>
+          <i></i>
+        </button>
       </div>
-    </div></section>
-    
-    <section class="projects collection-index" id="works" aria-labelledby="works-title">
-      <div class="collections-inner">
-        <h2 class="collections-label" id="works-title">WORKS</h2>
-        <a class="collection-feature" href="/temples.html">
-          <img src="/motion/assets/temples.jpg" alt="Intricately sculpted Kalaayana temple façade" loading="lazy" width="1200" height="900">
-          <div class="collection-feature-copy"><span>01 / SACRED SPACES</span><h3>Temple Architecture</h3><span class="collection-link">Discover collection <span aria-hidden="true">↗</span></span></div>
-        </a>
-        <a class="collection-feature" href="/portraits.html">
-          <img src="/motion/assets/portraits.jpg" alt="Kalaayana sculpted portrait" loading="lazy" width="1200" height="900">
-          <div class="collection-feature-copy"><span>02 / PORTRAITURE</span><h3>Potrtait</h3><span class="collection-link">Discover collection <span aria-hidden="true">↗</span></span></div>
-        </a>
-        <a class="collection-feature" href="/murals.html">
-          <img src="/motion/assets/murals.jpg" alt="Narrative relief mural by Kalaayana" loading="lazy" width="1200" height="900">
-          <div class="collection-feature-copy"><span>03 / NARRATIVE RELIEF</span><h3>Murals</h3><span class="collection-link">Discover collection <span aria-hidden="true">↗</span></span></div>
-        </a>
-        <a class="collection-feature" href="/landmarks.html">
-          <img src="/motion/assets/landmarks.jpg" alt="Monumental public sculpture by Kalaayana" loading="lazy" width="1200" height="900">
-          <div class="collection-feature-copy"><span>04 / LANDMARKS</span><h3>Monumental</h3><span class="collection-link">Discover collection <span aria-hidden="true">↗</span></span></div>
-        </a>
-        <a class="collection-feature" href="/installations.html">
-          <img src="/motion/assets/installations.jpg" alt="Oversized sculptural installation by Kalaayana" loading="lazy" width="1200" height="900">
-          <div class="collection-feature-copy"><span>05 / EXPERIENTIAL</span><h3>Architectural Installations</h3><span class="collection-link">Discover collection <span aria-hidden="true">↗</span></span></div>
-        </a>
+    </header>
+    <aside
+      class="menu-panel"
+      id="site-menu"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Studio navigation"
+      aria-hidden="true"
+      inert
+    >
+      <picture class="menu-backdrop" aria-hidden="true">
+        <source media="(max-width: 760px)" srcset="/motion/assets/gopuram-phone-enhanced.webp" />
+        <img src="/motion/assets/gopuram-desktop-enhanced.webp" alt="" />
+      </picture>
+      <div class="menu-top">
+        <img class="menu-logo" src="/motion/assets/logo.svg" alt="Kalaayana Studios" />
+        <button class="menu-close" type="button" aria-label="Close navigation">
+          CLOSE <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-    </section>
-    <section class="material"><div class="material-bg"><img src="/motion/assets/samudra-manthana.jpg" alt="Samudra Manthana sculpture detail"></div><div class="material-copy"><span>01 / CRAFT</span><h2>EVERY<br><i>DETAIL</i><br>MATTERS.</h2></div><div class="material-notes"><p>Gesture</p><p>Surface</p><p>Scale</p><p>Silhouette</p></div></section>
-    <section class="process">
-      <div class="process-head"><span>02 / PROCESS</span><h2>From imagination<br>to <i>matter.</i></h2></div>
-      <div class="process-visual"><div class="process-images"><img src="/motion/assets/yakshagana.jpg" alt="Yakshagana sculpture in progress"><img src="/motion/assets/shiva-hubli.jpg" alt="Shiva sculpture in progress"></div>
-      <div class="process-steps"><article><b>01</b><h3>DRAW</h3><p>Define the rhythm and emotional centre.</p></article><article><b>02</b><h3>MODEL</h3><p>Build the form through clay and touch.</p></article><article><b>03</b><h3>CAST</h3><p>Carry every gesture into lasting material.</p></article><article><b>04</b><h3>PLACE</h3><p>Complete the work in its intended world.</p></article></div></div>
-    </section>
-    <section class="archive" id="archive"><div class="archive-head"><span>03 / ARCHIVE</span><h2>A LIVING<br><i>BODY OF WORK.</i></h2></div><div class="archive-grid"><figure><img src="/motion/assets/portraits.jpg" alt="Portrait sculpture"><figcaption>PORTRAITURE · 18 WORKS</figcaption></figure><figure><img src="/motion/assets/murals.jpg" alt="Mural sculpture"><figcaption>MURALS · 12 WORKS</figcaption></figure><figure><img src="/motion/assets/landmarks.jpg" alt="Landmark sculpture"><figcaption>LANDMARKS · 09 WORKS</figcaption></figure><figure><img src="/motion/assets/temples.jpg" alt="Temple sculpture"><figcaption>SACRED SPACES · 24 WORKS</figcaption></figure></div></section>
-    <section class="scrubber"><div class="scrub-copy"><span>FROM CLAY TO PRESENCE</span><h2>Drag through<br>the process.</h2></div><div class="compare"><img src="/motion/assets/shiva-hubli.jpg" alt="Finished sculpture"><div class="compare-before"><img src="/motion/assets/yakshagana.jpg" alt="Sculpture in progress"></div><button class="compare-handle" aria-label="Compare process stages"><i></i></button><span class="label-before">PROCESS</span><span class="label-after">PRESENCE</span></div></section>
-    <section class="statement" id="story"><div class="statement-index">04 / OUR STORY</div><div class="story-grid"><div class="story-main"><h2>Our story</h2>{site.story.map((paragraph) => <p set:html={paragraph} />)}</div><div class="story-expertise"><h2>Expertise</h2><ul>{site.expertise.map((item) => <li>{item.title}</li>)}</ul><p class="story-materials">Materials — {site.materials.join(" · ")}</p></div></div><p class="story-sign">Team, Kalaayana Studios</p></section><section class="closing" id="contact"><div class="closing-ring"></div><p>HAVE A STORY WORTH SHAPING?</p><h2>LET IT TAKE<br><i>FORM.</i></h2><a class="magnetic" href="mailto:hello@kalaayanastudios.com">BEGIN A COMMISSION <span>↗</span></a><div class="closing-foot"><span>KALAAYANA STUDIOS</span><span>BENGALURU · INDIA</span><span>© 2026</span></div></section>
-  </main>
-  <script is:inline src="/motion/motion.js"></script>
-  <script is:inline src="/motion/phase.js"></script>
-</body></html>
+      <nav aria-label="Main navigation">
+        <a href="#story">
+          <span>Our story</span>
+          <span class="menu-arrow" aria-hidden="true">
+            &nearr;
+          </span>
+        </a>
+        <a href="#works" class="menu-gallery">
+          <span>Gallery</span>
+          <span class="menu-arrow" aria-hidden="true">
+            &nearr;
+          </span>
+        </a>
+        <a href="#contact">
+          <span>Contact</span>
+          <span class="menu-arrow" aria-hidden="true">
+            &nearr;
+          </span>
+        </a>
+      </nav>
+      <footer class="menu-footer">
+        <div>
+          KALAAYANA STUDIOS
+          <br />
+          BENGALURU, INDIA
+        </div>
+        <div class="menu-contact">
+          <a href="mailto:contact@kalaayanastudios.com">contact@kalaayanastudios.com</a>
+          <a
+            href="https://www.instagram.com/kalaayana_studios/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Instagram <span aria-hidden="true">&nearr;</span>
+          </a>
+        </div>
+      </footer>
+    </aside>
+    <main>
+      <section class="hero" id="home">
+        <div class="hero-sticky">
+          <div class="hero-image" data-zoom>
+            <picture>
+              <source
+                media="(max-width: 760px)"
+                srcset="/motion/assets/gopuram-phone-enhanced.webp"
+              />
+              <source
+                media="(orientation: portrait)"
+                srcset="/motion/assets/gopuram-tablet-enhanced.webp"
+              />
+              <source
+                media="(min-aspect-ratio: 2/1)"
+                srcset="/motion/assets/gopuram-ultrawide-enhanced.webp"
+              />
+              <source
+                media="(min-width: 1700px)"
+                srcset="/motion/assets/gopuram-desktop-enhanced.webp"
+              />
+              <img
+                src="/motion/assets/gopuram-laptop-enhanced.webp"
+                alt="A gopuram niche carrying Ganesha with a child figure, cream stucco against blue-grey temple stone"
+              />
+            </picture>
+          </div>
+          <div class="hero-shade"></div>
+          <img
+            class="hero-brand-logo"
+            src="/motion/assets/hero-logo.png"
+            alt="Kalaayana Studios"
+            width="1472"
+            height="762"
+            fetchpriority="high"
+          />
+          <div class="hero-title hero-brand">
+            <div class="hero-brand-copy">
+              <div class="hero-kicker">ART · DESIGN · LEGACY</div>
+              <h1>
+                <span>BESPOKE BY VISION.</span>
+                <span></span>TIMELESS
+                <span>
+                  <i>BY VISION.</i>
+                </span>
+              </h1>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="projects collection-index" id="works" aria-labelledby="works-title">
+        <div class="collections-inner">
+          <h2 class="collections-label" id="works-title">
+            WORKS
+          </h2>
+          <a class="collection-feature" href="/temples.html">
+            <img
+              src="/motion/assets/temples.jpg"
+              alt="Intricately sculpted Kalaayana temple façade"
+              loading="lazy"
+              width="1200"
+              height="900"
+            />
+            <div class="collection-feature-copy">
+              <span>01 / SACRED SPACES</span>
+              <h3>Temple Architecture</h3>
+              <span class="collection-link">
+                Discover collection <span aria-hidden="true">↗</span>
+              </span>
+            </div>
+          </a>
+          <a class="collection-feature" href="/portraits.html">
+            <img
+              src="/motion/assets/portraits.jpg"
+              alt="Kalaayana sculpted portrait"
+              loading="lazy"
+              width="1200"
+              height="900"
+            />
+            <div class="collection-feature-copy">
+              <span>02 / PORTRAITURE</span>
+              <h3>Potrtait</h3>
+              <span class="collection-link">
+                Discover collection <span aria-hidden="true">↗</span>
+              </span>
+            </div>
+          </a>
+          <a class="collection-feature" href="/murals.html">
+            <img
+              src="/motion/assets/murals.jpg"
+              alt="Narrative relief mural by Kalaayana"
+              loading="lazy"
+              width="1200"
+              height="900"
+            />
+            <div class="collection-feature-copy">
+              <span>03 / NARRATIVE RELIEF</span>
+              <h3>Murals</h3>
+              <span class="collection-link">
+                Discover collection <span aria-hidden="true">↗</span>
+              </span>
+            </div>
+          </a>
+          <a class="collection-feature" href="/landmarks.html">
+            <img
+              src="/motion/assets/landmarks.jpg"
+              alt="Monumental public sculpture by Kalaayana"
+              loading="lazy"
+              width="1200"
+              height="900"
+            />
+            <div class="collection-feature-copy">
+              <span>04 / LANDMARKS</span>
+              <h3>Monumental</h3>
+              <span class="collection-link">
+                Discover collection <span aria-hidden="true">↗</span>
+              </span>
+            </div>
+          </a>
+          <a class="collection-feature" href="/installations.html">
+            <img
+              src="/motion/assets/installations.jpg"
+              alt="Oversized sculptural installation by Kalaayana"
+              loading="lazy"
+              width="1200"
+              height="900"
+            />
+            <div class="collection-feature-copy">
+              <span>05 / EXPERIENTIAL</span>
+              <h3>Architectural Installations</h3>
+              <span class="collection-link">
+                Discover collection <span aria-hidden="true">↗</span>
+              </span>
+            </div>
+          </a>
+        </div>
+      </section>
+      <section class="statement" id="story">
+        <div class="statement-index">OUR STORY</div>
+        <div class="story-grid">
+          <div class="story-main">
+            <h2>Our story</h2>
+            {site.story.map((paragraph) => (
+              <p set:html={paragraph} />
+            ))}
+          </div>
+          <div class="story-expertise">
+            <h2>Expertise</h2>
+            <ul>
+              {site.expertise.map((item) => (
+                <li>{item.title}</li>
+              ))}
+            </ul>
+            <p class="story-materials">Materials — {site.materials.join(' · ')}</p>
+          </div>
+        </div>
+        <p class="story-sign">Team, Kalaayana Studios</p>
+      </section>
+      <section class="contact-studio" id="contact" aria-labelledby="contact-title">
+        <div class="contact-shell">
+          <div class="contact-heading">
+            <p>LET&#8217;S BEGIN</p>
+            <h2 id="contact-title">
+              A vision today.
+              <br />
+              <i>A legacy tomorrow.</i>
+            </h2>
+            <p>For commissions, collaborations and ideas worth making.</p>
+          </div>
+          <form class="contact-form" data-recipient="contact@kalaayanastudios.com">
+            <div class="contact-fields">
+              <label for="enquiry-name">
+                Your name
+                <input
+                  id="enquiry-name"
+                  name="name"
+                  autocomplete="name"
+                  required
+                  maxlength="120"
+                  placeholder="Full name"
+                />
+              </label>
+              <label for="enquiry-email">
+                Email address
+                <input
+                  id="enquiry-email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  required
+                  maxlength="254"
+                  placeholder="you@example.com"
+                />
+              </label>
+              <label for="enquiry-type">
+                Project type
+                <select id="enquiry-type" name="projectType" required>
+                  <option value="">Choose a direction</option>
+                  <option>Portrait sculpture</option>
+                  <option>Temple architecture</option>
+                  <option>Monumental sculpture</option>
+                  <option>Murals & installations</option>
+                  <option>Other enquiry</option>
+                </select>
+              </label>
+            </div>
+            <label for="enquiry-message">
+              What would you like to create?
+              <textarea
+                id="enquiry-message"
+                name="message"
+                rows="3"
+                required
+                maxlength="4000"
+                placeholder="Tell us a little about your vision&#8230;"
+              ></textarea>
+            </label>
+            <div class="contact-submit">
+              <div>
+                <p>BENGALURU &middot; WORKING ACROSS INDIA</p>
+                <small>Opens your email app with your enquiry ready to send.</small>
+              </div>
+              <button type="submit">
+                Begin a conversation <span aria-hidden="true">&#8599;</span>
+              </button>
+            </div>
+            <p class="contact-status" role="status" aria-live="polite"></p>
+          </form>
+          <div class="contact-details">
+            <div>
+              <h3>Write to us</h3>
+              <a href="mailto:contact@kalaayanastudios.com">contact@kalaayanastudios.com</a>
+              <h3>Call the studio</h3>
+              {site.contact.phones.map((phone) => (
+                <a href={`tel:${phone}`}>{phone.replace(/^(\+91)(\d{5})(\d{5})$/, '$1 $2 $3')}</a>
+              ))}
+            </div>
+            <div>
+              <h3>Visit the studio</h3>
+              <address>
+                {site.contact.address.map((line) => (
+                  <span>{line}</span>
+                ))}
+              </address>
+              <a
+                class="contact-directions"
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent('Kalaayana Studios ' + site.contact.address.join(' '))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open in Google Maps &#8599;
+              </a>
+              <h3>Follow our work</h3>
+              <a
+                href={`https://www.instagram.com/${site.contact.instagram}/`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Instagram &middot; @{site.contact.instagram} &#8599;
+              </a>
+            </div>
+            <iframe
+              title="Map of the studio address in BM Kaval, Kengeri"
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(site.contact.address.join(' '))}&output=embed`}
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <PolicyLinks />
+    </footer>
+    <script is:inline src="/motion/motion.js"></script>
+    <script is:inline src="/motion/phase.js"></script>
+    <script is:inline src="/motion/contact.js"></script>
+  </body>
+</html>

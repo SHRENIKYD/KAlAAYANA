@@ -28,6 +28,11 @@ built="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 if [[ "$environment" == "staging" && -f "$out/preview.html" && -f "$out/index.html" ]]; then
   mv "$out/index.html" "$out/coming-soon.html"
   mv "$out/preview.html" "$out/index.html"
+  # Local development uses /preview.html; staging serves that same page at /.
+  # Keep section and policy return links on the current staging deployment.
+  while IFS= read -r -d '' page; do
+    sed -i 's#href="/preview.html#href="/#g' "$page"
+  done < <(find "$out" -type f -name '*.html' -print0)
   echo "staging: serving the site under development at / (holding page at /coming-soon.html)"
 fi
 

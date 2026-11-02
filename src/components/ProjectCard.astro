@@ -8,7 +8,10 @@ import { photo } from '../lib/photos';
 
 interface Props {
   project: {
-    slug: string; title: string; scale: string; description: string;
+    slug: string;
+    title: string;
+    scale: string;
+    description: string;
     images: { file: string; alt: string }[];
   };
   /** Section route this card links into. Omit for a card that does not link. */
@@ -19,11 +22,17 @@ interface Props {
 const { project: p, href, delay = 0 } = Astro.props;
 const Tag = href ? 'a' : 'article';
 ---
+
 <Tag class="card" href={href} data-reveal data-delay={delay} data-tilt>
   <div class="card-media">
-    <Image src={photo(p.images[0].file)} alt={p.images[0].alt}
-           widths={[400, 800, 1200]} formats={['avif', 'webp']} loading="lazy"
-           sizes="(max-width: 620px) 92vw, (max-width: 1024px) 46vw, 30vw" />
+    <Image
+      src={photo(p.images[0].file)}
+      alt={p.images[0].alt}
+      widths={[400, 800, 1200]}
+      formats={['avif', 'webp']}
+      loading="lazy"
+      sizes="(max-width: 620px) 92vw, (max-width: 1024px) 46vw, 30vw"
+    />
   </div>
   <div class="card-body">
     <span class="card-scale">{p.scale}</span>

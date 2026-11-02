@@ -1,7 +1,38 @@
-const menuButton=document.querySelector('.menu'),menuPanel=document.querySelector('.menu-panel'),menuClose=document.querySelector('.menu-close');
-const setMenu=open=>{menuPanel.classList.toggle('open',open);menuPanel.setAttribute('aria-hidden',String(!open));document.body.style.overflow=open?'hidden':''};
-menuButton.addEventListener('click',()=>setMenu(true));menuClose.addEventListener('click',()=>setMenu(false));menuPanel.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>setMenu(false)));addEventListener('keydown',event=>{if(event.key==='Escape')setMenu(false)});
-const compare=document.querySelector('.compare');let dragging=false;
-const updateCompare=x=>{const box=compare.getBoundingClientRect();const value=Math.max(0,Math.min(100,(x-box.left)/box.width*100));compare.style.setProperty('--split',value+'%')};
-compare.addEventListener('pointerdown',event=>{dragging=true;compare.setPointerCapture(event.pointerId);updateCompare(event.clientX)});compare.addEventListener('pointermove',event=>{if(dragging)updateCompare(event.clientX)});compare.addEventListener('pointerup',()=>dragging=false);
-if(!matchMedia('(prefers-reduced-motion: reduce)').matches){const images=[...document.querySelectorAll('.archive-grid img')];const loop=()=>{images.forEach(image=>{const box=image.getBoundingClientRect();const progress=Math.max(0,Math.min(1,(innerHeight-box.top)/(innerHeight+box.height)));image.style.setProperty('--archive-wipe',(12-progress*12)+'%');image.style.setProperty('--archive-scale',1.08-progress*.08)});requestAnimationFrame(loop)};loop()}
+const menuButton = document.querySelector('.menu');
+const menuPanel = document.querySelector('.menu-panel');
+const menuClose = document.querySelector('.menu-close');
+
+if (menuButton && menuPanel && menuClose) {
+  let previousOverflow = '';
+  const setMenu = (open) => {
+    if (open === menuPanel.classList.contains('open')) return;
+    if (open) previousOverflow = document.body.style.overflow;
+    menuPanel.inert = !open;
+    menuPanel.classList.toggle('open', open);
+    menuPanel.setAttribute('aria-hidden', String(!open));
+    menuButton.setAttribute('aria-expanded', String(open));
+    document.body.style.overflow = open ? 'hidden' : previousOverflow;
+    if (open) menuClose.focus();
+    else menuButton.focus({ preventScroll: true });
+  };
+  menuButton.addEventListener('click', () => setMenu(true));
+  menuClose.addEventListener('click', () => setMenu(false));
+  menuPanel.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => setMenu(false));
+  });
+  document.addEventListener('keydown', (event) => {
+    if (!menuPanel.classList.contains('open')) return;
+    if (event.key === 'Escape') setMenu(false);
+    if (event.key !== 'Tab') return;
+    const controls = [...menuPanel.querySelectorAll('button, a[href]')];
+    const first = controls[0];
+    const last = controls[controls.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+}

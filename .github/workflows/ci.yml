@@ -34,6 +34,8 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Verify version rollover rules
+        run: npm run test:version
       - name: Run checks
         env:
           # Only a merge into main is a release, so only that requires notes.

@@ -28,14 +28,14 @@ for page in html:
         if not os.path.exists(os.path.join(OUT, path.lstrip('/'))):
             bad('%s references a missing file: %s' % (page, path))
 
-# 2. VERSION must be semver.
+# 2. VERSION uses the studio's custom release format (patch 00 through 99).
 try:
     version = open('VERSION', encoding='utf-8').read().strip()
 except FileNotFoundError:
     version = ''
     bad('VERSION file is missing')
-if version and not re.fullmatch(r'\d+\.\d+\.\d+', version):
-    bad('VERSION is not semver: %r' % version)
+if version and not re.fullmatch(r'(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.\d{1,2}', version):
+    bad('VERSION must use MAJOR.MINOR.PATCH with patch 00 through 99: %r' % version)
 
 # 3. The public entry point must declare its canonical origin and be indexable.
 if 'index.html' in html:
@@ -133,8 +133,13 @@ if freeze_until:
         else:
             print('freeze lapsed on %s — delete the FREEZE file' % freeze_until)
 
-# 6. Releasing to production requires a changelog entry for this version.
-if os.environ.get('REQUIRE_RELEASE_NOTES') == 'true' and version:
+# 6. Every changed release version requires notes, including staging milestones.
+base = os.environ.get('BASE_VERSION', '').strip()
+version_changed = bool(base and base != version)
+if version_changed and re.fullmatch(r'\d+\.\d+\.\d+', base) and re.fullmatch(r'\d+\.\d+\.\d+', version):
+    if tuple(map(int, version.split('.'))) <= tuple(map(int, base.split('.'))):
+        bad('VERSION %s must be greater than base version %s' % (version, base))
+if (os.environ.get('REQUIRE_RELEASE_NOTES') == 'true' or version_changed) and version:
     try:
         log = open('CHANGELOG.md', encoding='utf-8').read()
     except FileNotFoundError:
@@ -142,7 +147,6 @@ if os.environ.get('REQUIRE_RELEASE_NOTES') == 'true' and version:
         bad('CHANGELOG.md is missing')
     if log and ('## [%s]' % version) not in log:
         bad('CHANGELOG.md has no "## [%s]" section — every release needs notes' % version)
-    base = os.environ.get('BASE_VERSION', '').strip()
     if base and base == version:
         bad('VERSION is still %s — bump it before merging to main' % version)
 

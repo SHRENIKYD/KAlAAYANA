@@ -89,25 +89,15 @@ Content lives in `src/data`. Adding a project is one object in `projects.json`.
 
 ## Versioning
 
-Current staging update: **1.2.11**; **1.2.8** is already released. Increment the final component for each
-subsequent staging update: **1.2.12, 1.2.13, ... through 1.2.99**. Do not advance
-to 1.3.0 automatically for feature or layout work during this series. The next
-series after 1.2.99 needs an explicit decision. Each version gets a dated
-CHANGELOG entry. Staging version changes do not create production releases. A
-staging bump normally needs no tag or GitHub Release. When explicitly requested,
-publish a prerelease targeting the staging commit, without marking it latest.
-Stable releases and production deployments remain restricted to approved releases.
+See [VERSIONING.md](VERSIONING.md) for the authoritative numbering rules and
+historical ledger. Current local candidate: **1.2.12**, unreleased. Latest stable
+is 1.2.8 and latest published staging prerelease is 1.2.11. Changelog entries exist
+for 1.2.9 and 1.2.10; neither has a published GitHub Release in the reviewed history.
 
-[Semantic Versioning](https://semver.org). `VERSION` at the repo root is the
-single source of truth — no version numbers are derived from commit messages.
-
-| Bump | When |
-| --- | --- |
-| **Patch** `0.1.0 → 0.1.1` | Copy fix, colour tweak, bug fix, dependency change |
-| **Minor** `0.1.0 → 0.2.0` | A new section, a new page, a feature |
-| **Major** `0.9.0 → 1.0.0` | Launch, or a redesign that replaces what came before |
-
-`1.0.0` is reserved for the moment the holding page comes down.
+Use one increasing sequence for staging and stable releases. Do not reuse consumed
+numbers. The custom patch counter runs through 99 and rolls 1.2.99 to 1.3.00.
+Keep historical tags unchanged. VERSION, footer, changelog and release tag must
+agree. See RELEASE_READINESS.md before any live rollout.
 
 ## What is deployed right now
 
@@ -132,54 +122,22 @@ Actions → **Rollback production** → Run workflow → enter a tag such as
 
 ## Production freeze
 
-**No merge to `main` before 2026-11-07.**
+The existing FREEZE file contains **2026-11-07**. Do not merge into main or run
+production/rollback workflows during the freeze. Staging work continues on develop.
 
-The date lives in the `FREEZE` file at the repository root, read in three places:
+The guards on develop block main-targeting PR checks and guard deployment and
+rollback workflows. However, the live main branch still lacks these guards.
+Consequently, manual runs from main and branches using old checks are not fully
+blocked. The repository ruleset requires Checks but zero approving reviews.
+Do not describe this as a complete production lock.
 
-- `scripts/check.py` fails any pull request whose base is `main` while the date
-  is in the future. That runs as the `Checks` job, which the ruleset requires on
-  `main`.
-- **Deploy production** and **Rollback production** each begin with a `freeze`
-  job that every other job depends on, so a manual `workflow_dispatch` is
-  refused as well as an automatic deploy. Those jobs read the date from
-  `origin/develop`, not from the ref being deployed, so redeploying an old tag
-  does not escape the freeze.
+A repository-level approval control on the github-pages environment or equivalent
+protection must be verified before launch. Changing GitHub settings, deleting
+FREEZE or merging guards into main is not authorised merely by preparing a release.
 
-**What this does not cover.** A pull request's checks run from the merge commit —
-the head merged into the base — so `check.py` only carries the gate when one of
-those two sides does. A branch taken from `main` while `main` lacks the gate,
-merged into `main`, runs the old `check.py` and is not stopped. That is exactly
-the route PR #52 took into production. The workflow gate closes the deploy end
-of it, but only once these workflow files are themselves on `main`, and they
-cannot get there during a freeze without being waved through by hand.
-
-A freeze that must hold against every route, immediately, needs one thing set
-outside this repository: require a reviewer on the `github-pages` environment,
-or raise the ruleset's required approvals above zero. Both are GitHub settings,
-not code, and both cover paths no file in this repository can see.
-
-This replaces a freeze that was advisory. The previous one said
-`No merge to main before 2026-09-13`, nothing enforced it, and a pull request
-went into production past it while the expired text sat in this file for six
-weeks. A date in a file avoids both halves of that: the gate holds while the
-date stands, and it stops holding by itself the day after, with no edit needed.
-
-While the freeze holds:
-
-- Do not merge `develop` into `main`. That merge is the only thing that
-  deploys production. CI will refuse it.
-- Do not run **Deploy production** or **Rollback production** by hand. Their
-  `freeze` job refuses both while the date stands.
-- Staging milestones may bump `VERSION` with a dated changelog entry, without
-  creating a production tag or GitHub Release. The 1.2.x series is staging-only;
-  production keeps its deployed version until an approved release.
-- Feature work continues as normal — `feature/*` into `develop`, reviewed on
-  staging.
-
-To lift it, delete the `FREEZE` file in the release PR that ends the freeze.
-Changing the date extends or shortens it. Until then CI prints
-`freeze lapsed on <date> — delete the FREEZE file` once the date passes, so a
-stale file is visible in every run instead of going quiet.
+Current workflow logic uses UTC and unlocks at 05:30 IST on 7 November, rather
+than blocking through the whole day. Confirm the intended end time and obtain
+explicit release approval. See RELEASE_READINESS.md for the unresolved blockers.
 
 ## Releasing
 
