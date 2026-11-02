@@ -1,0 +1,261 @@
+﻿---
+import { Image } from 'astro:assets';
+import nayiPortrait from '../images/artist-nayi-kumar.png';
+import vishalPortrait from '../images/artist-vishal-kavatekar.png';
+import narayanaPortrait from '../images/artist-narayana-rao-completed.png';
+import site from '../data/site.json';
+const { profile = site.artistProfile, imageRight = false } = Astro.props;
+const artist = profile;
+const isVishal = artist.id === 'vishal-kavatekar';
+const isNarayana = artist.id === 'narayana-rao';
+const portrait = isNarayana ? narayanaPortrait : isVishal ? vishalPortrait : nayiPortrait;
+const vishalBiography =
+  'Vishal Kavatekar is a Bengaluru-based artist and sculptor from a family of traditional artists. He has served as an Assistant Professor in the Sculpture Department at the College of Fine Arts, Karnataka Chitrakala Parishath. A recipient of the Karnataka Shilpakala Academy Award and a member of the Karnataka Shilpakala Academy, Government of Karnataka, he co-founded Kalaayana Studios, bringing together traditional craftsmanship and contemporary artistic practices in sculpture, murals, and installations.';
+const vinayBiography =
+  'Vinay Kumar S. is a visual artist and co-founder of Kalaayana Studios. A graduate of the College of Fine Arts, Karnataka Chitrakala Parishath, Bengaluru, he has experience in both artistic practice and film production design. He has worked as a Production Design Assistant on projects including Pushpa and the web series Heeramandi. At Kalaayana Studios, he brings together creative thinking, practical execution, and an understanding of materials to contribute to sculptures, murals, installations, and diverse creative projects.';
+const headingId = `artist-${artist.id || 'vinay-kumar'}`;
+const narayanaSummary =
+  'Shilpi K. Narayana Rao comes from a lineage of traditional artists and has dedicated his life to preserving and carrying forward India’s rich sculptural heritage. He is renowned for his monumental cement sculptures, temple sculptures, and murals, reflecting his mastery of traditional craftsmanship.';
+const narayanaLegacy =
+  'His artistic legacy continues through Kalaayana Studios, where traditional craftsmanship meets contemporary possibilities, carrying forward the knowledge, techniques, and artistic values that define his work.';
+---
+
+<section
+  class:list={[
+    'artist-profile',
+    { 'artist-profile-right': imageRight, 'artist-profile-narayana': isNarayana },
+  ]}
+  aria-labelledby={headingId}
+>
+  <div class="artist-layout">
+    <figure class="artist-portrait">
+      <Image
+        src={portrait}
+        alt={`Portrait of ${artist.name}`}
+        widths={[400, 800, 1200, 1600].filter((width) => width <= portrait.width)}
+        sizes="(max-width: 760px) 44vw, 40vw"
+        quality={90}
+        loading="lazy"
+      />
+      <figcaption>
+        <span class="portrait-credit">
+          {artist.name} &mdash; {artist.role}
+          {artist.location ? `, ${artist.location}` : ''}.
+        </span>
+        <span class="portrait-tagline">{artist.name}</span>
+      </figcaption>
+    </figure>
+    <div class="artist-copy">
+      <div class="artist-intro">
+        <p class="artist-eyebrow">ABOUT THE ARTIST</p>
+      </div>
+      <div class="artist-identity">
+        <h3 id={headingId}>{artist.name}</h3>
+        <p class="artist-role">
+          {artist.role}
+          {artist.location && <> &middot; {artist.location}</>}
+        </p>
+      </div>
+      <p class="artist-desktop-summary">
+        {isNarayana ? narayanaSummary : isVishal ? vishalBiography : vinayBiography}
+      </p>
+      {isNarayana && <p class="artist-desktop-summary artist-legacy">{narayanaLegacy}</p>}
+      <div class="artist-mobile-story">
+        <p class="artist-lead">
+          {isNarayana ? narayanaSummary : isVishal ? vishalBiography : vinayBiography}
+        </p>
+        <p>
+          {isNarayana
+            ? narayanaLegacy
+            : 'The studio’s practice spans sculpture, portraiture and architectural relief. Its portfolio brings together sacred subjects, personal likenesses and work made for public spaces.'}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .artist-profile {
+    background: #e9e4da;
+    padding: 0 5vw 64px;
+    color: #191816;
+  }
+  .artist-layout {
+    display: grid;
+    grid-template-columns: 44% 56%;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+  .artist-profile-right .artist-layout {
+    grid-template-columns: 56% 44%;
+  }
+  .artist-profile-right .artist-portrait {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .artist-profile-right .artist-copy {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .artist-portrait {
+    position: relative;
+    margin: 0;
+    min-width: 0;
+    align-self: start;
+    background: #080807;
+  }
+  .artist-portrait img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: 50% 40%;
+  }
+  .artist-portrait figcaption {
+    position: absolute;
+    inset: auto 28px 28px;
+    color: #e9e4da;
+    font: 400 10px/1.5 var(--sans);
+    letter-spacing: 0.16em;
+  }
+  .artist-profile-narayana .artist-portrait img {
+    object-fit: contain;
+    object-position: center bottom;
+    padding: 24px 28px 0;
+    box-sizing: border-box;
+  }
+  .artist-profile-narayana .artist-portrait {
+    background: #e9e4da;
+  }
+  .artist-profile-narayana .artist-portrait figcaption {
+    position: static;
+    padding: 14px 0;
+    border-bottom: 1px solid #afa697;
+    color: #655e54;
+    letter-spacing: 0.04em;
+  }
+  .artist-profile-narayana .portrait-tagline {
+    color: inherit;
+  }
+  .portrait-credit {
+    display: none;
+  }
+  .artist-copy {
+    padding: clamp(32px, 4.4vw, 70px);
+    min-width: 0;
+    align-self: center;
+  }
+  .artist-eyebrow {
+    font: 400 11px/1.5 var(--sans);
+    letter-spacing: 0.23em;
+    color: #84704c;
+    margin: 0 0 38px;
+  }
+  .artist-intro h2 {
+    font: 400 clamp(2.5rem, 4.6vw, 5rem)/1 var(--serif);
+    letter-spacing: -0.035em;
+    margin: 0 0 40px;
+  }
+  .artist-intro em {
+    color: #8c774d;
+    font-weight: 400;
+  }
+  .artist-identity {
+    border-top: 1px solid #afa697;
+    padding-top: 26px;
+  }
+  .artist-identity h3 {
+    font: 400 clamp(2rem, 3vw, 3.1rem)/1.05 var(--serif);
+    margin: 0 0 14px;
+    letter-spacing: -0.025em;
+  }
+  .artist-role {
+    font: 400 11px/1.5 var(--sans);
+    letter-spacing: 0.16em;
+    color: #655e54;
+    margin: 0 0 30px;
+  }
+  .artist-desktop-summary {
+    max-width: 36ch;
+    font: 400 1rem/1.85 var(--sans);
+    color: #655e54;
+    margin: 0;
+  }
+  .artist-legacy {
+    margin-top: 1.15em;
+  }
+  .artist-mobile-story {
+    display: none;
+  }
+  @media (max-width: 760px) {
+    .artist-profile-right .artist-portrait {
+      float: right;
+      margin: 0 0 10px 20px;
+    }
+    .artist-profile {
+      padding: 0 20px 40px;
+    }
+    .artist-layout {
+      display: flow-root;
+    }
+    .artist-portrait {
+      float: left;
+      width: 45%;
+      margin: 0 20px 10px 0;
+      background: transparent;
+    }
+    .artist-portrait img {
+      height: auto;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      object-position: 50% 42%;
+    }
+    .artist-portrait figcaption {
+      position: static;
+      padding: 12px 0;
+      border-bottom: 1px solid #afa697;
+      color: #655e54;
+      font: 400 10px/1.5 var(--sans);
+      letter-spacing: 0;
+    }
+    .portrait-credit {
+      display: inline;
+    }
+    .portrait-tagline,
+    .artist-intro,
+    .artist-desktop-summary {
+      display: none;
+    }
+    .artist-copy {
+      display: contents;
+      padding: 0;
+    }
+    .artist-identity {
+      border: 0;
+      padding: 0;
+    }
+    .artist-identity h3 {
+      font-size: clamp(1.55rem, 6vw, 2rem);
+      margin: 0 0 9px;
+    }
+    .artist-role {
+      font-size: 9px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .artist-mobile-story {
+      display: block;
+    }
+    .artist-mobile-story p {
+      font: 400 clamp(1.25rem, 5vw, 1.6rem)/1.35 var(--serif);
+      margin: 0 0 22px;
+    }
+    .artist-lead::first-letter {
+      float: left;
+      font: 400 3.5rem/0.8 var(--serif);
+      padding: 7px 5px 0 0;
+    }
+  }
+</style>

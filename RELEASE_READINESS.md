@@ -21,8 +21,10 @@ This checklist is a release record, not launch approval.
 - [ ] Confirm freeze timing. Current workflow code compares UTC dates and permits
   release from 05:30 IST on 7 November, not after the end of that day. Reaching
   that time is not release approval. Do not shorten the existing freeze.
-- [ ] Complete grievance/privacy contact designations and final policy review.
-  Current policies deliberately display review-draft notices.
+- [x] Privacy contacts supplied: Rashmi Jadhav (Chairperson), with Vijaya Bai
+  (Chairperson) as alternate; enquiries use contact@kalaayanastudios.com.
+- [ ] Complete final policy review. Policy notices now display an effective date of 7 November 2026 at the
+  studio?s request; final legal review remains a launch prerequisite.
 - [ ] Verify image rights, client permissions and appropriate disclosure of
   materially AI-reconstructed portfolio images. A footer does not prove title.
 - [ ] Verify a successful Cloudflare staging deployment. v1.2.11 notes report a

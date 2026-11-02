@@ -10,7 +10,42 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
-Nothing yet.
+Nothing beyond the 1.2.13 candidate below.
+
+## [1.2.13] - Unreleased
+
+Staging candidate prepared 2026-11-02.
+
+Not yet tagged or published. VERSION is reserved for the next staging rollout;
+production and the existing FREEZE date remain unchanged.
+
+#### Added
+- Wide Studio Journal artist carousel featuring Shilpi K. Narayana Rao,
+  Vishal Kavatekar and Vinay Kumar S., with supplied biographies and roles.
+- Card presentation with centered side arrows, mobile swipe, keyboard controls,
+  reduced-motion support, accessible slide announcements and no number count.
+- Narayana Rao portrait with background removal and AI-completed shoulders and
+  shirt; original and intermediate source images remain available for rollback.
+- Hanuman Mural and Sri Adi Shankaracharya projects, with supplied artwork images.
+- Policy dialogs opened from the shared footer, retaining standalone page links
+  for modified clicks and error recovery.
+
+#### Changed
+- Display finished artwork first for available mural and installation projects;
+  updated Surya, Saraswathi, Siddaramaiah and Village Scenes image ordering.
+- Homepage Murals uses the supplied Shankaracharya photograph; Monumental uses
+  Hanuman with the crown retained in the crop.
+- Removed the contact-sheet image from the Sandwich gallery catalogue.
+- Reduced Works/Our Story spacing, removed the small duplicate story label,
+  vertically centered Expertise and tightened spacing above the team sign-off.
+- Added Home navigation on collection pages and made the shared footer sit at
+  the bottom of short pages without overlaying long content.
+- Updated privacy contacts to Rashmi Jadhav and Vijaya Bai, both Chairpersons;
+  policy notices now show an effective date of 7 November 2026 as requested.
+- Removed artist tagline headlines and work links; portraits identify the artist.
+
+Validation and rollout limitations are documented in
+[release-notes/1.2.13.md](release-notes/1.2.13.md).
 
 ## [1.2.12] - 2026-11-02
 

@@ -1,0 +1,300 @@
+---
+import ArtistProfile from './ArtistProfile.astro';
+import site from '../data/site.json';
+const artists = [
+  {
+    id: 'narayana-rao',
+    name: 'Shilpi K. Narayana Rao',
+    role: 'Traditional Sculptor | Kannada Rajyotsava Awardee',
+    location: '',
+  },
+  ...(site.vishalProfile.enabled ? [site.vishalProfile] : []),
+  ...(site.artistProfile.enabled ? [site.artistProfile] : []),
+];
+---
+
+<section class="artist-journal" aria-label="Meet the artists" aria-roledescription="carousel">
+  <div class="journal-card">
+    <header class="journal-header">
+      THE STUDIO JOURNAL <span>THE PEOPLE BEHIND THE PRACTICE</span>
+    </header>
+    <div class="journal-pages">
+      {artists.map((profile) => (
+        <div
+          class="journal-page"
+          role="group"
+          aria-roledescription="slide"
+          aria-label={profile.name}
+        >
+          <ArtistProfile profile={profile} />
+        </div>
+      ))}
+    </div>
+    <button
+      class="journal-arrow journal-previous"
+      type="button"
+      aria-label="Previous artist"
+      hidden
+    >
+      <span aria-hidden="true">&#8592;</span>
+    </button>
+    <button class="journal-arrow journal-next" type="button" aria-label="Next artist" hidden>
+      <span aria-hidden="true">&#8594;</span>
+    </button>
+    <span class="journal-status" aria-live="polite" aria-atomic="true"></span>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.artist-journal').forEach((journal) => {
+    const pages = Array.from(journal.querySelectorAll<HTMLElement>('.journal-page'));
+    const previous = journal.querySelector<HTMLButtonElement>('.journal-previous')!;
+    const next = journal.querySelector<HTMLButtonElement>('.journal-next')!;
+    const status = journal.querySelector<HTMLElement>('.journal-status')!;
+    let active = 0;
+    let animation: Animation | undefined;
+    const show = (index: number, animate = true) => {
+      animation?.cancel();
+      active = (index + pages.length) % pages.length;
+      pages.forEach((page, i) => {
+        page.classList.toggle('is-active', i === active);
+        page.setAttribute('aria-hidden', String(i !== active));
+        page.inert = i !== active;
+      });
+      status.textContent = pages[active].getAttribute('aria-label');
+      if (animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        animation = pages[active].animate(
+          [
+            { opacity: 0, transform: 'translateY(8px)' },
+            { opacity: 1, transform: 'translateY(0)' },
+          ],
+          { duration: 280, easing: 'cubic-bezier(.23,1,.32,1)' },
+        );
+      }
+    };
+    journal.classList.add('is-ready');
+    previous.hidden = next.hidden = pages.length < 2;
+    show(0, false);
+    previous.addEventListener('click', (event) => show(active - 1, event.detail !== 0));
+    next.addEventListener('click', (event) => show(active + 1, event.detail !== 0));
+    journal.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        show(active + (event.key === 'ArrowRight' ? 1 : -1), false);
+      }
+    });
+    let start: { x: number; y: number } | null = null;
+    journal.addEventListener('pointerdown', (event) => {
+      if ((event.target as HTMLElement).closest('button, a')) return;
+      start = { x: event.clientX, y: event.clientY };
+    });
+    journal.addEventListener('pointerup', (event) => {
+      if (!start) return;
+      const dx = event.clientX - start.x;
+      const dy = event.clientY - start.y;
+      if (
+        Math.abs(dx) > 50 &&
+        Math.abs(dx) > Math.abs(dy) * 1.5 &&
+        !window.getSelection()?.toString()
+      )
+        show(active + (dx < 0 ? 1 : -1));
+      start = null;
+    });
+    journal.addEventListener('pointercancel', () => {
+      start = null;
+    });
+  });
+</script>
+
+<style>
+  .artist-journal {
+    background: #e9e4da;
+    padding: 20px 3vw 64px;
+    color: #191816;
+  }
+  .journal-card {
+    position: relative;
+    max-width: 1760px;
+    margin: 0 auto;
+    border: 1px solid #b8ae9d;
+    border-radius: 12px;
+    background: #e2dccf;
+    box-shadow: 0 8px 28px #1918160a;
+    padding: 0 60px 36px;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+  .journal-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 26px 0;
+    border-bottom: 1px solid #b8ae9d;
+    font: 400 11px/1.5 var(--sans);
+    letter-spacing: 0.18em;
+  }
+  .is-ready .journal-pages {
+    display: grid;
+  }
+  .is-ready .journal-page {
+    grid-area: 1 / 1;
+    visibility: hidden;
+    min-width: 0;
+  }
+  .is-ready .journal-page.is-active {
+    visibility: visible;
+  }
+  .journal-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 64px;
+    border: 1px solid #a79b88;
+    border-radius: 6px;
+    color: #191816;
+    background: #e9e4da;
+    font: 400 25px/1 var(--sans);
+    cursor: pointer;
+    z-index: 2;
+  }
+  .journal-arrow[hidden] {
+    display: none;
+  }
+  .journal-arrow:hover {
+    background: #d8cfbd;
+  }
+  .journal-arrow:focus-visible {
+    outline: 2px solid #756346;
+    outline-offset: 3px;
+  }
+  .journal-previous {
+    left: 8px;
+  }
+  .journal-next {
+    right: 8px;
+  }
+  .journal-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .artist-journal :global(.artist-profile) {
+    background: transparent;
+    padding: 36px 0 0;
+  }
+  .artist-journal :global(.artist-layout) {
+    max-width: none;
+    grid-template-columns: minmax(0, 56fr) minmax(0, 44fr);
+    align-items: center;
+    gap: 30px;
+  }
+  .artist-journal :global(.artist-portrait) {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    max-width: 470px;
+    justify-self: end;
+    background: transparent;
+  }
+  .artist-journal :global(.artist-portrait img) {
+    aspect-ratio: 4/5;
+    object-fit: contain;
+    object-position: center bottom;
+    padding: 0;
+  }
+  .artist-journal :global(.artist-portrait figcaption) {
+    position: static;
+    padding: 14px 0;
+    border-bottom: 1px solid #afa697;
+    color: #655e54;
+    letter-spacing: 0.04em;
+  }
+  .artist-journal :global(.artist-copy) {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 24px 32px 24px 0;
+  }
+  .artist-journal :global(.artist-intro) {
+    display: none;
+  }
+  .artist-journal :global(.artist-identity) {
+    border: 0;
+    padding: 0;
+  }
+  .artist-journal :global(.artist-identity h3) {
+    font-size: clamp(2.5rem, 4vw, 4.4rem);
+  }
+  .artist-journal :global(.artist-desktop-summary) {
+    max-width: 48ch;
+    font: 400 clamp(1.2rem, 1.55vw, 1.7rem)/1.5 var(--serif);
+    color: #38342e;
+  }
+  @media (max-width: 760px) {
+    .artist-journal {
+      padding: 12px 12px 36px;
+    }
+    .journal-card {
+      padding: 0 32px 24px;
+      border-radius: 8px;
+    }
+    .journal-header {
+      padding: 18px 0;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+    }
+    .journal-header span {
+      display: none;
+    }
+    .journal-arrow {
+      width: 28px;
+      height: 56px;
+      border: 0;
+      font-size: 22px;
+      background: transparent;
+    }
+    .journal-arrow::before {
+      content: '';
+      position: absolute;
+      inset: -6px -8px;
+    }
+    .journal-previous {
+      left: 0;
+    }
+    .journal-next {
+      right: 0;
+    }
+    .artist-journal :global(.artist-profile) {
+      padding: 24px 0 0;
+    }
+    .artist-journal :global(.artist-layout) {
+      display: flow-root;
+    }
+    .artist-journal :global(.artist-portrait) {
+      float: right;
+      width: 44%;
+      margin: 0 0 14px 16px;
+    }
+    .artist-journal :global(.artist-portrait figcaption) {
+      font-size: 9px;
+    }
+    .artist-journal :global(.artist-copy) {
+      display: contents;
+    }
+    .artist-journal :global(.artist-identity h3) {
+      font-size: clamp(1.6rem, 6vw, 2.1rem);
+    }
+    .artist-journal :global(.artist-desktop-summary) {
+      display: none;
+    }
+    .artist-journal :global(.artist-mobile-story p) {
+      font-size: clamp(1.15rem, 4.8vw, 1.45rem);
+      line-height: 1.4;
+    }
+  }
+</style>

@@ -11,10 +11,11 @@ const fonts =
       &larr; Back to the studio
     </a>
     {!frontmatter.informational && (
-      <aside class="draft-notice" aria-label="Policy status">
-        <strong>Review draft — not yet effective.</strong> Prepared 2 November 2026. Contact
-        designations remain to be completed before final publication. Enquiries:{' '}
-        <a href="mailto:contact@kalaayanastudios.com">contact@kalaayanastudios.com</a>.
+      <aside class="policy-notice" aria-label="Policy status">
+        <strong>
+          Effective from <time datetime="2026-11-07">7 November 2026</time>.
+        </strong>{' '}
+        Enquiries: <a href="mailto:contact@kalaayanastudios.com">contact@kalaayanastudios.com</a>.
       </aside>
     )}
     <article>
@@ -46,7 +47,7 @@ const fonts =
   .policy-document .back {
     font-size: 0.85rem;
   }
-  .draft-notice {
+  .policy-notice {
     padding: 18px 0;
     margin: 28px 0 40px;
     border-block: 1px solid #afa697;

@@ -1,6 +1,19 @@
 {
   "name": "Kalaayana Studios",
   "legalName": "Kalaayana Studios LLP",
+  "artistProfile": {
+    "enabled": true,
+    "name": "Mr. Vinay Kumar S.",
+    "role": "Visual artist and co-founder",
+    "location": ""
+  },
+  "vishalProfile": {
+    "enabled": true,
+    "id": "vishal-kavatekar",
+    "name": "Mr. Vishal Kavatekar",
+    "role": "Visual artist and co-founder",
+    "location": ""
+  },
   "kicker": "Since the 19th century · Five generations",
   "tagline": "Monumental sculpture, temple architecture and the living continuity of a Mysore artistic lineage.",
   "description": "Kalaayana Studios LLP, Bangalore. Monumental landmarks, public sculptures, temple architecture, architectural installations, portrait and life sculptures in FRP, metal, concrete and GFRC.",

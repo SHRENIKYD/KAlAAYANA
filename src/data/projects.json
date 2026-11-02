@@ -603,12 +603,33 @@
     ]
   },
   {
+    "slug": "sri-adi-shankaracharya",
+    "group": "murals",
+    "title": "Sri Adi Shankaracharya",
+    "scale": "Wall relief",
+    "description": "A bronze-toned relief of Sri Adi Shankaracharya seated beneath a tree with four disciples.",
+    "images": [
+      {
+        "file": "sri-adi-shankaracharya-2.jpg",
+        "alt": "Framed bronze-toned relief of Sri Adi Shankaracharya seated beneath a spreading tree with four disciples"
+      },
+      {
+        "file": "sri-adi-shankaracharya-1.jpg",
+        "alt": "Sri Adi Shankaracharya and disciples relief displayed in a glass case with the Sri Kanchi Kamakoti Guruparampara Sankara Eye Hospital inauguration plaque"
+      }
+    ]
+  },
+  {
     "slug": "surya-mural",
     "group": "murals",
     "title": "Surya Mural",
     "scale": "10 ft dia",
     "description": "Circular relief.",
     "images": [
+      {
+        "file": "surya-mural-finished.jpg",
+        "alt": "Finished terracotta-coloured Surya mural mounted on a cream wall, with a dancing figure surrounded by flame-shaped rays"
+      },
       {
         "file": "surya-mural-1.jpg",
         "alt": "The ten-foot circular Surya mural, a dancing figure ringed by flame-like rays"
@@ -644,16 +665,16 @@
     "description": "Scenic views of a village, made in FRP.",
     "images": [
       {
+        "file": "village-scenes-3.jpg",
+        "alt": "A village panel with a herdsman and seated figures beneath a spreading tree"
+      },
+      {
         "file": "village-scenes-1.jpg",
         "alt": "An FRP relief panel of village life — figures at work beneath palms and thatched roofs"
       },
       {
         "file": "village-scenes-2.jpg",
         "alt": "A second village panel showing a bullock cart and figures at a well"
-      },
-      {
-        "file": "village-scenes-3.jpg",
-        "alt": "A village panel with a herdsman and seated figures beneath a spreading tree"
       }
     ]
   },
@@ -712,12 +733,12 @@
     "description": "FRP panel.",
     "images": [
       {
-        "file": "goddess-saraswathi-1.jpg",
-        "alt": "An FRP relief of Goddess Saraswathi seated with the veena"
-      },
-      {
         "file": "goddess-saraswathi-2.jpg",
         "alt": "The Saraswathi panel finished in gold within a columned surround"
+      },
+      {
+        "file": "goddess-saraswathi-1.jpg",
+        "alt": "An FRP relief of Goddess Saraswathi seated with the veena"
       }
     ]
   },
@@ -729,12 +750,12 @@
     "description": "FRP panel.",
     "images": [
       {
-        "file": "relief-panel-1.jpg",
-        "alt": "An FRP relief panel of a seated figure attended by others"
-      },
-      {
         "file": "relief-panel-2.jpg",
         "alt": "The same panel in terracotta finish, the group set within an arched frame"
+      },
+      {
+        "file": "relief-panel-1.jpg",
+        "alt": "An FRP relief panel of a seated figure attended by others"
       }
     ]
   },
@@ -746,12 +767,33 @@
     "description": "Chief Minister of Karnataka. FRP relief.",
     "images": [
       {
+        "file": "sri-siddaramaiah-relief-finished.jpg",
+        "alt": "Finished painted relief of Sri Siddaramaiah with glasses, a cream shawl and folded arms, closely framed around the artwork"
+      },
+      {
         "file": "sri-siddaramaiah-2-2.jpg",
         "alt": "The reference photograph of Sri Siddaramaiah used for the relief"
       },
       {
         "file": "sri-siddaramaiah-2-1.jpg",
         "alt": "A clay relief portrait of Sri Siddaramaiah, arms folded"
+      }
+    ]
+  },
+  {
+    "slug": "hanuman-mural",
+    "group": "murals",
+    "title": "Hanuman Mural",
+    "scale": "Wall relief",
+    "description": "A standing Hanuman relief with hands resting on a mace, detailed ornaments and flowing drapery.",
+    "images": [
+      {
+        "file": "hanuman-mural-1.jpg",
+        "alt": "Hanuman wall relief in grey clay against an orange workshop wall, with both hands resting on a mace"
+      },
+      {
+        "file": "hanuman-mural-2.jpg",
+        "alt": "Cream-coloured presentation of the Hanuman relief against a grey wall beneath warm lighting"
       }
     ]
   },
@@ -763,12 +805,12 @@
     "description": "Oversized burger sculpture and branded restaurant installation.",
     "images": [
       {
-        "file": "burger-1.jpg",
-        "alt": "oversized burger sculpture, primary view"
-      },
-      {
         "file": "burger-2.jpg",
         "alt": "oversized burger sculpture, view 2"
+      },
+      {
+        "file": "burger-1.jpg",
+        "alt": "oversized burger sculpture, primary view"
       },
       {
         "file": "burger-3.jpg",
@@ -788,16 +830,16 @@
     "description": "A monumental sculpted face integrated into an architectural facade.",
     "images": [
       {
+        "file": "face-3.jpg",
+        "alt": "monumental face facade, view 3"
+      },
+      {
         "file": "face-1.jpg",
         "alt": "monumental face facade, primary view"
       },
       {
         "file": "face-2.jpg",
         "alt": "monumental face facade, view 2"
-      },
-      {
-        "file": "face-3.jpg",
-        "alt": "monumental face facade, view 3"
       },
       {
         "file": "face-4.jpg",
@@ -817,16 +859,16 @@
     "description": "Oversized fries sculpture created as an immersive hospitality display.",
     "images": [
       {
+        "file": "fries-3.jpg",
+        "alt": "oversized fries sculpture, view 3"
+      },
+      {
         "file": "fries-1.jpg",
         "alt": "oversized fries sculpture, primary view"
       },
       {
         "file": "fries-2.jpg",
         "alt": "oversized fries sculpture, view 2"
-      },
-      {
-        "file": "fries-3.jpg",
-        "alt": "oversized fries sculpture, view 3"
       },
       {
         "file": "fries-4.jpg",
@@ -842,12 +884,12 @@
     "description": "Oversized noodles sculpture developed from workshop form to finished display.",
     "images": [
       {
-        "file": "noodles-1.jpg",
-        "alt": "oversized noodles sculpture, primary view"
-      },
-      {
         "file": "noodles-2.jpg",
         "alt": "oversized noodles sculpture, view 2"
+      },
+      {
+        "file": "noodles-1.jpg",
+        "alt": "oversized noodles sculpture, primary view"
       },
       {
         "file": "noodles-3.jpg",
@@ -904,6 +946,10 @@
     "description": "Oversized pori-inspired food sculpture for a hospitality environment.",
     "images": [
       {
+        "file": "pori-4.jpg",
+        "alt": "oversized pori-inspired sculpture, view 4"
+      },
+      {
         "file": "pori-1.jpg",
         "alt": "oversized pori-inspired sculpture, primary view"
       },
@@ -914,10 +960,6 @@
       {
         "file": "pori-3.jpg",
         "alt": "oversized pori-inspired sculpture, view 3"
-      },
-      {
-        "file": "pori-4.jpg",
-        "alt": "oversized pori-inspired sculpture, view 4"
       }
     ]
   },
@@ -929,12 +971,12 @@
     "description": "A monumental culinary pot and food installation for a restaurant interior.",
     "images": [
       {
-        "file": "pot-1.jpg",
-        "alt": "monumental culinary pot installation, primary view"
-      },
-      {
         "file": "pot-2.jpg",
         "alt": "monumental culinary pot installation, view 2"
+      },
+      {
+        "file": "pot-1.jpg",
+        "alt": "monumental culinary pot installation, primary view"
       },
       {
         "file": "pot-3.jpg",
@@ -954,12 +996,12 @@
     "description": "Oversized sandwich sculpture developed through workshop and installation stages.",
     "images": [
       {
-        "file": "sandwich-1.jpg",
-        "alt": "oversized sandwich sculpture, primary view"
-      },
-      {
         "file": "sandwich-2.jpg",
         "alt": "oversized sandwich sculpture, view 2"
+      },
+      {
+        "file": "sandwich-1.jpg",
+        "alt": "oversized sandwich sculpture, primary view"
       },
       {
         "file": "sandwich-3.jpg",
@@ -980,10 +1022,6 @@
       {
         "file": "sandwich-7.jpg",
         "alt": "oversized sandwich sculpture, view 7"
-      },
-      {
-        "file": "sandwich-8.jpg",
-        "alt": "oversized sandwich sculpture, view 8"
       }
     ]
   }
