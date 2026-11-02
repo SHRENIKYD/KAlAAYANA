@@ -149,3 +149,32 @@ body.homepage {
 .homepage .hero-brand-copy {
   color: var(--home-paper);
 }
+
+/* Keep Works and Our Story connected without stacked section padding. */
+.homepage .collection-index {
+  padding-bottom: 32px;
+}
+.homepage .statement {
+  min-height: 0;
+  padding-top: 64px;
+  grid-template-columns: 1fr;
+  row-gap: 24px;
+}
+.homepage .story-grid,
+.homepage .story-sign {
+  grid-column: 1;
+}
+.homepage .story-expertise {
+  align-self: center;
+}
+.homepage .story-sign {
+  margin: 0;
+}
+@media (max-width: 760px) {
+  .homepage .collection-index {
+    padding-bottom: 24px;
+  }
+  .homepage .statement {
+    padding-top: 36px;
+  }
+}

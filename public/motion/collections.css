@@ -64,10 +64,10 @@
   margin-top: 40px;
 }
 .collection-feature[href='/murals.html'] > img {
-  object-position: 45% 58%;
+  object-position: 50% 50%;
 }
 .collection-feature[href='/landmarks.html'] > img {
-  object-position: 50% 32%;
+  object-position: 50% 0%;
 }
 .collection-feature[href='/installations.html'] > img {
   object-position: 50% 72%;

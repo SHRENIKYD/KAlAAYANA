@@ -232,8 +232,8 @@ body.motion-inner {
   .inner-nav p {
     display: none;
   }
-  .inner-nav .inner-links a:not(:last-child) {
-    display: none;
+  .inner-nav .inner-links {
+    gap: 20px;
   }
   .collection-hero {
     min-height: 82svh;

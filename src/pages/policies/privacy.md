@@ -13,11 +13,11 @@ Kalaayana Studios LLP (“Kalaayana”, “we”, “us”) handles information 
 
 **Privacy email:** contact@kalaayanastudios.com
 
-**Primary privacy/grievance contact:** Vinay Kumar R — **[designation to be inserted]**.
+**Primary privacy/grievance contact:** **Rashmi Jadhav** — **Chairperson**.
 
-**Alternate contact:** **[second person's name]** — **[designation to be inserted]**.
+**Alternate contact:** **Vijaya Bai** — **Chairperson**.
 
-These placeholders must be completed before this policy is displayed as effective. The primary contact must be authorised and available to handle requests; listing a name alone does not establish a grievance process.
+Send privacy requests and grievances to contact@kalaayanastudios.com, addressed to the primary contact above. The alternate contact may assist where the primary contact is unavailable.
 
 ## 2. Information involved
 

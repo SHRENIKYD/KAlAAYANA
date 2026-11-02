@@ -1,6 +1,6 @@
 # Website release versions
 
-`VERSION` is the source of truth. The current staging release line is `1.2.12`.
+`VERSION` is the source of truth. The current staging candidate is `1.2.13`; the last published tag is `v1.2.12`.
 Its GitHub Release records publication, merged commit and deployment status.
 The website footer reads this file during build; it must not have a separate
 hard-coded version. Deployment stamping adds the commit, environment and build
@@ -26,8 +26,8 @@ or deploy. Rebuild after changing it so the footer matches the release.
 Stable releases and staging prereleases share one increasing sequence. Do not
 derive the next number from the latest stable release alone. Published tags
 consume numbers even when not deployed to production. Never delete or move a
-historical tag to fill a gap. Current version 1.2.12 is already reserved:
-the next bump command would prepare 1.2.13, not publish 1.2.12.
+historical tag to fill a gap. Current candidate 1.2.13 is already reserved:
+the next bump command would prepare 1.2.14, not publish 1.2.13.
 
 After 1.2.99 comes 1.3.00. The example 1.20.99 -> 1.21.00 describes rollover,
 not the current version. Historical single-digit patches remain unchanged.
@@ -38,11 +38,12 @@ Reviewed on 2 November 2026 against GitHub releases, branch refs and local histo
 
 | Version | Evidence | Status |
 | --- | --- | --- |
-| 1.2.8 | GitHub stable release | Latest published stable release; main at 611c134. |
-| 1.2.9 | Dated changelog entry and annotated historical tag | Tag added retrospectively on 2 November 2026 at merged staging commit c8096af (PR #58). No GitHub Release or production deployment created. |
-| 1.2.10 | Changelog entry and Git tag | Staging milestone; no GitHub Release found. |
+| 1.2.8 | GitHub stable release | Production main remains at 611c134; see current GitHub Release statuses. |
+| 1.2.9 | Dated changelog entry and annotated historical tag | Tag added retrospectively on 2 November 2026 at merged staging commit c8096af (PR #58). Historical staging GitHub prerelease created on 2 November; no production deployment. |
+| 1.2.10 | Changelog entry and Git tag | Historical staging GitHub prerelease created on 2 November. |
 | 1.2.11 | GitHub prerelease, develop at b26dacc | Published staging image enhancement. Notes report Cloudflare failure; deployment was not verified. |
-| 1.2.12 | VERSION and changelog dated 2 November 2026 | Staging rollout; see its GitHub prerelease for the exact merged commit, validation and deployment status. |
+| 1.2.12 | Published GitHub Release at b61cfa1 | GitHub currently marks this Latest; production main is still 611c134. |
+| 1.2.13 | VERSION and Unreleased changelog | Current staging candidate; not tagged or published. |
 
 The earlier explanation that 1.2.9 had no release record was incomplete: its
 changelog entry already existed. Its missing tag was subsequently restored at

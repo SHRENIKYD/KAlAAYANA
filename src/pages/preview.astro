@@ -5,7 +5,10 @@
  * the approach line alone. Read, not retyped.
  */
 import site from '../data/site.json';
+import { Image } from 'astro:assets';
+import { photo, photoWidths } from '../lib/photos';
 import PolicyLinks from '../components/PolicyLinks.astro';
+import ArtistCarousel from '../components/ArtistCarousel.astro';
 ---
 
 <!doctype html>
@@ -31,7 +34,7 @@ import PolicyLinks from '../components/PolicyLinks.astro';
     <link rel="stylesheet" href="/motion/contact.css" />
     <link rel="stylesheet" href="/motion/menu.css" />
   </head>
-  <body class="homepage">
+  <body class="homepage site-shell">
     <div class="cursor">
       <span>VIEW</span>
     </div>
@@ -194,12 +197,13 @@ import PolicyLinks from '../components/PolicyLinks.astro';
             </div>
           </a>
           <a class="collection-feature" href="/murals.html">
-            <img
-              src="/motion/assets/murals.jpg"
-              alt="Narrative relief mural by Kalaayana"
+            <Image
+              src={photo('sri-adi-shankaracharya-1.jpg')}
+              alt="Bronze-toned Sri Adi Shankaracharya mural with four disciples, displayed in a glass case"
+              widths={photoWidths(photo('sri-adi-shankaracharya-1.jpg'))}
+              sizes="(max-width: 760px) 90vw, (min-width: 1024px) 45vw, 90vw"
+              quality={95}
               loading="lazy"
-              width="1200"
-              height="900"
             />
             <div class="collection-feature-copy">
               <span>03 / NARRATIVE RELIEF</span>
@@ -210,12 +214,13 @@ import PolicyLinks from '../components/PolicyLinks.astro';
             </div>
           </a>
           <a class="collection-feature" href="/landmarks.html">
-            <img
-              src="/motion/assets/landmarks.jpg"
-              alt="Monumental public sculpture by Kalaayana"
+            <Image
+              src={photo('hanuman-hangluru-1.jpg')}
+              alt="The monumental standing Hanuman sculpture at Hangluru holding a mace"
+              widths={photoWidths(photo('hanuman-hangluru-1.jpg'))}
+              sizes="(max-width: 760px) 90vw, (min-width: 1024px) 45vw, 90vw"
+              quality={95}
               loading="lazy"
-              width="1200"
-              height="900"
             />
             <div class="collection-feature-copy">
               <span>04 / LANDMARKS</span>
@@ -235,7 +240,7 @@ import PolicyLinks from '../components/PolicyLinks.astro';
             />
             <div class="collection-feature-copy">
               <span>05 / EXPERIENTIAL</span>
-              <h3>Architectural Installations</h3>
+              <h3>Other Installations</h3>
               <span class="collection-link">
                 Discover collection <span aria-hidden="true">↗</span>
               </span>
@@ -244,7 +249,6 @@ import PolicyLinks from '../components/PolicyLinks.astro';
         </div>
       </section>
       <section class="statement" id="story">
-        <div class="statement-index">OUR STORY</div>
         <div class="story-grid">
           <div class="story-main">
             <h2>Our story</h2>
@@ -264,6 +268,7 @@ import PolicyLinks from '../components/PolicyLinks.astro';
         </div>
         <p class="story-sign">Team, Kalaayana Studios</p>
       </section>
+      <ArtistCarousel />
       <section class="contact-studio" id="contact" aria-labelledby="contact-title">
         <div class="contact-shell">
           <div class="contact-heading">

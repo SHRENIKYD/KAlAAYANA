@@ -20,7 +20,203 @@ const version = releaseVersion.trim();
   </small>
 </footer>
 
+<dialog class="policy-dialog" aria-labelledby="policy-dialog-title">
+  <div class="policy-dialog-header">
+    <h2 id="policy-dialog-title">Website policies</h2>
+    <button type="button" class="policy-dialog-close" aria-label="Close policy">
+      Close &times;
+    </button>
+  </div>
+  <div class="policy-dialog-content" aria-live="polite"></div>
+</dialog>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('.policy-dialog');
+  const content = dialog?.querySelector<HTMLElement>('.policy-dialog-content');
+  const title = dialog?.querySelector<HTMLElement>('#policy-dialog-title');
+  if (dialog && content && title) {
+    let request: AbortController | undefined;
+    let previousOverflow = '';
+    let opener: HTMLElement | undefined;
+    document.querySelectorAll<HTMLAnchorElement>('.policy-navigation a').forEach((link) => {
+      link.addEventListener('click', async (event) => {
+        if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        request?.abort();
+        request = new AbortController();
+        const activeRequest = request;
+        opener = link;
+        title.textContent = link.textContent;
+        content.textContent = 'Loading document…';
+        content.setAttribute('aria-busy', 'true');
+        if (!dialog.open) {
+          previousOverflow = document.body.style.overflow;
+          document.body.style.overflow = 'hidden';
+          dialog.showModal();
+        }
+        try {
+          const response = await fetch(link.href, { signal: activeRequest.signal });
+          if (!response.ok) throw new Error('Document unavailable');
+          const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+          const documentContent = page.querySelector('.policy-document');
+          if (!documentContent) throw new Error('Document missing');
+          documentContent.querySelector('.back')?.remove();
+          if (activeRequest.signal.aborted) return;
+          content.replaceChildren(document.importNode(documentContent, true));
+          content.scrollTop = 0;
+        } catch (error) {
+          if (activeRequest.signal.aborted) return;
+          const message = document.createElement('p');
+          message.textContent = 'This document could not load. Please try again or ';
+          const fallback = document.createElement('a');
+          fallback.href = link.href;
+          fallback.textContent = 'open the policy page';
+          message.append(fallback);
+          content.replaceChildren(message);
+        } finally {
+          if (!activeRequest.signal.aborted) content.removeAttribute('aria-busy');
+        }
+      });
+    });
+    dialog.querySelector('.policy-dialog-close')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (event) => {
+      const bounds = dialog.getBoundingClientRect();
+      if (
+        event.target === dialog &&
+        (event.clientX < bounds.left ||
+          event.clientX > bounds.right ||
+          event.clientY < bounds.top ||
+          event.clientY > bounds.bottom)
+      )
+        dialog.close();
+    });
+    dialog.addEventListener('close', () => {
+      request?.abort();
+      document.body.style.overflow = previousOverflow;
+      content.removeAttribute('aria-busy');
+      opener?.focus({ preventScroll: true });
+    });
+  }
+</script>
+
 <style>
+  :global(body.site-shell) {
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  :global(body.site-shell > main) {
+    flex: 1 0 auto;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  :global(body.site-shell > .site-footer) {
+    margin-top: auto;
+    flex-shrink: 0;
+    width: 100%;
+  }
+  .policy-links {
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+  .policy-dialog {
+    width: min(860px, calc(100% - 40px));
+    max-height: min(85dvh, 950px);
+    padding: 0;
+    border: 1px solid #645e54;
+    background: #e9e4da;
+    color: #191816;
+    overflow: hidden;
+    font:
+      400 0.95rem/1.75 'DM Sans',
+      Arial,
+      sans-serif;
+  }
+  .policy-dialog[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  .policy-dialog::backdrop {
+    background: #000b;
+  }
+  .policy-dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 16px 28px;
+    border-bottom: 1px solid #bcb5a9;
+  }
+  .policy-dialog-header h2 {
+    margin: 0;
+    font:
+      400 1.1rem/1.4 'DM Sans',
+      Arial,
+      sans-serif;
+  }
+  .policy-dialog-close {
+    flex-shrink: 0;
+    min-height: 44px;
+    padding: 8px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+  .policy-dialog-content {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 24px 28px;
+  }
+  .policy-dialog-content :global(.policy-document) {
+    padding: 0;
+    margin: 0;
+    max-width: none;
+  }
+  .policy-dialog-content :global(h1) {
+    font:
+      400 clamp(2rem, 5vw, 3rem)/1.1 'Instrument Serif',
+      Georgia,
+      serif;
+    margin: 0 0 24px;
+  }
+  .policy-dialog-content :global(h2) {
+    font:
+      500 1.1rem/1.4 'DM Sans',
+      Arial,
+      sans-serif;
+    margin: 28px 0 12px;
+  }
+  .policy-dialog-content :global(p) {
+    margin: 0 0 16px;
+  }
+  .policy-dialog-content :global(a) {
+    color: inherit;
+    text-decoration: underline;
+    overflow-wrap: anywhere;
+  }
+  .policy-dialog-content :global(.policy-notice) {
+    border-block: 1px solid #afa697;
+    padding: 16px 0;
+    margin-bottom: 24px;
+    font-size: 0.85rem;
+  }
+  @media (max-width: 600px) {
+    .policy-dialog {
+      width: calc(100% - 24px);
+      max-height: 90dvh;
+    }
+    .policy-dialog-header {
+      padding: 10px 16px;
+    }
+    .policy-dialog-content {
+      padding: 20px 16px;
+    }
+  }
   .policy-links {
     display: flex;
     flex-wrap: wrap;

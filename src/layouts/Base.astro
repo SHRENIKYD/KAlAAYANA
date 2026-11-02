@@ -214,7 +214,7 @@ const card = `${origin}/assets/img/social-card.jpg`;
     </script>
     <slot name="head" />
   </head>
-  <body class={bodyClass}>
+  <body class:list={['site-shell', bodyClass]}>
     <div id="boot" aria-hidden="true">
       <div class="boot-mark">
         <div class="boot-seg s1">
@@ -236,8 +236,8 @@ const card = `${origin}/assets/img/social-card.jpg`;
       <p class="boot-place">Bengaluru</p>
     </div>
     <slot />
-    <footer>
+    <div class="site-footer">
       <PolicyLinks />
-    </footer>
+    </div>
   </body>
 </html>
