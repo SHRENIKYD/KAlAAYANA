@@ -36,11 +36,47 @@ const artists = [
       aria-label="Previous artist"
       hidden
     >
-      <span aria-hidden="true">&#8592;</span>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
     </button>
     <button class="journal-arrow journal-next" type="button" aria-label="Next artist" hidden>
-      <span aria-hidden="true">&#8594;</span>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M9 18l6-6-6-6" />
+      </svg>
     </button>
+    <div class="journal-dots" role="tablist" aria-label="Select artist">
+      {artists.map((profile, i) => (
+        <button
+          class:list={['journal-dot', { 'is-active': i === 0 }]}
+          type="button"
+          role="tab"
+          aria-selected={i === 0 ? 'true' : 'false'}
+          aria-label={`Artist ${i + 1}: ${profile.name}`}
+          data-index={i}
+        />
+      ))}
+    </div>
     <span class="journal-status" aria-live="polite" aria-atomic="true"></span>
   </div>
 </section>
@@ -51,6 +87,7 @@ const artists = [
     const previous = journal.querySelector<HTMLButtonElement>('.journal-previous')!;
     const next = journal.querySelector<HTMLButtonElement>('.journal-next')!;
     const status = journal.querySelector<HTMLElement>('.journal-status')!;
+    const dots = Array.from(journal.querySelectorAll<HTMLButtonElement>('.journal-dot'));
     let active = 0;
     let animation: Animation | undefined;
     const show = (index: number, animate = true) => {
@@ -60,6 +97,11 @@ const artists = [
         page.classList.toggle('is-active', i === active);
         page.setAttribute('aria-hidden', String(i !== active));
         page.inert = i !== active;
+      });
+      dots.forEach((dot, i) => {
+        const isActive = i === active;
+        dot.classList.toggle('is-active', isActive);
+        dot.setAttribute('aria-selected', String(isActive));
       });
       status.textContent = pages[active].getAttribute('aria-label');
       if (animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -77,6 +119,9 @@ const artists = [
     show(0, false);
     previous.addEventListener('click', (event) => show(active - 1, event.detail !== 0));
     next.addEventListener('click', (event) => show(active + 1, event.detail !== 0));
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => show(index));
+    });
     journal.addEventListener('keydown', (event) => {
       if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
         event.preventDefault();
@@ -120,8 +165,8 @@ const artists = [
     border-radius: 12px;
     background: #e2dccf;
     box-shadow: 0 8px 28px #1918160a;
-    padding: 0 60px 36px;
-    overflow: hidden;
+    padding: 0 60px 28px;
+    overflow: visible;
     touch-action: pan-y;
   }
   .journal-header {
@@ -148,33 +193,84 @@ const artists = [
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 64px;
-    border: 1px solid #a79b88;
-    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid rgba(167, 155, 136, 0.65);
+    background: rgba(226, 220, 207, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     color: #191816;
-    background: #e9e4da;
-    font: 400 25px/1 var(--sans);
     cursor: pointer;
     z-index: 2;
+    box-shadow: 0 4px 16px rgba(25, 24, 22, 0.06);
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .journal-arrow[hidden] {
     display: none;
   }
   .journal-arrow:hover {
-    background: #d8cfbd;
+    background: #191816;
+    color: #faf7f2;
+    border-color: #191816;
+    box-shadow: 0 8px 24px rgba(25, 24, 22, 0.18);
+  }
+  .journal-arrow svg {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .journal-previous:hover svg {
+    transform: translateX(-3px);
+  }
+  .journal-next:hover svg {
+    transform: translateX(3px);
   }
   .journal-arrow:focus-visible {
     outline: 2px solid #756346;
     outline-offset: 3px;
   }
   .journal-previous {
-    left: 8px;
+    left: -25px;
   }
   .journal-next {
-    right: 8px;
+    right: -25px;
+  }
+  .journal-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding-top: 20px;
+    margin-top: 10px;
+    border-top: 1px solid rgba(184, 174, 157, 0.35);
+  }
+  .journal-dot {
+    position: relative;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #9d9485;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .journal-dot:hover {
+    background: #756346;
+    transform: scale(1.15);
+  }
+  .journal-dot.is-active {
+    background: #242220;
+    transform: scale(1.1);
+    box-shadow:
+      0 0 0 2px #e2dccf,
+      0 0 0 3.5px #242220;
+  }
+  .journal-dot:focus-visible {
+    outline: 2px solid #756346;
+    outline-offset: 2px;
   }
   .journal-status {
     position: absolute;
@@ -184,29 +280,18 @@ const artists = [
     clip-path: inset(50%);
     white-space: nowrap;
   }
-  .artist-journal :global(.artist-profile) {
-    background: transparent;
-    padding: 36px 0 0;
-  }
-  .artist-journal :global(.artist-layout) {
-    max-width: none;
-    grid-template-columns: minmax(0, 56fr) minmax(0, 44fr);
-    align-items: center;
-    gap: 30px;
-  }
   .artist-journal :global(.artist-portrait) {
-    grid-column: 2;
-    grid-row: 1;
-    width: 100%;
-    max-width: 470px;
-    justify-self: end;
-    background: transparent;
+    background: transparent !important;
   }
   .artist-journal :global(.artist-portrait img) {
     aspect-ratio: 4/5;
     object-fit: contain;
     object-position: center bottom;
-    padding: 0;
+    padding: 0 !important;
+    background: radial-gradient(ellipse at 50% 35%, #2a2620 0%, #0d0c0b 100%);
+    border-radius: 8px;
+    border: 1px solid rgba(184, 174, 157, 0.45);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   }
   .artist-journal :global(.artist-portrait figcaption) {
     position: static;
@@ -215,25 +300,46 @@ const artists = [
     color: #655e54;
     letter-spacing: 0.04em;
   }
-  .artist-journal :global(.artist-copy) {
-    grid-column: 1;
-    grid-row: 1;
-    padding: 24px 32px 24px 0;
-  }
-  .artist-journal :global(.artist-intro) {
-    display: none;
-  }
-  .artist-journal :global(.artist-identity) {
-    border: 0;
-    padding: 0;
-  }
-  .artist-journal :global(.artist-identity h3) {
-    font-size: clamp(2.5rem, 4vw, 4.4rem);
-  }
-  .artist-journal :global(.artist-desktop-summary) {
-    max-width: 48ch;
-    font: 400 clamp(1.2rem, 1.55vw, 1.7rem)/1.5 var(--serif);
-    color: #38342e;
+
+  @media (min-width: 761px) {
+    .artist-journal :global(.artist-profile) {
+      background: transparent;
+      padding: 36px 0 0;
+    }
+    .artist-journal :global(.artist-layout) {
+      max-width: 1220px;
+      margin: 0 auto;
+      grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+      align-items: center;
+      gap: clamp(32px, 4vw, 56px);
+    }
+    .artist-journal :global(.artist-portrait) {
+      grid-column: 2;
+      grid-row: 1;
+      width: 100%;
+      max-width: 440px;
+      justify-self: center;
+    }
+    .artist-journal :global(.artist-copy) {
+      grid-column: 1;
+      grid-row: 1;
+      padding: 18px 0;
+    }
+    .artist-journal :global(.artist-intro) {
+      display: none;
+    }
+    .artist-journal :global(.artist-identity) {
+      border: 0;
+      padding: 0;
+    }
+    .artist-journal :global(.artist-identity h3) {
+      font-size: clamp(2.5rem, 4vw, 4.4rem);
+    }
+    .artist-journal :global(.artist-desktop-summary) {
+      max-width: 48ch;
+      font: 400 clamp(1.2rem, 1.55vw, 1.7rem)/1.5 var(--serif);
+      color: #38342e;
+    }
   }
   @media (max-width: 760px) {
     .artist-journal {
@@ -242,6 +348,7 @@ const artists = [
     .journal-card {
       padding: 0 32px 24px;
       border-radius: 8px;
+      overflow: hidden;
     }
     .journal-header {
       padding: 18px 0;
@@ -253,10 +360,28 @@ const artists = [
     }
     .journal-arrow {
       width: 28px;
-      height: 56px;
+      height: 40px;
       border: 0;
       font-size: 22px;
       background: transparent;
+      border-radius: 0;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    .journal-arrow:hover {
+      background: transparent;
+      color: inherit;
+      box-shadow: none;
+      border-color: transparent;
+    }
+    .journal-arrow svg {
+      width: 22px;
+      height: 22px;
+      transform: none !important;
+    }
+    .journal-dots {
+      display: flex;
     }
     .journal-arrow::before {
       content: '';
@@ -264,13 +389,14 @@ const artists = [
       inset: -6px -8px;
     }
     .journal-previous {
-      left: 0;
+      left: 4px;
     }
     .journal-next {
-      right: 0;
+      right: 4px;
     }
     .artist-journal :global(.artist-profile) {
       padding: 24px 0 0;
+      background: transparent;
     }
     .artist-journal :global(.artist-layout) {
       display: flow-root;
@@ -290,11 +416,13 @@ const artists = [
       font-size: clamp(1.6rem, 6vw, 2.1rem);
     }
     .artist-journal :global(.artist-desktop-summary) {
-      display: none;
+      display: block;
+      max-width: none;
+      font: 400 1.1rem/1.5 var(--serif);
+      color: #38342e;
     }
-    .artist-journal :global(.artist-mobile-story p) {
-      font-size: clamp(1.15rem, 4.8vw, 1.45rem);
-      line-height: 1.4;
+    .artist-journal :global(.artist-mobile-story) {
+      display: none;
     }
   }
 </style>

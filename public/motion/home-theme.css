@@ -1,5 +1,7 @@
 /* Warm cream across homepage surfaces; image overlays retain light lettering. */
 body.homepage {
+  --home-content-width: 1440px;
+  --home-gutter: max(5vw, calc((100% - var(--home-content-width)) / 2));
   --home-paper: #e9e4da;
   --home-ink: #171512;
   --home-muted: #655e54;
@@ -156,6 +158,8 @@ body.homepage {
 }
 .homepage .statement {
   min-height: 0;
+  padding-inline: var(--home-gutter);
+  padding-bottom: 40px;
   padding-top: 64px;
   grid-template-columns: 1fr;
   row-gap: 24px;
@@ -170,7 +174,32 @@ body.homepage {
 .homepage .story-sign {
   margin: 0;
 }
+.homepage .collection-index,
+.homepage .artist-journal,
+.homepage .contact-studio {
+  padding-inline: var(--home-gutter);
+}
+.homepage .collections-inner,
+.homepage .journal-card,
+.homepage .contact-shell {
+  width: 100%;
+  max-width: var(--home-content-width);
+  margin-inline: auto;
+}
+.homepage .story-grid {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+}
+.homepage .story-grid > * {
+  min-width: 0;
+}
 @media (max-width: 760px) {
+  body.homepage {
+    --home-gutter: 20px;
+  }
+  .homepage .story-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .homepage .collection-index {
     padding-bottom: 24px;
   }

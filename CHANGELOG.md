@@ -10,14 +10,35 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
-Nothing beyond the 1.2.13 candidate below.
+## [1.2.14] - Unreleased
 
-## [1.2.13] - Unreleased
+Staging candidate prepared 4 November 2026. Production remains unchanged.
+
+### Added
+- Collectables page with rounded, natural-height masonry cards, Hanuman views,
+  seated sculptures, Karnataka Mathe and six enhanced framed relief images.
+- Shared image preview with side arrows, thumbnails, keyboard navigation,
+  focus restoration and image-click opening across project galleries.
+
+### Changed
+- Unified page gutters, larger project cards and centered one/two-image galleries.
+- Homepage Works follows row order, with the finished Shankaracharya mural cover
+  and full-framed Collectables Hanuman; four-project indexes use two columns.
+- Refined Our Story and Expertise alignment and responsive Studio Journal layout.
+- Mobile Journal uses desktop typography, plain side arrows and navigation dots.
+- Removed the circle cursor while retaining the Works hover View indicator.
+- Renamed Vinay's portrait asset to artist-vinay-kumar.png and updated its import.
+- Removed duplicate seated-sculpture imagery and cropped presentation borders.
+
+See [release-notes/1.2.14.md](release-notes/1.2.14.md) for validation and limitations.
+
+## [1.2.13] - 2026-11-04
 
 Staging candidate prepared 2026-11-02.
 
-Not yet tagged or published. VERSION is reserved for the next staging rollout;
-production and the existing FREEZE date remain unchanged.
+Published as a staging prerelease at merged commit 11ea4a2 (PR #62).
+GitHub CI and Cloudflare build checks succeeded; live version.json was not
+independently verified. Production and FREEZE remain unchanged.
 
 #### Added
 - Wide Studio Journal artist carousel featuring Shilpi K. Narayana Rao,

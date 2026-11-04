@@ -1,0 +1,191 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import ImagePreview from '../components/ImagePreview.astro';
+import { photo, photoWidths } from '../lib/photos';
+import site from '../data/site.json';
+
+const fonts =
+  'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap';
+const images: {
+  file: string;
+  alt: string;
+  crop?: { x: number; y: number; width: number; height: number; sourceWidth: number };
+}[] = [
+  { file: 'collectables-framed-lakshmi.jpg', alt: 'Lakshmi, framed gold relief collectable' },
+  {
+    file: 'collectables-framed-standing-deity.jpg',
+    alt: 'Standing deity beneath an ornamental arch, framed gold relief collectable',
+  },
+  {
+    file: 'collectables-framed-saraswati.jpg',
+    alt: 'Saraswati with veena, framed gold relief collectable',
+  },
+  {
+    file: 'collectables-framed-rama-parivar.jpg',
+    alt: 'Rama Parivar with Sita, Lakshmana and Hanuman, framed gold relief collectable',
+  },
+  {
+    file: 'collectables-framed-lakshmi-narasimha.jpg',
+    alt: 'Lakshmi Narasimha, framed gold relief collectable',
+  },
+  {
+    file: 'collectables-framed-deity-trio.jpg',
+    alt: 'Three deities beneath an ornamental arch, framed gold relief collectable',
+  },
+  { file: 'collectables-hanuman-front.jpg', alt: 'Hanuman collectable, front view' },
+  { file: 'collectables-hanuman-left.jpg', alt: 'Hanuman collectable, left three-quarter view' },
+  { file: 'collectables-hanuman-rear.jpg', alt: 'Hanuman collectable, rear view' },
+  { file: 'collectables-hanuman-right.jpg', alt: 'Hanuman collectable, right three-quarter view' },
+  { file: 'collectables-seated-1.jpg', alt: 'Seated bronze collectable, three-quarter view' },
+  { file: 'collectables-seated-2.jpg', alt: 'Seated bronze collectable, side view' },
+  {
+    file: 'collectables-seated-3.jpg',
+    alt: 'Seated bronze collectables in 10-inch and 6-inch sizes',
+  },
+  { file: 'collectables-seated-4.jpg', alt: 'Seated bronze collectable, front view' },
+  { file: 'collectables-seated-5.jpg', alt: 'Seated collectable with a gold finish' },
+  {
+    file: 'karnataka-mathe-front-view.jpg',
+    alt: 'Karnataka Mathe collectable, front view',
+    crop: { x: 75, y: 80, width: 930, height: 1189, sourceWidth: 1080 },
+  },
+  {
+    file: 'karnataka-mathe-gold-12-inch.jpg',
+    alt: 'Karnataka Mathe collectable, 12-inch gold finish',
+    crop: { x: 101, y: 68, width: 871, height: 1214, sourceWidth: 1080 },
+  },
+  {
+    file: 'karnataka-mathe-right-view.jpg',
+    alt: 'Karnataka Mathe collectable, right three-quarter view',
+    crop: { x: 108, y: 108, width: 887, height: 1139, sourceWidth: 1080 },
+  },
+  {
+    file: 'karnataka-mathe-left-view.jpg',
+    alt: 'Karnataka Mathe collectable, left three-quarter view',
+    crop: { x: 110, y: 73, width: 863, height: 1169, sourceWidth: 1080 },
+  },
+  {
+    file: 'karnataka-mathe-portrait-detail.jpg',
+    alt: 'Karnataka Mathe collectable, portrait detail',
+  },
+  { file: 'karnataka-mathe-crown-detail.jpg', alt: 'Karnataka Mathe collectable, crown detail' },
+  {
+    file: 'karnataka-mathe-base-detail.jpg',
+    alt: 'Karnataka Mathe collectable, base and craftsmanship detail',
+  },
+];
+---
+
+<Base
+  title={`Collectables | ${site.name}`}
+  description="Explore collectables by Kalaayana Studios."
+  fonts={fonts}
+  bodyClass="motion-inner"
+>
+  <link slot="head" rel="stylesheet" href="/motion/inner.css?v=1.2.1" />
+  <header class="inner-nav">
+    <nav class="inner-links" aria-label="Page navigation">
+      <a href="/preview.html#home">Home</a>
+      <a href="/preview.html#works">Works</a>
+      <a href="/preview.html#contact">Contact</a>
+    </nav>
+  </header>
+  <main>
+    <section class="collection-hero">
+      <div class="collection-heading">
+        <h1>Collectables</h1>
+      </div>
+    </section>
+    <section class="collectables-gallery" aria-label="Collectables gallery">
+      {images.map((image, index) => (
+        <figure
+          class:list={{ 'trim-white-border': image.crop }}
+          role="button"
+          tabindex="0"
+          aria-label={`View ${image.alt}`}
+          data-preview-index={index}
+          style={
+            image.crop
+              ? `--crop-ratio: ${image.crop.width} / ${image.crop.height}; --crop-width: ${(image.crop.sourceWidth / image.crop.width) * 100}%; --crop-left: ${(-image.crop.x / image.crop.width) * 100}%; --crop-top: ${(-image.crop.y / image.crop.height) * 100}%;`
+              : undefined
+          }
+        >
+          <Image
+            src={photo(image.file)}
+            alt={image.alt}
+            widths={photoWidths(photo(image.file))}
+            sizes="(max-width: 600px) 46vw, (max-width: 900px) 30vw, 260px"
+            quality={95}
+            formats={['avif', 'webp']}
+            loading={index < 2 ? 'eager' : 'lazy'}
+          />
+        </figure>
+      ))}
+    </section>
+  </main>
+  <ImagePreview title="Collectables" />
+</Base>
+
+<style>
+  .collectables-gallery {
+    display: block;
+    columns: 260px;
+    column-gap: 12px;
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
+    padding: 2rem 24px 4rem;
+  }
+
+  .collectables-gallery figure {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    margin: 0 0 12px;
+    vertical-align: top;
+    break-inside: avoid;
+    overflow: hidden;
+    border-radius: 20px;
+  }
+
+  .collectables-gallery img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .collectables-gallery .trim-white-border {
+    position: relative;
+    aspect-ratio: var(--crop-ratio);
+  }
+
+  .collectables-gallery .trim-white-border img {
+    position: absolute;
+    left: var(--crop-left);
+    top: var(--crop-top);
+    width: var(--crop-width);
+    max-width: none;
+    height: auto;
+  }
+
+  @media (max-width: 900px) {
+    .collectables-gallery {
+      columns: 3;
+      column-gap: 14px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .collectables-gallery {
+      columns: 2;
+      column-gap: 12px;
+      padding: 1.5rem 16px 3rem;
+    }
+
+    .collectables-gallery figure {
+      margin-bottom: 12px;
+      border-radius: 16px;
+    }
+  }
+</style>

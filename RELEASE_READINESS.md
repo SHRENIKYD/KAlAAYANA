@@ -1,13 +1,13 @@
 # Launch readiness
 
-Prepared 2 November 2026. Candidate **1.2.12** is local and unreleased.
+Updated 4 November 2026. Candidate **1.2.14** is local and unreleased.
 This checklist is a release record, not launch approval.
 
 ## Verified repository state
 
 - Production main: 611c1347909f9833ff84e39624c6b3de1e82e016.
-- Staging develop: b26dacc853dd48970315dce904f2a475e32cd510.
-- Latest stable release: v1.2.8. Latest staging prerelease: v1.2.11.
+- Staging develop: 11ea4a2c230e6ed175fcde1eb8980a54960a05cd (merged PR #62).
+- Latest stable release: v1.2.8. Latest staging prerelease: v1.2.13 (published 4 November 2026).
 - Active ruleset requires PRs and Checks on both branches, prohibits force pushes
   and deletion, but currently requires zero approving reviews.
 - develop/FREEZE contains 2026-11-07. Keep it unchanged during feature work.
@@ -27,18 +27,18 @@ This checklist is a release record, not launch approval.
   studio?s request; final legal review remains a launch prerequisite.
 - [ ] Verify image rights, client permissions and appropriate disclosure of
   materially AI-reconstructed portfolio images. A footer does not prove title.
-- [ ] Verify a successful Cloudflare staging deployment. v1.2.11 notes report a
-  failed build; no later successful live verification is recorded here.
+- [x] CI and Cloudflare build checks succeeded for v1.2.13 at 11ea4a2.
+- [ ] Independently verify live staging version.json; build success alone is not live verification.
 
 ## Candidate verification
 
 - [ ] Review and commit accumulated local changes through a PR to develop.
-- [ ] Match VERSION, footer, changelog, tag and release title to 1.2.12.
+- [ ] Match VERSION, footer, changelog, tag and release title to 1.2.14.
 - [ ] Run npm ci, npm run build and python scripts/check.py; require passing CI.
 - [ ] Compare staging version.json with the reviewed version and commit.
-- [ ] Check desktop/mobile menu, Works, five collections, image framing, links,
+- [ ] Check desktop/mobile menu, Works, six Works categories, image framing, links,
   contact mail draft, map, policy pages and favicon in a browser.
-- [ ] When requested, publish staging v1.2.12 as a prerelease with an actual date,
+- [ ] When requested, publish staging v1.2.14 as a prerelease with an actual date,
   detailed notes and accurate deployment status, without marking it latest.
 
 ## Approved production rollout
