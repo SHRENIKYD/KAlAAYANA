@@ -44,6 +44,7 @@ const fonts =
       <section
         class="detail-gallery"
         data-image-count={gallery.length}
+        style={`--gallery-columns: ${Math.min(gallery.length, 3)}; --gallery-mobile-columns: ${Math.min(gallery.length, 2)}`}
         aria-label={`${project.title} photographs`}
       >
         {gallery.map((image, index) => (
@@ -80,17 +81,42 @@ const fonts =
   <ImagePreview title={project.title} />
 </Base>
 
+<script>
+  document.querySelectorAll<HTMLElement>('.detail-gallery').forEach((gallery) => {
+    if (Number(gallery.dataset.imageCount) <= 2) return;
+    let frame = 0;
+    const pack = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        gallery.classList.add('masonry-ready');
+        const gap = parseFloat(getComputedStyle(gallery).rowGap);
+        gallery.querySelectorAll<HTMLElement>('figure').forEach((figure) => {
+          const height = figure.getBoundingClientRect().height;
+          figure.style.gridRowEnd = `span ${Math.ceil((height + gap) / (1 + gap))}`;
+        });
+      });
+    };
+    const observer = new ResizeObserver(pack);
+    gallery.querySelectorAll('figure').forEach((figure) => observer.observe(figure));
+    pack();
+  });
+</script>
+
 <style is:global>
   body.detail-page main .detail-gallery {
-    display: block;
-    columns: 400px 3;
-    column-gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(var(--gallery-columns), minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+  }
+  body.detail-page main .detail-gallery.masonry-ready {
+    grid-auto-rows: 1px;
   }
   body.detail-page main .detail-gallery figure {
     display: inline-block;
     vertical-align: top;
     width: 100%;
-    margin: 0 0 20px;
+    margin: 0;
     break-inside: avoid;
     border-radius: 16px;
     overflow: hidden;
@@ -104,6 +130,7 @@ const fonts =
   }
   body.detail-page main .detail-gallery:is([data-image-count='1'], [data-image-count='2']) {
     display: flex;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
     gap: 24px;
@@ -127,7 +154,7 @@ const fonts =
       flex: none;
     }
     body.detail-page main .detail-gallery {
-      columns: 2;
+      grid-template-columns: repeat(var(--gallery-mobile-columns), minmax(0, 1fr));
     }
     body.detail-page main .detail-gallery:is([data-image-count='1'], [data-image-count='2']) {
       display: flex;
