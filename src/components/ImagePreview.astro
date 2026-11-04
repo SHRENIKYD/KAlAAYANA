@@ -101,6 +101,33 @@ const { title } = Astro.props;
     viewer.querySelector('.viewer-close')!.addEventListener('click', () => viewer.close());
     viewer.querySelector('.viewer-prev')!.addEventListener('click', () => select(active - 1));
     viewer.querySelector('.viewer-next')!.addEventListener('click', () => select(active + 1));
+    let swipeStart: { x: number; y: number } | null = null;
+    stage.addEventListener(
+      'touchstart',
+      (event) => {
+        swipeStart =
+          event.touches.length === 1
+            ? { x: event.touches[0].clientX, y: event.touches[0].clientY }
+            : null;
+      },
+      { passive: true },
+    );
+    stage.addEventListener(
+      'touchend',
+      (event) => {
+        if (!swipeStart || event.changedTouches.length !== 1) return;
+        const dx = event.changedTouches[0].clientX - swipeStart.x;
+        const dy = event.changedTouches[0].clientY - swipeStart.y;
+        swipeStart = null;
+        if (Math.abs(dx) >= 45 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+          select(active + (dx < 0 ? 1 : -1));
+        }
+      },
+      { passive: true },
+    );
+    stage.addEventListener('touchcancel', () => {
+      swipeStart = null;
+    });
     viewer.addEventListener('click', (event) => {
       if (event.target === viewer) viewer.close();
     });
@@ -188,6 +215,7 @@ const { title } = Astro.props;
     padding: 16px;
   }
   .viewer-photo {
+    touch-action: pan-y pinch-zoom;
     min-width: 0;
     min-height: 0;
     display: grid;
