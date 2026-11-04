@@ -61,7 +61,11 @@ const fonts =
               formats={['avif', 'webp']}
               loading="lazy"
               quality={95}
-              sizes="(max-width: 760px) 90vw, (max-width: 1300px) 44vw, 32vw"
+              sizes={
+                gallery.length <= 2
+                  ? '(max-width: 760px) 90vw, (max-width: 1500px) 45vw, 1100px'
+                  : '(max-width: 760px) 44vw, (max-width: 1300px) 44vw, 30vw'
+              }
             />
             {image.generated && (
               <figcaption class="finish-visualization">
