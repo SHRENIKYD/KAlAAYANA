@@ -1,0 +1,318 @@
+---
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<dialog class="collectable-viewer" aria-labelledby="viewer-title">
+  <div class="viewer-panel">
+    <header class="viewer-header">
+      <h2 id="viewer-title">{title}</h2>
+      <button class="viewer-close" type="button" aria-label="Close preview">
+        &times;
+      </button>
+    </header>
+    <div class="viewer-stage">
+      <button class="viewer-prev" type="button" aria-label="Previous image">
+        &#8249;
+      </button>
+      <div class="viewer-photo"></div>
+      <button class="viewer-next" type="button" aria-label="Next image">
+        &#8250;
+      </button>
+    </div>
+    <p class="viewer-caption" aria-live="polite"></p>
+    <nav class="viewer-thumbnails" aria-label="Choose an image"></nav>
+  </div>
+</dialog>
+
+<script>
+  const viewer = document.querySelector<HTMLDialogElement>('.collectable-viewer');
+  const stage = viewer?.querySelector<HTMLElement>('.viewer-photo');
+  const thumbnails = viewer?.querySelector<HTMLElement>('.viewer-thumbnails');
+  const caption = viewer?.querySelector<HTMLElement>('.viewer-caption');
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-preview-index]')];
+  if (viewer && stage && thumbnails && caption) {
+    let active = 0;
+    let opener: HTMLElement | null = null;
+    let oldOverflow = '';
+    const clonePhoto = (card: HTMLElement) => {
+      const figure = card.cloneNode(true) as HTMLElement;
+      ['role', 'tabindex', 'aria-label', 'data-preview-index'].forEach((attribute) =>
+        figure.removeAttribute(attribute),
+      );
+      const img = figure.querySelector('img')!;
+      figure.querySelector('figcaption')?.remove();
+      img.loading = 'eager';
+      img.sizes = '90vw';
+      return figure;
+    };
+    const fit = () => {
+      const figure = stage.firstElementChild as HTMLElement | null;
+      const source = cards[active];
+      if (!figure || !source) return;
+      const image = source.querySelector('img')!;
+      const box = source.getBoundingClientRect();
+      const ratio = source.classList.contains('trim-white-border')
+        ? box.width / box.height
+        : Number(image.getAttribute('width')) / Number(image.getAttribute('height'));
+      const available = stage.getBoundingClientRect();
+      const width = Math.min(available.width, available.height * ratio);
+      figure.style.width = `${width}px`;
+      figure.style.height = `${width / ratio}px`;
+    };
+    const select = (index: number) => {
+      active = (index + cards.length) % cards.length;
+      stage.replaceChildren(clonePhoto(cards[active]));
+      caption.textContent = [
+        cards[active].querySelector('img')!.alt,
+        cards[active].querySelector('figcaption')?.textContent?.trim(),
+      ]
+        .filter(Boolean)
+        .join(' — ');
+      thumbnails.querySelectorAll('button').forEach((button, i) => {
+        button.setAttribute('aria-current', String(i === active));
+      });
+      fit();
+    };
+    cards.forEach((card, index) => {
+      const open = () => {
+        opener = card;
+        oldOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        viewer.showModal();
+        select(index);
+      };
+      card.addEventListener('click', open);
+      card.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          open();
+        }
+      });
+      const thumb = document.createElement('button');
+      thumb.type = 'button';
+      thumb.setAttribute('aria-label', card.querySelector('img')!.alt);
+      thumb.append(clonePhoto(card));
+      thumb.addEventListener('click', () => select(index));
+      thumbnails.append(thumb);
+    });
+    viewer.querySelector('.viewer-close')!.addEventListener('click', () => viewer.close());
+    viewer.querySelector('.viewer-prev')!.addEventListener('click', () => select(active - 1));
+    viewer.querySelector('.viewer-next')!.addEventListener('click', () => select(active + 1));
+    viewer.addEventListener('click', (event) => {
+      if (event.target === viewer) viewer.close();
+    });
+    viewer.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        select(active - 1);
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        select(active + 1);
+      }
+    });
+    viewer.addEventListener('close', () => {
+      document.body.style.overflow = oldOverflow;
+      opener?.focus({ preventScroll: true });
+    });
+    new ResizeObserver(() => {
+      if (viewer.open) fit();
+    }).observe(stage);
+  }
+</script>
+
+<style is:global>
+  [data-preview-index] {
+    cursor: zoom-in;
+  }
+  [data-preview-index]:focus-visible {
+    outline: 3px solid #d5b37a;
+    outline-offset: 3px;
+  }
+  dialog.collectable-viewer {
+    width: min(1120px, 94vw);
+    height: min(860px, 92dvh);
+    max-width: none;
+    max-height: none;
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 18px;
+    background: #f5f2ec;
+    color: #23211d;
+    overflow: hidden;
+  }
+  .collectable-viewer::backdrop {
+    background: rgb(0 0 0 / 78%);
+  }
+  .viewer-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid #d6d0c6;
+  }
+  .viewer-header h2 {
+    margin: 0;
+    font:
+      500 18px 'DM Sans',
+      sans-serif;
+  }
+  .collectable-viewer button {
+    cursor: pointer;
+    color: #23211d;
+  }
+  .viewer-close {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    font:
+      32px Arial,
+      sans-serif;
+  }
+  .viewer-stage {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) 48px;
+    gap: 8px;
+    padding: 16px;
+  }
+  .viewer-photo {
+    min-width: 0;
+    min-height: 0;
+    display: grid;
+    place-items: center;
+  }
+  .viewer-photo figure {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 8px;
+  }
+  .viewer-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .viewer-photo .trim-white-border img {
+    position: absolute;
+    width: var(--crop-width);
+    height: auto;
+    max-width: none;
+    left: var(--crop-left);
+    top: var(--crop-top);
+  }
+  .viewer-prev,
+  .viewer-next {
+    align-self: center;
+    justify-self: center;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    padding: 0 0 3px;
+    border: 1px solid #c7c0b5;
+    border-radius: 50%;
+    background: #fff;
+    font:
+      30px/1 Arial,
+      sans-serif;
+    appearance: none;
+  }
+  .viewer-prev:hover,
+  .viewer-next:hover {
+    background: #e9e4da;
+    border-color: #806237;
+  }
+  .viewer-prev:focus-visible,
+  .viewer-next:focus-visible,
+  .viewer-close:focus-visible {
+    outline: 2px solid #806237;
+    outline-offset: 2px;
+  }
+  .viewer-caption {
+    text-align: center;
+    margin: 0 16px 10px;
+    font:
+      14px/1.4 'DM Sans',
+      sans-serif;
+  }
+  .viewer-thumbnails {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 10px 20px 16px;
+  }
+  .viewer-thumbnails button {
+    flex: 0 0 60px;
+    height: 72px;
+    padding: 3px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background: #e4dfd6;
+  }
+  .viewer-thumbnails button[aria-current='true'] {
+    border-color: #806237;
+  }
+  .viewer-thumbnails figure {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+  .viewer-thumbnails img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  @media (max-width: 600px) {
+    dialog.collectable-viewer {
+      width: 96vw;
+      height: 90dvh;
+      border-radius: 12px;
+    }
+    .viewer-stage {
+      position: relative;
+      grid-template-columns: minmax(0, 1fr);
+      padding: 8px 12px;
+    }
+    .viewer-prev,
+    .viewer-next {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      width: 44px;
+      height: 44px;
+      font-size: 28px;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 12%);
+    }
+    .viewer-prev {
+      left: 8px;
+    }
+    .viewer-next {
+      right: 8px;
+    }
+    .viewer-header {
+      padding: 6px 12px;
+    }
+    .viewer-thumbnails {
+      padding: 8px 12px 12px;
+    }
+  }
+</style>

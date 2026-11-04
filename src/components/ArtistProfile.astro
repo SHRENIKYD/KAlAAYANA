@@ -1,6 +1,6 @@
 ﻿---
 import { Image } from 'astro:assets';
-import nayiPortrait from '../images/artist-nayi-kumar.png';
+import vinayPortrait from '../images/artist-vinay-kumar.png';
 import vishalPortrait from '../images/artist-vishal-kavatekar.png';
 import narayanaPortrait from '../images/artist-narayana-rao-completed.png';
 import site from '../data/site.json';
@@ -8,7 +8,7 @@ const { profile = site.artistProfile, imageRight = false } = Astro.props;
 const artist = profile;
 const isVishal = artist.id === 'vishal-kavatekar';
 const isNarayana = artist.id === 'narayana-rao';
-const portrait = isNarayana ? narayanaPortrait : isVishal ? vishalPortrait : nayiPortrait;
+const portrait = isNarayana ? narayanaPortrait : isVishal ? vishalPortrait : vinayPortrait;
 const vishalBiography =
   'Vishal Kavatekar is a Bengaluru-based artist and sculptor from a family of traditional artists. He has served as an Assistant Professor in the Sculpture Department at the College of Fine Arts, Karnataka Chitrakala Parishath. A recipient of the Karnataka Shilpakala Academy Award and a member of the Karnataka Shilpakala Academy, Government of Karnataka, he co-founded Kalaayana Studios, bringing together traditional craftsmanship and contemporary artistic practices in sculpture, murals, and installations.';
 const vinayBiography =
@@ -102,7 +102,7 @@ const narayanaLegacy =
     margin: 0;
     min-width: 0;
     align-self: start;
-    background: #080807;
+    background: transparent;
   }
   .artist-portrait img {
     display: block;
@@ -122,11 +122,11 @@ const narayanaLegacy =
   .artist-profile-narayana .artist-portrait img {
     object-fit: contain;
     object-position: center bottom;
-    padding: 24px 28px 0;
+    padding: 0;
     box-sizing: border-box;
   }
   .artist-profile-narayana .artist-portrait {
-    background: #e9e4da;
+    background: transparent;
   }
   .artist-profile-narayana .artist-portrait figcaption {
     position: static;

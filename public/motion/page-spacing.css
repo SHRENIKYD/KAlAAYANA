@@ -1,0 +1,143 @@
+/* Match the Temple Architecture page gutters across the developed site. */
+:root {
+  --page-gutter: 5vw;
+}
+body.homepage {
+  --home-gutter: var(--page-gutter);
+  --home-content-width: none;
+}
+body.homepage .collection-index,
+body.homepage .statement,
+body.homepage .artist-journal,
+body.homepage .contact-studio {
+  box-sizing: border-box;
+  width: 100%;
+  padding-inline: var(--page-gutter);
+}
+body.homepage .collections-inner,
+body.homepage .journal-card,
+body.homepage .contact-shell {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+}
+body.homepage .story-grid {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  grid-template-columns: minmax(140px, 0.55fr) minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: clamp(28px, 3vw, 64px);
+  align-items: start;
+}
+body.homepage .story-main {
+  columns: auto;
+  max-width: 68ch;
+}
+body.homepage .story-main p {
+  max-width: none;
+}
+body.homepage .story-main .story-sign {
+  margin: 28px 0 0;
+  font-size: 0.62rem;
+  line-height: 1.5;
+  letter-spacing: 0.18em;
+  color: #655e54;
+}
+body.homepage .story-expertise {
+  align-self: center;
+}
+body.homepage .story-expertise h2 {
+  text-align: left;
+}
+body.homepage .story-grid h2 {
+  margin: 0 0 28px;
+}
+body.homepage .story-grid .story-title {
+  align-self: center;
+  justify-self: center;
+  margin: 0;
+  text-align: center;
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  body.homepage .story-grid {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  }
+  body.homepage .story-title {
+    grid-column: 1 / -1;
+  }
+}
+body.homepage .collections-inner {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+body.homepage .collections-label {
+  grid-column: 1 / -1;
+  margin-bottom: 8px;
+}
+body.homepage .collections-inner .collection-feature {
+  display: inline-block;
+  vertical-align: top;
+  break-inside: avoid;
+  width: 100%;
+  margin: 0;
+  border-radius: 16px;
+}
+body.homepage .collections-inner .collection-feature > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  max-height: none;
+  object-fit: cover;
+}
+body.homepage .collections-inner .collection-feature h3 {
+  font-size: clamp(2.3rem, 3vw, 3.8rem);
+}
+body.homepage .collections-inner .collection-feature[href='/collectables.html'] > img {
+  object-fit: contain;
+  object-position: center;
+  background: #bca58e;
+}
+@media (min-width: 761px) and (max-width: 1200px) {
+  body.homepage .collections-inner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+body.motion-inner .collection-hero,
+body.motion-inner .collection-grid,
+body.motion-inner .detail-gallery,
+body.motion-inner main .collectables-gallery {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+  padding-inline: var(--page-gutter);
+}
+body.motion-inner .inner-nav,
+body.motion-inner .project-nav {
+  padding-inline: var(--page-gutter);
+}
+body.policy-page .policy-document {
+  box-sizing: border-box;
+  max-width: none;
+  padding-inline: var(--page-gutter);
+}
+body.policy-page .policy-document article {
+  max-width: 80ch;
+}
+@media (max-width: 760px) {
+  :root {
+    --page-gutter: 20px;
+  }
+  body.homepage .story-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body.homepage .collections-inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  body.homepage .collections-inner .collection-feature > img {
+    aspect-ratio: 4 / 5;
+  }
+}

@@ -33,6 +33,7 @@ import ArtistCarousel from '../components/ArtistCarousel.astro';
     <link rel="stylesheet" href="/motion/home-theme.css" />
     <link rel="stylesheet" href="/motion/contact.css" />
     <link rel="stylesheet" href="/motion/menu.css" />
+    <link rel="stylesheet" href="/motion/page-spacing.css" />
   </head>
   <body class="homepage site-shell">
     <div class="cursor">
@@ -198,9 +199,9 @@ import ArtistCarousel from '../components/ArtistCarousel.astro';
           </a>
           <a class="collection-feature" href="/murals.html">
             <Image
-              src={photo('sri-adi-shankaracharya-1.jpg')}
-              alt="Bronze-toned Sri Adi Shankaracharya mural with four disciples, displayed in a glass case"
-              widths={photoWidths(photo('sri-adi-shankaracharya-1.jpg'))}
+              src={photo('sri-adi-shankaracharya-2.jpg')}
+              alt="Finished Sri Adi Shankaracharya mural with four disciples beneath a tree in an ornate bronze frame"
+              widths={photoWidths(photo('sri-adi-shankaracharya-2.jpg'))}
               sizes="(max-width: 760px) 90vw, (min-width: 1024px) 45vw, 90vw"
               quality={95}
               loading="lazy"
@@ -230,6 +231,23 @@ import ArtistCarousel from '../components/ArtistCarousel.astro';
               </span>
             </div>
           </a>
+          <a class="collection-feature" href="/collectables.html">
+            <Image
+              src={photo('collectables-hanuman-front.jpg')}
+              alt="Hanuman collectable sculpture"
+              widths={photoWidths(photo('collectables-hanuman-front.jpg'))}
+              sizes="(max-width: 760px) 90vw, (min-width: 1024px) 45vw, 90vw"
+              quality={95}
+              loading="lazy"
+            />
+            <div class="collection-feature-copy">
+              <span>05 / COLLECTABLES</span>
+              <h3>Collectables</h3>
+              <span class="collection-link">
+                View collectables <span aria-hidden="true">&#8599;</span>
+              </span>
+            </div>
+          </a>
           <a class="collection-feature" href="/installations.html">
             <img
               src="/motion/assets/installations.jpg"
@@ -239,7 +257,7 @@ import ArtistCarousel from '../components/ArtistCarousel.astro';
               height="900"
             />
             <div class="collection-feature-copy">
-              <span>05 / EXPERIENTIAL</span>
+              <span>06 / EXPERIENTIAL</span>
               <h3>Other Installations</h3>
               <span class="collection-link">
                 Discover collection <span aria-hidden="true">↗</span>
@@ -250,11 +268,12 @@ import ArtistCarousel from '../components/ArtistCarousel.astro';
       </section>
       <section class="statement" id="story">
         <div class="story-grid">
+          <h2 class="story-title">Our story</h2>
           <div class="story-main">
-            <h2>Our story</h2>
             {site.story.map((paragraph) => (
               <p set:html={paragraph} />
             ))}
+            <p class="story-sign">Team, Kalaayana Studios</p>
           </div>
           <div class="story-expertise">
             <h2>Expertise</h2>
@@ -266,7 +285,6 @@ import ArtistCarousel from '../components/ArtistCarousel.astro';
             <p class="story-materials">Materials — {site.materials.join(' · ')}</p>
           </div>
         </div>
-        <p class="story-sign">Team, Kalaayana Studios</p>
       </section>
       <ArtistCarousel />
       <section class="contact-studio" id="contact" aria-labelledby="contact-title">

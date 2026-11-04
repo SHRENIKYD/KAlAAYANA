@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
+import ImagePreview from '../../components/ImagePreview.astro';
 import { photo, photoWidths } from '../../lib/photos';
 import site from '../../data/site.json';
 import projects from '../../data/projects.json';
@@ -40,9 +41,19 @@ const fonts =
 
   <main>
     {gallery.length > 0 && (
-      <section class="detail-gallery" aria-label={`${project.title} photographs`}>
-        {gallery.map((image) => (
-          <figure class={image.orientation}>
+      <section
+        class="detail-gallery"
+        data-image-count={gallery.length}
+        aria-label={`${project.title} photographs`}
+      >
+        {gallery.map((image, index) => (
+          <figure
+            class={image.orientation}
+            role="button"
+            tabindex="0"
+            data-preview-index={index}
+            aria-label={`View ${image.alt}`}
+          >
             <Image
               src={image.source}
               alt={image.alt}
@@ -50,7 +61,11 @@ const fonts =
               formats={['avif', 'webp']}
               loading="lazy"
               quality={95}
-              sizes="(max-width: 760px) 90vw, (max-width: 1600px) 45vw, 736px"
+              sizes={
+                gallery.length <= 2
+                  ? '(max-width: 760px) 90vw, (max-width: 1500px) 45vw, 1100px'
+                  : '(max-width: 760px) 44vw, (max-width: 1300px) 44vw, 30vw'
+              }
             />
             {image.generated && (
               <figcaption class="finish-visualization">
@@ -62,4 +77,72 @@ const fonts =
       </section>
     )}
   </main>
+  <ImagePreview title={project.title} />
 </Base>
+
+<style is:global>
+  body.detail-page main .detail-gallery {
+    display: block;
+    columns: 400px 3;
+    column-gap: 20px;
+  }
+  body.detail-page main .detail-gallery figure {
+    display: inline-block;
+    vertical-align: top;
+    width: 100%;
+    margin: 0 0 20px;
+    break-inside: avoid;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  body.detail-page main .detail-gallery img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: contain;
+  }
+  body.detail-page main .detail-gallery:is([data-image-count='1'], [data-image-count='2']) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    min-height: calc(100svh - 150px);
+    columns: auto;
+  }
+  body.detail-page main .detail-gallery:is([data-image-count='1'], [data-image-count='2']) figure {
+    flex: 0 1 680px;
+    margin: 0;
+    min-width: 0;
+  }
+  body.detail-page main .detail-gallery[data-image-count='1'] figure.landscape {
+    flex-basis: 1100px;
+  }
+  body.detail-page main .detail-gallery:is([data-image-count='1'], [data-image-count='2']) img {
+    max-height: 78svh;
+    object-fit: contain;
+  }
+  @media (max-width: 760px) {
+    body.detail-page main .detail-gallery[data-image-count='1'] figure.landscape {
+      flex: none;
+    }
+    body.detail-page main .detail-gallery {
+      columns: 2;
+    }
+    body.detail-page main .detail-gallery:is([data-image-count='1'], [data-image-count='2']) {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    body.detail-page
+      main
+      .detail-gallery:is([data-image-count='1'], [data-image-count='2'])
+      figure {
+      flex: none;
+      width: 100%;
+    }
+    body.detail-page main .detail-gallery:is([data-image-count='1'], [data-image-count='2']) img {
+      max-height: none;
+    }
+  }
+</style>

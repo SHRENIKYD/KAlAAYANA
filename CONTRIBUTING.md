@@ -90,9 +90,9 @@ Content lives in `src/data`. Adding a project is one object in `projects.json`.
 ## Versioning
 
 See [VERSIONING.md](VERSIONING.md) for the authoritative numbering rules and
-historical ledger. Current local candidate: **1.2.12**, unreleased. Latest stable
-is 1.2.8 and latest published staging prerelease is 1.2.11. Changelog entries exist
-for 1.2.9 and 1.2.10; neither has a published GitHub Release in the reviewed history.
+historical ledger. Current local candidate: **1.2.14**, unreleased. Latest published
+staging prerelease is v1.2.13 at 11ea4a2 (4 November 2026). Production main
+remains at 611c134. Historical releases v1.2.9 and v1.2.10 are published.
 
 Use one increasing sequence for staging and stable releases. Do not reuse consumed
 numbers. The custom patch counter runs through 99 and rolls 1.2.99 to 1.3.00.
