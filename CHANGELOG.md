@@ -10,9 +10,26 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
-## [1.2.14] - Unreleased
+## [1.2.15] - Unreleased
 
-Staging candidate prepared 4 November 2026. Production remains unchanged.
+Staging candidate prepared 5 November 2026. Production remains unchanged.
+
+### Added
+- Theme-matched continuous client logo strip with progressive colour near the
+  centre, faded edges, hover/focus pause, client name labels and reduced motion.
+- Supplied client logos and corrected Chaaru Art Gallery naming; removed the
+  duplicate Guruparampara client while keeping Sankara Eye Hospital separate.
+
+### Changed
+- Straightened three temple/monument covers, retaining original photographs.
+- Removed two unwanted Madhvacharya gallery images and refined the remaining
+  two-image layout without changing shared previews or navigation.
+
+See [release-notes/1.2.15.md](release-notes/1.2.15.md) for scope and rollout checks.
+
+## [1.2.14] - 2026-11-04
+
+Published staging prerelease at d9d32b8 (PRs #63 and #64). CI passed; the latest Cloudflare build failed and live version verification remains pending. Production remains unchanged.
 
 ### Added
 - Collectables page with rounded, natural-height masonry cards, Hanuman views,

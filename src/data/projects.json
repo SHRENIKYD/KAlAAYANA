@@ -28,7 +28,7 @@
     "description": "Concrete reinforced. Tumkuru, Karnataka.",
     "images": [
       {
-        "file": "hanuman-tumkuru-1.jpg",
+        "file": "hanuman-tumkuru-1-straightened.png",
         "alt": "The 75-foot Hanuman at Tumkuru, painted and framed by a tall ornamental arch"
       },
       {
@@ -150,7 +150,7 @@
     "description": "Temple facade. Whitefield, Bengaluru, Karnataka.",
     "images": [
       {
-        "file": "shree-varasiddhi-vinayaka-1.jpg",
+        "file": "shree-varasiddhi-vinayaka-1-straightened.png",
         "alt": "The carved facade of Shree Varasiddhi Vinayaka temple at Whitefield, Bengaluru"
       },
       {
@@ -187,7 +187,7 @@
     "description": "Temple arch. Chikkanayakanahalli, Karnataka.",
     "images": [
       {
-        "file": "shree-anjaneya-1.jpg",
+        "file": "shree-anjaneya-1-straightened.png",
         "alt": "The Shree Anjaneya temple arch at Chikkanayakanahalli, tiered and painted, with Anjaneya at its centre"
       },
       {
@@ -259,16 +259,8 @@
         "alt": "Three-quarter view of Sri Madhvacharya seated on a sculpted chair with his right hand raised"
       },
       {
-        "file": "sri-madhvacharya-2.jpg",
-        "alt": "Wide three-quarter view of the seated Sri Madhvacharya sculpture on a black plinth"
-      },
-      {
         "file": "sri-madhvacharya-3.jpg",
         "alt": "Front view of Sri Madhvacharya with prayer beads and a raised hand"
-      },
-      {
-        "file": "sri-madhvacharya-4.jpg",
-        "alt": "Wide front view of the seated Sri Madhvacharya sculpture and its plinth"
       }
     ]
   },
