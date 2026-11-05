@@ -80,12 +80,40 @@ const fonts =
   </main>
 </Base>
 
+<script>
+  document.querySelectorAll<HTMLElement>('.collection-grid').forEach((grid) => {
+    if (Number(grid.dataset.projectCount) <= 2) return;
+    let frame = 0;
+    const pack = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const mobile = matchMedia('(max-width: 760px)').matches;
+        grid.classList.toggle('masonry-ready', !mobile);
+        const gap = parseFloat(getComputedStyle(grid).rowGap);
+        grid.querySelectorAll<HTMLElement>('.work-tile').forEach((tile) => {
+          tile.style.gridRowEnd = mobile
+            ? ''
+            : `span ${Math.ceil((tile.getBoundingClientRect().height + gap) / (1 + gap))}`;
+        });
+      });
+    };
+    const observer = new ResizeObserver(pack);
+    grid.querySelectorAll('.work-tile').forEach((tile) => observer.observe(tile));
+    window.addEventListener('resize', pack);
+    document.fonts.ready.then(pack);
+    pack();
+  });
+</script>
+
 <style is:global>
   body.motion-inner main .collection-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 32px 24px;
     align-items: start;
+  }
+  body.motion-inner main .collection-grid.masonry-ready {
+    grid-auto-rows: 1px;
   }
   body.motion-inner main .collection-grid[data-project-count='4'] {
     grid-template-columns: repeat(2, minmax(0, 1fr));

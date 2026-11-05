@@ -10,9 +10,20 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
-## [1.2.15] - Unreleased
+## [1.2.16] - Unreleased
 
-Staging candidate prepared 5 November 2026. Production remains unchanged.
+### Fixed
+- Pinterest-style masonry packing on all five project indexes: Temple Architecture,
+  Portrait, Murals, Monumental and Other Installations. Shorter cards no longer
+  leave fixed-row whitespace. Natural image proportions, titles and project links
+  remain intact; mobile stays single-column.
+- Recalculate packing after card resizing, image loading and font readiness.
+
+See [release-notes/1.2.16.md](release-notes/1.2.16.md).
+
+## [1.2.15] - 2026-11-05
+
+Published staging prerelease at 9c28e17 through PR #65. Production remains unchanged.
 
 ### Added
 - Theme-matched continuous client logo strip with progressive colour near the
