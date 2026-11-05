@@ -9,6 +9,7 @@ import { Image } from 'astro:assets';
 import { photo, photoWidths } from '../lib/photos';
 import PolicyLinks from '../components/PolicyLinks.astro';
 import ArtistCarousel from '../components/ArtistCarousel.astro';
+import ClientMarquee from '../components/ClientMarquee.astro';
 ---
 
 <!doctype html>
@@ -287,6 +288,7 @@ import ArtistCarousel from '../components/ArtistCarousel.astro';
         </div>
       </section>
       <ArtistCarousel />
+      <ClientMarquee />
       <section class="contact-studio" id="contact" aria-labelledby="contact-title">
         <div class="contact-shell">
           <div class="contact-heading">

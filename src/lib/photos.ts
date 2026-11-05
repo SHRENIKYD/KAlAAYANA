@@ -7,7 +7,7 @@
  */
 import type { ImageMetadata } from 'astro';
 
-const photos = import.meta.glob<{ default: ImageMetadata }>('../images/projects/*.jpg', {
+const photos = import.meta.glob<{ default: ImageMetadata }>('../images/projects/*.{jpg,png}', {
   eager: true,
 });
 

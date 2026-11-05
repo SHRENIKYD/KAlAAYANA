@@ -1,6 +1,6 @@
 # Website release versions
 
-`VERSION` is the source of truth. The current staging candidate is `1.2.14`; the last published tag is `v1.2.13`.
+`VERSION` is the source of truth. The current staging candidate is `1.2.15`; the last published tag is `v1.2.14`.
 Its GitHub Release records publication, merged commit and deployment status.
 The website footer reads this file during build; it must not have a separate
 hard-coded version. Deployment stamping adds the commit, environment and build
@@ -26,7 +26,7 @@ or deploy. Rebuild after changing it so the footer matches the release.
 Stable releases and staging prereleases share one increasing sequence. Do not
 derive the next number from the latest stable release alone. Published tags
 consume numbers even when not deployed to production. Never delete or move a
-historical tag to fill a gap. Current candidate 1.2.14 is reserved; the next bump command prepares 1.2.15.
+historical tag to fill a gap. Current candidate 1.2.15 is reserved; the next bump command prepares 1.2.16.
 
 After 1.2.99 comes 1.3.00. The example 1.20.99 -> 1.21.00 describes rollover,
 not the current version. Historical single-digit patches remain unchanged.
@@ -43,7 +43,8 @@ Reviewed on 2 November 2026 against GitHub releases, branch refs and local histo
 | 1.2.11 | GitHub prerelease, develop at b26dacc | Published staging image enhancement. Notes report Cloudflare failure; deployment was not verified. |
 | 1.2.12 | Published GitHub Release at b61cfa1 | GitHub currently marks this Latest; production main is still 611c134. |
 | 1.2.13 | Merged PR #62 at 11ea4a2 | Staging prerelease published 4 November 2026; CI and Cloudflare build checks succeeded. |
-| 1.2.14 | VERSION and Unreleased changelog | Current staging candidate; not published. |
+| 1.2.14 | Tag at d9d32b8, PRs #63/#64 | Staging prerelease published 4 November 2026. CI passed; latest Cloudflare build failed; live verification pending. |
+| 1.2.15 | VERSION and Unreleased changelog | Prepared 5 November 2026; not published. |
 
 The earlier explanation that 1.2.9 had no release record was incomplete: its
 changelog entry already existed. Its missing tag was subsequently restored at
