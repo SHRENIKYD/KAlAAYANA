@@ -1,13 +1,13 @@
 # Launch readiness
 
-Updated 5 November 2026. Candidate **1.2.15** is local and unreleased.
+Updated 5 November 2026. Candidate **1.2.16** is local and unreleased.
 This checklist is a release record, not launch approval.
 
 ## Verified repository state
 
 - Production main: 611c1347909f9833ff84e39624c6b3de1e82e016.
-- Staging develop: d9d32b863e229b6f2807f10bd7ca5660cb5ba02f (merged PR #64).
-- GitHub Latest release: v1.2.12. Latest staging prerelease: v1.2.14 (published 4 November 2026).
+- Staging develop: 9c28e17310c4db5e0ee10d900e63fba825523a14 (merged PR #65).
+- GitHub Latest release: v1.2.12. Latest staging prerelease: v1.2.15 (published 4 November 2026).
 - Active ruleset requires PRs and Checks on both branches, prohibits force pushes
   and deletion, but currently requires zero approving reviews.
 - develop/FREEZE contains 2026-11-07. Keep it unchanged during feature work.
@@ -33,12 +33,12 @@ This checklist is a release record, not launch approval.
 ## Candidate verification
 
 - [ ] Review and commit accumulated local changes through a PR to develop.
-- [ ] Match VERSION, footer, changelog, tag and release title to 1.2.15.
+- [ ] Match VERSION, footer, changelog, tag and release title to 1.2.16.
 - [ ] Run npm ci, npm run build and python scripts/check.py; require passing CI.
 - [ ] Compare staging version.json with the reviewed version and commit.
 - [ ] Check desktop/mobile menu, Works, six Works categories, image framing, links,
   contact mail draft, map, policy pages and favicon in a browser.
-- [ ] When requested, publish staging v1.2.15 as a prerelease with an actual date,
+- [ ] When requested, publish staging v1.2.16 as a prerelease with an actual date,
   detailed notes and accurate deployment status, without marking it latest.
 
 ## Approved production rollout
