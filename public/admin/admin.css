@@ -397,10 +397,15 @@ body.tab-insights .shell {
   font-size: 1.2rem;
   margin-bottom: 8px;
 }
+.insight-grid table {
+  table-layout: fixed;
+}
 .insight-grid td:last-child,
 .insight-grid th:last-child {
   text-align: right;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  width: 84px;
 }
 .insight-grid td:first-child {
   max-width: 260px;
