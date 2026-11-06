@@ -2435,7 +2435,37 @@
   }
 
   /* ---------- boot ---------- */
+  /* ---------- skeleton while the content loads ---------- */
+  function skeleton() {
+    const line = (w) => el('span', { class: 'skel skel-line', style: `width:${w}` });
+    const card = (h) =>
+      el(
+        'div',
+        { class: 'skel-card' },
+        el('span', { class: 'skel skel-thumb', style: `height:${h}px` }),
+        line('70%'),
+        line('40%'),
+      );
+    $('#sections').replaceChildren(
+      ...[72, 58, 64, 48, 66].map((w) =>
+        el('div', { class: 'skel-row' }, line(`${w}%`), line('14px')),
+      ),
+    );
+    $('#main').replaceChildren(
+      el(
+        'div',
+        { class: 'skel-page', 'aria-hidden': 'true' },
+        line('120px'),
+        el('span', { class: 'skel skel-title' }),
+        line('60%'),
+        el('div', { class: 'grid' }, ...[260, 180, 220, 300, 200, 240].map(card)),
+      ),
+      el('p', { class: 'sr-only', role: 'status' }, 'Loading…'),
+    );
+  }
+
   async function load() {
+    skeleton();
     const data = await api('/content');
     Object.assign(state, {
       email: data.email,
@@ -2459,10 +2489,6 @@
     state.original = snapshot();
     $('#who').textContent = `${data.email} · ${data.role || 'admin'}`;
     if (data.sessionEnds) startSessionClock(Number(data.sessionEnds));
-    if (!sessionName()) {
-      await askWhoIsHere();
-      $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
-    } else $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
     document.body.classList.toggle('role-admin', data.role !== 'superadmin');
     document.body.classList.toggle('role-superadmin', data.role === 'superadmin');
     if (data.role !== 'superadmin' && ['home', 'log', 'users'].includes(state.tab))
@@ -2472,6 +2498,9 @@
     $('#message').value = '';
     markDirty();
     showTab(state.tab);
+    // The page is drawn behind the prompt, so the skeleton never lingers.
+    if (!sessionName()) await askWhoIsHere();
+    $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
   }
 
   $('#result-x').addEventListener('click', closeDialog);
