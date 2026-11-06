@@ -24,8 +24,7 @@
     "logo": "/assets/clients/anegudde.png"
   },
   {
-    "name": "Shree Siddhivinayaka Temple",
-    "logo": null
+    "name": "Shree Siddhivinayaka Temple"
   },
   {
     "name": "HackerRank",
@@ -66,5 +65,9 @@
   {
     "name": "Chaaru Art Gallery",
     "logo": "/assets/clients/chaaru-art-gallery.jpg"
+  },
+  {
+    "name": "Shrenik YD",
+    "logo": "/assets/clients/shrenik-yd.png"
   }
 ]
