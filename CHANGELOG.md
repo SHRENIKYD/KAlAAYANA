@@ -32,6 +32,9 @@ is a holding page. `1.0.0` marks the launch of the full site.
   step until the hour ends or the editor signs out.
 - Admin: "Keep editing" after a preview; the next preview updates the same
   proposal instead of starting a new one.
+- Admin: a Clients tab for superadmins to add, rename, reorder and remove the
+  homepage's "Our clients" logos, with logo upload (JPG or PNG); changes go
+  through the same preview and accept as every other edit.
 
 ## [1.2.18] - 2026-11-06
 

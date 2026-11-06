@@ -19,6 +19,13 @@ import {
   PERMANENT_SUPERADMIN,
 } from '../worker/validate.js';
 import { makeEntry, parseLog, decodePhoto } from '../worker/logbook.js';
+import {
+  CLIENTS_JSON,
+  CLIENT_DIR,
+  validateClients,
+  applyClients,
+  sameClients,
+} from '../worker/clients.js';
 import { spawn } from 'node:child_process';
 
 const port = Number(process.argv[2] || 8788);
@@ -201,6 +208,8 @@ http
         home: site.home,
         projectFiles: [...listDir('src/images/projects')],
         bannerFiles: [...listDir('src/images/sections')],
+        clients: readJson(CLIENTS_JSON),
+        clientFiles: fs.existsSync(CLIENT_DIR) ? fs.readdirSync(CLIENT_DIR) : [],
       });
     }
     const img = url.pathname.match(
@@ -227,14 +236,25 @@ http
       }
       const projectFiles = listDir('src/images/projects'),
         bannerFiles = listDir('src/images/sections');
-      let uploads, banners;
+      let uploads, banners, clientLogos;
       try {
         uploads = decode(payload.uploads);
         banners = decode(payload.banners);
+        clientLogos = decode(payload.clientLogos);
       } catch (e) {
         return json(res, { error: e.message }, 400);
       }
       const problems = validate({ ...payload, uploads, banners }, projectFiles, bannerFiles);
+      const clientFiles = new Set(fs.existsSync(CLIENT_DIR) ? fs.readdirSync(CLIENT_DIR) : []);
+      const withClients = Array.isArray(payload.clients);
+      if (withClients) {
+        problems.push(...validateClients(payload.clients, clientLogos, clientFiles));
+        if (
+          roleOf(users(), signedIn(req)) !== 'superadmin' &&
+          !sameClients(readJson(CLIENTS_JSON), payload.clients)
+        )
+          problems.push('Only a superadmin can change the clients.');
+      }
       if (roleOf(users(), signedIn(req)) !== 'superadmin') {
         const baseSite = readJson('src/data/site.json');
         problems.push(
@@ -252,6 +272,19 @@ http
         return json(res, { error: isPreview ? 'Cannot preview yet' : 'Not saved', problems }, 422);
       const target = isPreview ? path.join(previewRoot, 'input') : out;
       const deletions = materialize(target, payload, uploads, banners, projectFiles);
+      // The clients strip: its list and any new logos, applied with the rest.
+      const clientChange = withClients
+        ? applyClients(readJson(CLIENTS_JSON), payload.clients, clientFiles)
+        : null;
+      const writeClients = (root) => {
+        if (!clientChange) return;
+        fs.mkdirSync(path.join(root, CLIENT_DIR), { recursive: true });
+        fs.writeFileSync(path.join(root, CLIENTS_JSON), clientChange.json);
+        for (const [f, b] of Object.entries(clientLogos))
+          if (clientChange.used.has(f)) fs.writeFileSync(path.join(root, CLIENT_DIR, f), b);
+        for (const f of clientChange.deletions)
+          fs.rmSync(path.join(root, CLIENT_DIR, f), { force: true });
+      };
       if (!isPreview && !(payload.accepted && payload.accepted.at))
         return json(res, { error: 'Preview the change and accept it before saving.' }, 400);
       if (!isPreview) {
@@ -263,6 +296,7 @@ http
           for (const f of fs.readdirSync(path.join(out, 'images', kind)))
             fs.copyFileSync(path.join(out, 'images', kind, f), path.join('src/images', kind, f));
         for (const f of deletions) fs.rmSync(path.join('src/images/projects', f), { force: true });
+        writeClients('.');
         appendLog([
           makeEntry({
             category: 'content',
@@ -318,6 +352,7 @@ http
             );
         for (const f of deletions)
           fs.rmSync(path.join(site, 'src/images/projects', f), { force: true });
+        writeClients(site);
         // LIVE so the preview shows the launched site at /, like production after release.
         fs.writeFileSync(path.join(site, 'LIVE'), '');
         await new Promise((resolve, reject) => {

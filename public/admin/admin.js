@@ -42,6 +42,8 @@
       u: Object.keys(state.uploads),
       b: Object.keys(state.banners),
       c: state.bannerCopies,
+      cl: state.clients,
+      cu: Object.keys(state.clientLogos || {}),
     });
   const slugify = (s) =>
     s
@@ -270,7 +272,7 @@
   /* ---------- tabs ----------
      The tab, and the open work on the Projects tab, live in the address
      (#projects/murals), so a refresh or the back button lands where you were. */
-  const TABS = ['home', 'projects', 'insights', 'log', 'users'];
+  const TABS = ['home', 'projects', 'clients', 'insights', 'log', 'users'];
   function readPlace() {
     const [tab, key] = location.hash.replace(/^#/, '').split('/');
     if (TABS.includes(tab)) state.tab = tab;
@@ -293,6 +295,7 @@
     else if (tab === 'log') showLog();
     else if (tab === 'users') showUsers();
     else if (tab === 'insights') showInsights();
+    else if (tab === 'clients') editClients();
     else
       openSection(
         state.current && state.sections[state.current]
@@ -2614,6 +2617,164 @@
     renderSections();
   }
 
+  /* ---------- clients ----------
+     The "Our clients" strip on the homepage, in this order. A client is a
+     name and, optionally, a logo; without one the strip shows the name. */
+  function editClients() {
+    state.view = 'clients';
+    state.current = null;
+    writePlace();
+    const list = el('div', { class: 'clients-list' });
+    const logoSrc = (c) => {
+      const f = (c.logo || '').replace('/assets/clients/', '');
+      return state.previews[`client:${f}`] || c.logo;
+    };
+    const pickLogo = (c) => {
+      const input = el('input', { type: 'file', accept: 'image/jpeg,image/png', hidden: '' });
+      input.addEventListener('change', async () => {
+        const file = input.files[0];
+        if (!file) return;
+        const ext = file.type === 'image/png' ? 'png' : 'jpg';
+        const base = slugify(c.name || 'client') || 'client';
+        const taken = new Set([...state.clientFiles, ...Object.keys(state.clientLogos)]);
+        let name = `${base}.${ext}`;
+        for (let n = 2; taken.has(name); n += 1) name = `${base}-${n}.${ext}`;
+        state.clientLogos[name] = await readFile(file);
+        state.previews[`client:${name}`] = URL.createObjectURL(file);
+        c.logo = `/assets/clients/${name}`;
+        markDirty();
+        render();
+      });
+      document.body.appendChild(input);
+      input.click();
+      setTimeout(() => input.remove(), 60000);
+    };
+    const move = (i, d) => {
+      const j = i + d;
+      if (j < 0 || j >= state.clients.length) return;
+      [state.clients[i], state.clients[j]] = [state.clients[j], state.clients[i]];
+      markDirty();
+      render();
+    };
+    const render = () => {
+      list.replaceChildren(
+        ...state.clients.map((c, i) =>
+          el(
+            'div',
+            { class: 'client-row' },
+            el(
+              'div',
+              { class: 'client-logo' },
+              c.logo
+                ? el('img', { src: logoSrc(c), alt: '', loading: 'lazy' })
+                : el('span', {}, 'No logo'),
+            ),
+            el('span', { class: 'client-num' }, String(i + 1).padStart(2, '0')),
+            field('Name', {
+              value: c.name,
+              required: true,
+              placeholder: 'Client or organisation',
+              oninput: (v) => {
+                c.name = v;
+                markDirty();
+              },
+            }),
+            el(
+              'div',
+              { class: 'client-tools' },
+              el(
+                'button',
+                { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => pickLogo(c) },
+                c.logo ? 'Change logo' : 'Add logo',
+              ),
+              c.logo
+                ? el(
+                    'button',
+                    {
+                      class: 'btn btn-ghost btn-sm',
+                      type: 'button',
+                      onclick: () => {
+                        delete c.logo;
+                        markDirty();
+                        render();
+                      },
+                    },
+                    'Remove logo',
+                  )
+                : null,
+              el(
+                'button',
+                {
+                  class: 'btn btn-ghost btn-sm',
+                  type: 'button',
+                  'aria-label': `Move ${c.name || 'client'} up`,
+                  disabled: i === 0 ? '' : null,
+                  onclick: () => move(i, -1),
+                },
+                '↑',
+              ),
+              el(
+                'button',
+                {
+                  class: 'btn btn-ghost btn-sm',
+                  type: 'button',
+                  'aria-label': `Move ${c.name || 'client'} down`,
+                  disabled: i === state.clients.length - 1 ? '' : null,
+                  onclick: () => move(i, 1),
+                },
+                '↓',
+              ),
+              el(
+                'button',
+                {
+                  class: 'btn btn-danger btn-sm',
+                  type: 'button',
+                  onclick: () => {
+                    state.clients.splice(i, 1);
+                    markDirty();
+                    render();
+                  },
+                },
+                'Remove',
+              ),
+            ),
+          ),
+        ),
+      );
+    };
+    const add = () => {
+      state.clients.push({ name: '' });
+      markDirty();
+      render();
+      const inputs = list.querySelectorAll('.client-row input');
+      inputs[inputs.length - 1]?.focus();
+    };
+    $('#main').replaceChildren(
+      el(
+        'div',
+        { class: 'head' },
+        el(
+          'div',
+          {},
+          el('p', { class: 'eyebrow' }, 'Homepage'),
+          el('h1', {}, 'Clients'),
+          el(
+            'p',
+            { class: 'muted' },
+            'The logos shown under OUR CLIENTS on the homepage, in this order. A client without a logo is shown by name. Logos are JPG or PNG; a square or transparent PNG looks best.',
+          ),
+        ),
+        el(
+          'div',
+          { class: 'actions' },
+          el('button', { class: 'btn', type: 'button', onclick: add }, '+ Add a client'),
+        ),
+      ),
+      list,
+    );
+    render();
+  }
+
   /* ---------- section editor ---------- */
   function editSection(key, isNew = false) {
     const s =
@@ -2958,6 +3119,7 @@
      rejects (closed, branch deleted). */
   function previewPath() {
     if (state.view === 'home') return '/#works';
+    if (state.view === 'clients') return '/#clients';
     if (state.view === 'project' && state.editing?.slug)
       return `/${state.editing.group}/${state.editing.slug}/`;
     if ((state.view === 'section' || state.view === 'section-edit') && state.editing)
@@ -2973,6 +3135,9 @@
     const need = (ok, text, go) => {
       if (!ok) out.push({ text, go });
     };
+    (state.clients || []).forEach((c, i) =>
+      need(String(c.name || '').trim(), `Client ${i + 1} needs a name`, () => showTab('clients')),
+    );
     Object.entries(state.sections).forEach(([key, sec]) => {
       const go = () => editSection(key);
       for (const f of ['eyebrow', 'title', 'lede'])
@@ -3053,6 +3218,12 @@
       uploads: state.uploads,
       banners: state.banners,
       bannerCopies: state.bannerCopies,
+      clients: state.clients,
+      clientLogos: Object.fromEntries(
+        Object.entries(state.clientLogos).filter(([f]) =>
+          state.clients.some((c) => c.logo === `/assets/clients/${f}`),
+        ),
+      ),
       message: $('#message').value,
     };
   }
@@ -3700,6 +3871,21 @@
           ),
         ),
       ];
+    else if (tab === 'clients')
+      body = [
+        ...head('110px', '80%'),
+        row('margin:40px 0 28px;gap:10px;justify-content:flex-end', btn(140, true)),
+        ...[150, 120, 180, 100, 140].map((w) =>
+          el(
+            'div',
+            { class: 'client-row' },
+            el('span', { class: 'skel', style: 'width:72px;height:72px;border-radius:50%' }),
+            line('18px', 10, 'margin:0'),
+            el('span', {}, line('40px', 9), line(`${w}px`, 14)),
+            row('gap:6px', box('96px', 31), box('34px', 31), box('34px', 31), box('72px', 31)),
+          ),
+        ),
+      ];
     else if (tab === 'users') {
       const user = (w, dark) =>
         el(
@@ -3836,6 +4022,9 @@
       home: data.home || { works: [] },
       projectFiles: new Set(data.projectFiles),
       bannerFiles: new Set(data.bannerFiles),
+      clients: data.clients || [],
+      clientFiles: new Set(data.clientFiles || []),
+      clientLogos: {},
       uploads: {},
       banners: {},
       bannerCopies: {},
@@ -3850,7 +4039,7 @@
     if (data.sessionEnds) startSessionClock(Number(data.sessionEnds));
     document.body.classList.toggle('role-admin', data.role !== 'superadmin');
     document.body.classList.toggle('role-superadmin', data.role === 'superadmin');
-    if (data.role !== 'superadmin' && ['home', 'log', 'users'].includes(state.tab))
+    if (data.role !== 'superadmin' && ['home', 'clients', 'log', 'users'].includes(state.tab))
       state.tab = 'projects';
     $('#base-note').textContent =
       `Editing the ${data.base} branch. Nothing is recorded until you preview and accept; accepting opens and merges a pull request, and staging updates after that.`;
@@ -3882,6 +4071,7 @@
   $('#tab-users').addEventListener('click', () => showTab('users'));
   $('#tab-insights').addEventListener('click', () => showTab('insights'));
   $('#tab-projects').addEventListener('click', () => showTab('projects'));
+  $('#tab-clients').addEventListener('click', () => showTab('clients'));
   $('#new-project').addEventListener('click', newProjectAnywhere);
   $('#save').addEventListener('click', publish);
   $('#discard').addEventListener('click', () =>

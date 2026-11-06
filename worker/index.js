@@ -11,6 +11,7 @@ import {
   branchAlias,
 } from './github.js';
 import { syncAccessPolicy } from './policy.js';
+import { CLIENTS_JSON, CLIENT_DIR, validateClients, applyClients, sameClients } from './clients.js';
 import { fetchInsights } from './insights.js';
 import { verifyAccessJwt } from './access.js';
 import { makeEntry, parseLog, decodePhoto } from './logbook.js';
@@ -205,6 +206,11 @@ async function handleApi(request, env) {
           site: gh.file('src/data/site.json', base).then((r) => r.json()),
           projectFiles: gh.listDir('src/images/projects', base),
           bannerFiles: gh.listDir('src/images/sections', base),
+          clients: gh
+            .file(CLIENTS_JSON, base)
+            .then((r) => r.json())
+            .catch(() => []),
+          clientFiles: gh.listDir(CLIENT_DIR, base).catch(() => new Set()),
           log: textOr(gh, 'logs/admin-log.jsonl', base),
           prs: gh.call('GET', '/pulls?state=all&sort=created&direction=desc&per_page=30'),
         }
@@ -222,11 +228,13 @@ async function handleApi(request, env) {
   const logItem = (fields) => makeEntry({ email, name, ...fields });
 
   if (request.method === 'GET' && route === '/content') {
-    const [projects, site, projectFiles, bannerFiles] = await Promise.all([
+    const [projects, site, projectFiles, bannerFiles, clients, clientFiles] = await Promise.all([
       content.projects,
       content.site,
       content.projectFiles,
       content.bannerFiles,
+      content.clients,
+      content.clientFiles,
     ]);
     let log = null;
     let decisions = null;
@@ -260,6 +268,8 @@ async function handleApi(request, env) {
       home: site.home,
       projectFiles: [...projectFiles],
       bannerFiles: [...bannerFiles],
+      clients,
+      clientFiles: [...clientFiles],
     });
   }
 
@@ -349,14 +359,31 @@ async function handleApi(request, env) {
       gh.listDir('src/images/projects', base),
       gh.listDir('src/images/sections', base),
     ]);
-    let uploads, banners;
+    let uploads, banners, clientLogos;
     try {
       uploads = decodeUploads(payload.uploads);
       banners = decodeUploads(payload.banners);
+      clientLogos = decodeUploads(payload.clientLogos);
     } catch (e) {
       return json({ error: e.message }, 400);
     }
     const problems = validate({ ...payload, uploads, banners }, projectFiles, bannerFiles);
+    // The clients strip travels with the save when the editor sent it.
+    const withClients = Array.isArray(payload.clients);
+    const [clientsBefore, clientFiles] = withClients
+      ? await Promise.all([
+          gh
+            .file(CLIENTS_JSON, base)
+            .then((r) => r.json())
+            .catch(() => []),
+          gh.listDir(CLIENT_DIR, base).catch(() => new Set()),
+        ])
+      : [[], new Set()];
+    if (withClients) {
+      problems.push(...validateClients(payload.clients, clientLogos, clientFiles));
+      if (!superadmin && !sameClients(clientsBefore, payload.clients))
+        problems.push('Only a superadmin can change the clients.');
+    }
     if (!superadmin)
       problems.push(
         ...restrictForAdmin(
@@ -404,7 +431,35 @@ async function handleApi(request, env) {
           72,
         )}" · ${Object.keys(uploads).length} photograph(s) added, ${deletions.length} deleted, ${Object.keys(banners).length} banner(s) added`,
     });
+    const clientChange =
+      withClients && !problems.length
+        ? applyClients(clientsBefore, payload.clients, clientFiles)
+        : null;
+    const logoShas = Object.fromEntries(
+      await Promise.all(
+        Object.entries(clientLogos)
+          .filter(([f]) => clientChange?.used.has(f))
+          .map(async ([f, b]) => [f, await blobSha(b)]),
+      ),
+    );
     const entries = [
+      ...(clientChange
+        ? [
+            { path: CLIENTS_JSON, mode: '100644', type: 'blob', content: clientChange.json },
+            ...Object.entries(logoShas).map(([f, sha]) => ({
+              path: `${CLIENT_DIR}/${f}`,
+              mode: '100644',
+              type: 'blob',
+              sha,
+            })),
+            ...clientChange.deletions.map((f) => ({
+              path: `${CLIENT_DIR}/${f}`,
+              mode: '100644',
+              type: 'blob',
+              sha: null,
+            })),
+          ]
+        : []),
       ...treeEntries({
         projectsJson: JSON.stringify(payload.projects, null, 2) + '\n',
         siteJson: JSON.stringify(nextSite, null, 2) + '\n',

@@ -393,13 +393,80 @@ body.role-admin .superadmin-only {
 }
 body.tab-log .side,
 body.tab-users .side,
+body.tab-clients .side,
 body.tab-insights .side {
   display: none;
 }
 body.tab-log .shell,
 body.tab-users .shell,
+body.tab-clients .shell,
 body.tab-insights .shell {
   grid-template-columns: 1fr;
+}
+/* ---------- clients ---------- */
+.clients-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+}
+.client-row {
+  display: grid;
+  grid-template-columns: 72px 28px minmax(180px, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+.client-row .f {
+  margin: 0;
+}
+.client-logo {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  background: #f3efe7;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.client-logo img {
+  max-width: 84%;
+  max-height: 84%;
+  object-fit: contain;
+}
+.client-logo span {
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.client-num {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.client-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+@media (max-width: 760px) {
+  .client-row {
+    grid-template-columns: 56px 1fr;
+  }
+  .client-logo {
+    width: 56px;
+    height: 56px;
+  }
+  .client-num {
+    display: none;
+  }
+  .client-tools {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
 }
 /* ---------- insights ---------- */
 .range {
