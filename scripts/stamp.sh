@@ -14,7 +14,15 @@ ref="${3:-}"
 [[ -n "$ref" ]] || ref="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)"
 
 out="${OUT_DIR:-dist}"
-[[ -d "$out" ]] || { echo "$out/ not found — run the build first"; exit 1; }
+# Cloudflare's preview builds run this script alone (a legacy
+# previews_base_config with no dashboard field), so when there is no build
+# output yet, build first. Production and CI always run the full
+# `npm run build:staging`, so this branch never runs for them.
+if [[ ! -d "$out" ]]; then
+  echo "$out/ not found — running npm run build first"
+  npm run build
+fi
+[[ -d "$out" ]] || { echo "$out/ still not found — the build failed"; exit 1; }
 
 version="$(tr -d '[:space:]' < VERSION)"
 short="${commit:0:8}"

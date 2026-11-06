@@ -8,11 +8,11 @@ feature/*  ──PR──▶  develop  ──PR──▶  main
                  staging (private)   kalaayanastudios.com
 ```
 
-| Branch | Purpose | Direct pushes |
-| --- | --- | --- |
-| `main` | Production. Deploys to `kalaayanastudios.com` on merge. | Never — PR only |
-| `develop` | Integration. Everything lands here first and is reviewed on staging. | Never — PR only |
-| `feature/*` | One change each. Branch from `develop`, merge back to `develop`. | Yes, it is yours |
+| Branch      | Purpose                                                              | Direct pushes    |
+| ----------- | -------------------------------------------------------------------- | ---------------- |
+| `main`      | Production. Deploys to `kalaayanastudios.com` on merge.              | Never — PR only  |
+| `develop`   | Integration. Everything lands here first and is reviewed on staging. | Never — PR only  |
+| `feature/*` | One change each. Branch from `develop`, merge back to `develop`.     | Yes, it is yours |
 
 Branch names: `feature/<short-description>`, `fix/<short-description>`,
 `chore/<short-description>`.
@@ -37,18 +37,23 @@ Nothing reaches `kalaayanastudios.com` without passing through staging first.
 Staging is a Cloudflare Worker built from this repo and protected by Cloudflare
 Access, so only allowed accounts can open it. Its settings:
 
-| Setting | Value |
-| --- | --- |
-| Production branch | `develop` |
-| Build command | `npm run build:staging` |
-| Deploy command | `npx wrangler deploy` |
+| Setting                            | Value                               |
+| ---------------------------------- | ----------------------------------- |
+| Production branch                  | `develop`                           |
+| Build command                      | `npm run build:staging`             |
+| Deploy command                     | `npx wrangler deploy`               |
 | Builds for non-production branches | on — gives every branch its own URL |
-| Protect with Cloudflare Access | on |
+| Protect with Cloudflare Access     | on                                  |
 
 `wrangler.jsonc` serves the repo root as static assets; `.assetsignore` keeps
 scripts, workflows and docs out of what is served. The build command is what
 makes staging carry a real version — without it staging would serve `?v=dev`
 forever and cache stale assets.
+
+Cloudflare's **preview** (non-production branch) builds use a separate, legacy
+build command — `bash scripts/stamp.sh staging` — that the dashboard no longer
+shows. `scripts/stamp.sh` therefore runs `npm run build` itself when `dist/`
+is missing, so previews build; production never takes that path.
 
 The build command is a single npm script on purpose. It expands to
 `astro build && bash scripts/stamp.sh staging`, and both halves are required:

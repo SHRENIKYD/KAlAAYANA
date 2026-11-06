@@ -105,7 +105,7 @@ CI passes, so an entry appears there within a minute or two.
 
 ## Using it
 
-Open `https://<staging host>/admin/`, sign in through Access. Two tabs:
+Open `https://kalaayana.shrenikyd.workers.dev/admin/`, sign in through Access. Two tabs:
 
 - **Homepage** — the _works_ shown under WORKS on the homepage, in order
   (Temple Architecture, Portraits, Murals…). Each has an eyebrow, a name,
