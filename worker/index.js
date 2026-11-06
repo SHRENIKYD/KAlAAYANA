@@ -88,8 +88,9 @@ async function handleApi(request, env) {
     } catch {
       return json({ error: 'Body must be JSON' }, 400);
     }
-    const [site, projectFiles, bannerFiles] = await Promise.all([
+    const [site, before, projectFiles, bannerFiles] = await Promise.all([
       gh.file('src/data/site.json', base).then((r) => r.json()),
+      gh.file('src/data/projects.json', base).then((r) => r.json()),
       gh.listDir('src/images/projects', base),
       gh.listDir('src/images/sections', base),
     ]);
@@ -111,7 +112,7 @@ async function handleApi(request, env) {
     const bannerShas = Object.fromEntries(
       await Promise.all(Object.entries(banners).map(async ([f, b]) => [f, await blobSha(b)])),
     );
-    const deletions = orphans(payload.projects, projectFiles);
+    const deletions = orphans(before, payload.projects, projectFiles);
 
     const nextSite = { ...site, sections: payload.sections };
     const entries = treeEntries({

@@ -90,8 +90,17 @@ test('new sections need a banner and a matching href', () => {
   assert.ok(bad.some((m) => m.includes('gardens.jpg is not uploaded')));
 });
 
-test('orphaned images are deleted, referenced ones kept', () => {
-  assert.deepEqual(orphans([project()], files), ['old-1.jpg']);
+test('only photographs removed by this save are deleted; never-referenced files are left alone', () => {
+  const before = [
+    project({
+      images: [
+        { file: 'hanuman-1.jpg', alt: 'a' },
+        { file: 'old-1.jpg', alt: 'b' },
+      ],
+    }),
+  ];
+  assert.deepEqual(orphans(before, [project()], files), ['old-1.jpg']);
+  assert.deepEqual(orphans([project()], [project()], new Set([...files, 'hand-used.jpg'])), []);
 });
 
 test('image type is read from bytes, not the name', () => {

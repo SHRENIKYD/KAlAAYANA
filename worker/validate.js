@@ -80,8 +80,13 @@ export function validate(payload, existingProjectFiles, existingBannerFiles) {
   return bad;
 }
 
-/** Image files no project references any more, so the commit removes them. */
-export function orphans(projects, existingProjectFiles) {
-  const used = new Set(projects.flatMap((p) => p.images.map((i) => i.file)));
-  return [...existingProjectFiles].filter((f) => !used.has(f)).sort();
+/**
+ * Photographs this save took off a project: referenced before, not after, and
+ * present in the repository. Files that were never referenced are left alone,
+ * because pages may use them by hand.
+ */
+export function orphans(before, after, existingProjectFiles) {
+  const was = new Set(before.flatMap((p) => p.images.map((i) => i.file)));
+  const still = new Set(after.flatMap((p) => p.images.map((i) => i.file)));
+  return [...was].filter((f) => !still.has(f) && existingProjectFiles.has(f)).sort();
 }

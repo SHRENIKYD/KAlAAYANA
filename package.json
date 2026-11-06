@@ -16,7 +16,8 @@
     "format": "prettier --write \"**/*.{astro,ts,js,css,html,json,jsonc,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{astro,ts,js,css,html,json,jsonc,yml,yaml}\"",
     "test:diagnostics": "node --test scripts/diagnostics.test.mjs",
-    "test:admin": "node --test scripts/admin.test.mjs"
+    "test:admin": "node --test scripts/admin.test.mjs",
+    "admin:demo": "npm run build:staging && node scripts/admin-demo.mjs"
   },
   "devDependencies": {
     "astro": "^7.3.1",

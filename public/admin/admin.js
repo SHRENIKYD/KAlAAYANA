@@ -715,25 +715,35 @@
         }),
       });
       $('#result-body').replaceChildren(
-        el('h2', {}, 'Saved'),
-        el(
-          'p',
-          {},
-          'Your changes are in ',
-          el(
-            'a',
-            { href: result.url, target: '_blank', rel: 'noopener noreferrer' },
-            `pull request #${result.number}`,
-          ),
-          '.',
-        ),
-        el(
-          'p',
-          {},
-          result.autoMerge
-            ? 'The checks are running. When they pass it merges itself and staging rebuilds — allow three or four minutes.'
-            : 'Auto-merge is not enabled on the repository, so merge it on GitHub once the checks pass. Staging rebuilds after the merge.',
-        ),
+        ...[
+          el('h2', {}, 'Saved'),
+          result.demo
+            ? el(
+                'p',
+                {},
+                `Demo mode: written to ${result.folder} in the project folder (${result.added} image(s) added, ${result.removed} marked for removal). Nothing was committed.`,
+              )
+            : el(
+                'p',
+                {},
+                'Your changes are in ',
+                el(
+                  'a',
+                  { href: result.url, target: '_blank', rel: 'noopener noreferrer' },
+                  `pull request #${result.number}`,
+                ),
+                '.',
+              ),
+          result.demo
+            ? null
+            : el(
+                'p',
+                {},
+                result.autoMerge
+                  ? 'The checks are running. When they pass it merges itself and staging rebuilds — allow three or four minutes.'
+                  : 'Auto-merge is not enabled on the repository, so merge it on GitHub once the checks pass. Staging rebuilds after the merge.',
+              ),
+        ].filter(Boolean),
       );
       $('#result-close').textContent = 'Close';
       $('#result-close').onclick = () => $('#result').close();
