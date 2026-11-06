@@ -911,16 +911,24 @@ body.signin .main {
   box-shadow: 0 24px 60px #1a181614;
   overflow: hidden;
 }
+@media (prefers-color-scheme: dark) {
+  .signin-brand .mark {
+    background: var(--black);
+  }
+}
 .signin-brand {
-  background: var(--black);
-  padding: 36px 32px 28px;
+  padding: 36px 32px 8px;
   display: grid;
   place-items: center;
 }
-.signin-brand img {
-  width: 150px;
-  height: auto;
-  display: block;
+/* The mark is gold on logo.svg; on cream it reads better in ink, so the
+   shape is used as a mask over the ink colour. */
+.signin-brand .mark {
+  width: 170px;
+  aspect-ratio: 2856 / 1479;
+  background: var(--black);
+  -webkit-mask: url('/assets/img/logo.svg') no-repeat center / contain;
+  mask: url('/assets/img/logo.svg') no-repeat center / contain;
 }
 .signin-body {
   padding: 28px 32px 32px;

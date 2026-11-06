@@ -1900,7 +1900,7 @@
     const brand = el(
       'div',
       { class: 'signin-brand' },
-      el('img', { src: '/assets/img/logo.svg', alt: 'Kalaayana Studios' }),
+      el('div', { class: 'mark', role: 'img', 'aria-label': 'Kalaayana Studios' }),
     );
     const box = el('div', { class: 'signin-card' }, brand);
     const expired = Boolean(err.expired);
