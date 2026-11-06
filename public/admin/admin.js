@@ -405,6 +405,7 @@
         'Retake',
       );
       const camNote = el('small', { class: 'muted' }, 'Starting the camera…');
+      const go = el('button', { class: 'btn', type: 'submit' }, 'Continue');
       let stream = null;
       let photo = null;
       const stop = () => {
@@ -418,7 +419,8 @@
             audio: false,
           });
           video.srcObject = stream;
-          camNote.textContent = 'A photograph is kept in the log with your name.';
+          camNote.textContent =
+            'Take a photograph to continue; it is kept in the log with your name.';
         } catch {
           cam.hidden = true;
           take.hidden = true;
@@ -450,16 +452,28 @@
         el('div', { class: 'f' }, el('label', { for: 'who-name' }, 'Name'), name),
         cam,
         el('div', { class: 'cam-tools' }, take, retake, camNote),
-        el('button', { class: 'btn', type: 'submit' }, 'Continue'),
+        go,
         note,
       );
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (go.disabled) return;
         const who = name.value.trim();
-        if (!who) return (note.textContent = 'Enter your name.');
-        if (stream && !photo) {
-          take.click();
+        if (!who) {
+          note.textContent = 'Enter your name.';
+          name.focus();
+          return;
         }
+        // With a camera, the photograph is part of the record: no photo, no entry.
+        if (stream && !photo) {
+          note.textContent = 'Take your photograph first.';
+          take.focus();
+          return;
+        }
+        note.textContent = '';
+        go.disabled = true;
+        go.classList.add('is-busy');
+        go.textContent = 'Signing in…';
         try {
           await api('/session', { method: 'POST', body: JSON.stringify({ name: who, photo }) });
           try {
@@ -472,6 +486,9 @@
           resolve();
         } catch (x) {
           note.textContent = x.message;
+          go.disabled = false;
+          go.classList.remove('is-busy');
+          go.textContent = 'Continue';
         }
       });
       $('#result-body').replaceChildren(

@@ -179,6 +179,33 @@ img.pic.loaded {
     animation: none;
   }
 }
+/* a button that is waiting on the server */
+.btn.is-busy {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+.btn.is-busy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ffffff66;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: btn-spin 0.8s linear infinite;
+}
+.btn-ghost.is-busy::after {
+  border-color: #1a181633;
+  border-top-color: var(--black);
+}
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 .pending-note {
   margin: 10px 0 0;
   color: var(--gold);
