@@ -409,6 +409,16 @@ http
       appendLog([item]);
       return json(res, { ok: true, name: who });
     }
+    if (req.method === 'GET' && url.pathname === '/admin/api/insights')
+      return json(
+        res,
+        {
+          error:
+            'Insights are not set up yet: the Worker needs CF_API_TOKEN (with Account Analytics: Read) and CF_WEB_ANALYTICS_SITE_TAG.',
+          unconfigured: true,
+        },
+        503,
+      );
     if (req.method === 'POST' && url.pathname === '/admin/api/log') {
       let raw = '';
       for await (const chunk of req) raw += chunk;

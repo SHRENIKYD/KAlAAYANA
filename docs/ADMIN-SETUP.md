@@ -75,6 +75,24 @@ as a Worker secret named `CF_API_TOKEN` (same place as `GITHUB_TOKEN`).
 Without the token the Users tab still works, but each invitation must also
 be added to the Access policy by hand; the log line says so.
 
+### 6. Website insights (optional)
+
+The Insights tab shows visits, page views, pages, referrers, countries and
+devices from Cloudflare Web Analytics, which counts page loads without
+cookies. Three things switch it on:
+
+1. Cloudflare dashboard → Analytics & Logs → Web Analytics → Add a site →
+   enter the public hostname (`kalaayanastudios.com`), choose the JavaScript
+   snippet. Copy the **token** from the snippet and the site's **site tag**
+   (on the site's page; also the `siteTag` in the dashboard URL).
+2. Put the token in `src/data/site.json` under `analytics.cloudflareBeaconToken`
+   and commit: every page then loads the beacon. The token is public by design.
+3. Put the site tag in `wrangler.jsonc` as `CF_WEB_ANALYTICS_SITE_TAG`, and add
+   **Account · Account Analytics · Read** to the `CF_API_TOKEN` token's
+   permissions (edit the token in My Profile → API Tokens).
+
+Until all three are in place the tab explains what is missing.
+
 ## Roles and invitations
 
 Who may sign in, and as what, is `admin/users.json` in the repository, so

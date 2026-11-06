@@ -43,7 +43,7 @@ Submitting an enquiry is voluntary. You may omit optional details or contact us 
 
 ## 5. Website technologies and third-party services
 
-The reviewed website contains no intentionally installed advertising trackers or analytics library, and sets no cookies or browser-storage values of its own.
+The website sets no cookies or browser-storage values of its own and carries no advertising trackers. It may use Cloudflare Web Analytics, a privacy-first measurement service that counts page views without cookies, fingerprinting or cross-site tracking; the only information processed is the page requested and ordinary technical request data, used in aggregate to understand which pages are read.
 
 Fonts are requested from Google Fonts. The contact page embeds Google Maps. Loading these resources can disclose technical request information to Google, including IP address and browser information; Google may use its own storage or cookies according to its services and your settings. The embedded map can load when the visitor reaches the map area, before the visitor clicks it. We therefore do not describe the website as “cookie-free” or say that third parties receive data only after an outbound click.
 

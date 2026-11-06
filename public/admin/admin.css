@@ -179,6 +179,33 @@ img.pic.loaded {
     animation: none;
   }
 }
+/* a button that is waiting on the server */
+.btn.is-busy {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+.btn.is-busy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ffffff66;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: btn-spin 0.8s linear infinite;
+}
+.btn-ghost.is-busy::after {
+  border-color: #1a181633;
+  border-top-color: var(--black);
+}
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 .pending-note {
   margin: 10px 0 0;
   color: var(--gold);
@@ -256,12 +283,297 @@ body.role-admin .superadmin-only {
   display: none;
 }
 body.tab-log .side,
-body.tab-users .side {
+body.tab-users .side,
+body.tab-insights .side {
   display: none;
 }
 body.tab-log .shell,
-body.tab-users .shell {
+body.tab-users .shell,
+body.tab-insights .shell {
   grid-template-columns: 1fr;
+}
+/* ---------- insights ---------- */
+.range {
+  display: inline-flex;
+  gap: 2px;
+  border: 1px solid var(--line);
+  padding: 3px;
+  background: var(--panel);
+}
+.range + .range {
+  margin-left: 10px;
+}
+.range button {
+  all: unset;
+  cursor: pointer;
+  padding: 6px 14px;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.range button[aria-pressed='true'] {
+  background: var(--black);
+  color: #f5f1ea;
+}
+.refetching {
+  opacity: 0.45;
+  transition: opacity 0.2s;
+}
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+  margin: 20px 0 20px;
+}
+.tile {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 16px 18px 14px;
+  min-width: 0;
+}
+.tile small {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.tile-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+.tile b {
+  font: 600 1.9rem/1.1 var(--sans);
+  letter-spacing: -0.01em;
+}
+.spark {
+  width: 96px;
+  height: 28px;
+  flex: none;
+}
+.delta {
+  display: block;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.delta.good {
+  color: #2f6b3a;
+}
+.delta.bad {
+  color: #a3432e;
+}
+.ins-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 18px 20px 16px;
+  min-width: 0;
+}
+.ins-card h2 {
+  font-size: 1.15rem;
+  margin: 0 0 12px;
+}
+.ins-main {
+  margin-bottom: 20px;
+}
+.card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+.legend i.key-line {
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+}
+.chart-slot {
+  position: relative;
+}
+.chart-wrap {
+  position: relative;
+}
+.line-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--sans);
+}
+.line-chart .grid {
+  stroke: #e6e0d6;
+  stroke-width: 1;
+}
+.line-chart .tick {
+  font-size: 11px;
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.line-chart .end-label {
+  font-size: 11px;
+  fill: var(--black);
+}
+.line-chart .crosshair {
+  stroke: var(--black);
+  stroke-width: 1;
+  opacity: 0.35;
+}
+.line-chart rect:focus-visible {
+  outline: 2px solid var(--black);
+}
+.chart-tip {
+  position: absolute;
+  top: 8px;
+  transform: translateX(-50%);
+  background: var(--black);
+  color: #f5f1ea;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  pointer-events: none;
+  white-space: nowrap;
+  min-width: 150px;
+}
+.chart-tip b {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 400;
+  color: #cfc6b4;
+}
+.tip-row {
+  display: grid;
+  grid-template-columns: 14px auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+.tip-row i {
+  display: block;
+  width: 14px;
+  height: 2px;
+}
+.tip-row strong {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.tip-row span {
+  color: #cfc6b4;
+}
+.ins-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+.bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.bars li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) 52px 42px;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+.bar-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bar-track {
+  display: block;
+  height: 8px;
+  background: #ece6db;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.bar-track i {
+  display: block;
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+}
+.bar-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.bar-share {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.segments {
+  display: flex;
+  gap: 2px;
+  height: 28px;
+  margin: 6px 0 12px;
+}
+.segments span {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 0;
+  overflow: hidden;
+}
+.ins-table td:not(:first-child),
+.ins-table th:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  width: 92px;
+}
+.ins-table td:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 260px;
+}
+.insight-note {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 20px 22px;
+  max-width: 720px;
+}
+@media (max-width: 820px) {
+  .bars li {
+    grid-template-columns: minmax(0, 1fr) 52px 42px;
+  }
+  .bars li .bar-track {
+    grid-column: 1 / -1;
+  }
+  .range + .range {
+    margin-left: 0;
+    margin-top: 8px;
+  }
 }
 .log-block {
   margin-bottom: 36px;

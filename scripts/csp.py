@@ -24,12 +24,12 @@ DIRECTIVES = [
     "default-src 'self'",
     "base-uri 'self'",
     "object-src 'none'",
-    "script-src 'self'{hashes}",
+    "script-src 'self' https://static.cloudflareinsights.com{hashes}",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: blob:",
     "frame-src https://maps.google.com https://www.google.com",
-    "connect-src 'self'",
+    "connect-src 'self' https://cloudflareinsights.com",
     "form-action 'self' mailto:",
 ]
 

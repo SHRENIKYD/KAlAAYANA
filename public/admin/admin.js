@@ -133,8 +133,22 @@
     renderSections();
   }
 
-  /* ---------- tabs ---------- */
-  const TABS = ['home', 'projects', 'log', 'users'];
+  /* ---------- tabs ----------
+     The tab, and the open work on the Projects tab, live in the address
+     (#projects/murals), so a refresh or the back button lands where you were. */
+  const TABS = ['home', 'projects', 'insights', 'log', 'users'];
+  function readPlace() {
+    const [tab, key] = location.hash.replace(/^#/, '').split('/');
+    if (TABS.includes(tab)) state.tab = tab;
+    if (tab === 'projects' && key) state.current = decodeURIComponent(key);
+  }
+  function writePlace() {
+    const hash =
+      state.tab === 'projects' && state.current
+        ? `#projects/${encodeURIComponent(state.current)}`
+        : `#${state.tab}`;
+    if (location.hash !== hash) history.replaceState(null, '', hash);
+  }
   function showTab(tab) {
     state.tab = tab;
     for (const t of TABS) {
@@ -144,12 +158,589 @@
     if (tab === 'home') editHome();
     else if (tab === 'log') showLog();
     else if (tab === 'users') showUsers();
+    else if (tab === 'insights') showInsights();
     else
       openSection(
         state.current && state.sections[state.current]
           ? state.current
           : Object.keys(state.sections)[0],
       );
+    writePlace();
+  }
+
+  /* ---------- insights (everyone) ---------- */
+  let insightsResizeBound = false;
+  async function showInsights(days) {
+    state.view = 'insights';
+    state.insightDays = days || state.insightDays || 7;
+    renderInsights();
+    const want = state.insightDays;
+    if (state.insights?.days === want && Date.now() - (state.insightsAt || 0) < 120000) return;
+    if (state.insights) renderInsights();
+    try {
+      const data = await api(`/insights?days=${want}`);
+      if (state.insightDays !== want) return;
+      state.insights = data;
+      state.insightsError = '';
+      state.insightsUnconfigured = false;
+      state.insightsAt = Date.now();
+    } catch (e) {
+      state.insights = null;
+      state.insightsError = e.message;
+      state.insightsUnconfigured = Boolean(e.status === 503);
+    }
+    if (state.view === 'insights') renderInsights();
+    if (!insightsResizeBound) {
+      insightsResizeBound = true;
+      let t;
+      window.addEventListener('resize', () => {
+        clearTimeout(t);
+        t = setTimeout(() => {
+          if (state.view === 'insights' && state.insights) renderInsights();
+        }, 150);
+      });
+    }
+  }
+  /* The dashboard. Two series share one axis (both are counts): visits in
+     gold, page views in blue, validated for colour-vision separation on this
+     surface. A period change keeps the previous render dimmed until the new
+     figures arrive; the skeleton shows only on the first load. */
+  const INS = {
+    visits: { label: 'Visits', color: '#a8781a' },
+    views: { label: 'Page views', color: '#2a6fa8' },
+  };
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = (tag, attrs = {}, ...children) => {
+    const node = document.createElementNS(svgNS, tag);
+    for (const [k, v] of Object.entries(attrs)) if (v != null) node.setAttribute(k, v);
+    for (const c of children.flat()) if (c != null) node.append(c);
+    return node;
+  };
+  const fmt = (x) => {
+    const v = Number(x || 0);
+    if (v >= 1e6) return `${(v / 1e6).toFixed(v >= 1e7 ? 0 : 1)}M`;
+    if (v >= 1e4) return `${(v / 1e3).toFixed(v >= 1e5 ? 0 : 1)}K`;
+    return v.toLocaleString('en-IN');
+  };
+  const niceCeil = (v) => {
+    if (v <= 0) return 1;
+    const p = 10 ** Math.floor(Math.log10(v));
+    for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= v) return m * p;
+    return 10 * p;
+  };
+  const delta = (cur, prev) => {
+    if (!prev) return null;
+    return (cur - prev) / prev;
+  };
+  function sparkline(raw, color) {
+    const buckets = Math.min(12, raw.length);
+    const size = raw.length / buckets;
+    const values = Array.from({ length: buckets }, (_, b) =>
+      raw.slice(Math.round(b * size), Math.round((b + 1) * size)).reduce((n, v) => n + v, 0),
+    );
+    const w = 96;
+    const h = 28;
+    const max = Math.max(1, ...values);
+    const step = values.length > 1 ? w / (values.length - 1) : w;
+    const pts = values.map(
+      (v, i) => `${(i * step).toFixed(1)},${(h - 2 - (v / max) * (h - 4)).toFixed(1)}`,
+    );
+    return svg(
+      'svg',
+      { class: 'spark', viewBox: `0 0 ${w} ${h}`, 'aria-hidden': 'true' },
+      svg('polyline', {
+        points: pts.join(' '),
+        fill: 'none',
+        stroke: color,
+        'stroke-width': '1.5',
+        'stroke-linejoin': 'round',
+        'stroke-linecap': 'round',
+      }),
+      svg('circle', {
+        cx: pts[pts.length - 1].split(',')[0],
+        cy: pts[pts.length - 1].split(',')[1],
+        r: '3',
+        fill: color,
+        stroke: '#fff',
+        'stroke-width': '2',
+      }),
+    );
+  }
+  function statTile({ label, value, deltaValue, periodLabel, spark, color, upIsGood = true }) {
+    let d = null;
+    if (deltaValue != null && Number.isFinite(deltaValue)) {
+      const up = deltaValue >= 0;
+      const good = up === upIsGood;
+      d = el(
+        'span',
+        { class: `delta ${deltaValue === 0 ? '' : good ? 'good' : 'bad'}` },
+        el('i', { 'aria-hidden': 'true' }, deltaValue === 0 ? '·' : up ? '▲' : '▼'),
+        ` ${Math.abs(Math.round(deltaValue * 100))}% vs previous ${periodLabel}`,
+      );
+    } else if (deltaValue === null)
+      d = el('span', { class: 'delta' }, `No previous ${periodLabel} to compare`);
+    return el(
+      'div',
+      { class: 'tile' },
+      el('small', {}, label),
+      el('div', { class: 'tile-row' }, el('b', {}, value), spark ? sparkline(spark, color) : null),
+      d,
+    );
+  }
+  function lineChart(d, width) {
+    const W = Math.max(320, width);
+    const H = 260;
+    const pad = { t: 18, r: 96, b: 30, l: 44 };
+    const iw = W - pad.l - pad.r;
+    const ih = H - pad.t - pad.b;
+    const n = d.byDay.length;
+    const max = niceCeil(Math.max(1, ...d.byDay.map((x) => Math.max(x.visits, x.views))));
+    const x = (i) => pad.l + (n > 1 ? (i / (n - 1)) * iw : iw / 2);
+    const y = (v) => pad.t + ih - (v / max) * ih;
+    const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => max * f);
+    const g = svg('svg', {
+      class: 'line-chart',
+      viewBox: `0 0 ${W} ${H}`,
+      width: W,
+      height: H,
+      role: 'img',
+      'aria-label': `Visits and page views per day for the last ${d.days} days`,
+    });
+    for (const t of ticks) {
+      g.append(svg('line', { x1: pad.l, x2: W - pad.r, y1: y(t), y2: y(t), class: 'grid' }));
+      g.append(
+        svg('text', { x: pad.l - 8, y: y(t) + 4, class: 'tick', 'text-anchor': 'end' }, fmt(t)),
+      );
+    }
+    const every = n > 45 ? 15 : n > 14 ? 7 : 1;
+    d.byDay.forEach((p, i) => {
+      if (i === n - 1 || (i % every === 0 && n - 1 - i > every / 2))
+        g.append(
+          svg(
+            'text',
+            {
+              x: x(i),
+              y: H - 8,
+              class: 'tick',
+              'text-anchor': i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle',
+            },
+            p.date.slice(5).replace('-', '/'),
+          ),
+        );
+    });
+    for (const key of ['views', 'visits']) {
+      const pts = d.byDay.map((p, i) => [x(i), y(p[key])]);
+      const path = pts
+        .map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`)
+        .join(' ');
+      g.append(
+        svg('path', {
+          d: `${path} L${pts[n - 1][0].toFixed(1)},${y(0)} L${pts[0][0].toFixed(1)},${y(0)} Z`,
+          fill: INS[key].color,
+          'fill-opacity': '0.08',
+        }),
+      );
+      g.append(
+        svg('path', {
+          d: path,
+          fill: 'none',
+          stroke: INS[key].color,
+          'stroke-width': '2',
+          'stroke-linejoin': 'round',
+          'stroke-linecap': 'round',
+        }),
+      );
+      const last = pts[n - 1];
+      g.append(
+        svg('circle', {
+          cx: last[0],
+          cy: last[1],
+          r: '4',
+          fill: INS[key].color,
+          stroke: '#fff',
+          'stroke-width': '2',
+        }),
+      );
+      g.append(
+        svg(
+          'text',
+          { x: last[0] + 10, y: last[1] + 4, class: 'end-label' },
+          `${fmt(d.byDay[n - 1][key])} ${key === 'views' ? 'views' : 'visits'}`,
+        ),
+      );
+    }
+    // crosshair layer
+    const cross = svg('line', {
+      class: 'crosshair',
+      y1: pad.t,
+      y2: pad.t + ih,
+      x1: 0,
+      x2: 0,
+      visibility: 'hidden',
+    });
+    const dots = ['visits', 'views'].map((key) =>
+      svg('circle', {
+        r: '5',
+        fill: INS[key].color,
+        stroke: '#fff',
+        'stroke-width': '2',
+        visibility: 'hidden',
+      }),
+    );
+    g.append(cross, ...dots);
+    const hit = svg('rect', {
+      x: pad.l,
+      y: pad.t,
+      width: iw,
+      height: ih,
+      fill: 'transparent',
+      tabindex: '0',
+      'aria-label': 'Hover or use arrow keys to read values',
+    });
+    g.append(hit);
+    const wrap = el('div', { class: 'chart-wrap' });
+    const tip = el('div', { class: 'chart-tip', hidden: '' });
+    wrap.append(g, tip);
+    let current = -1;
+    const show = (i) => {
+      if (i < 0 || i >= n) return;
+      current = i;
+      const p = d.byDay[i];
+      cross.setAttribute('x1', x(i));
+      cross.setAttribute('x2', x(i));
+      cross.setAttribute('visibility', 'visible');
+      ['visits', 'views'].forEach((key, k) => {
+        dots[k].setAttribute('cx', x(i));
+        dots[k].setAttribute('cy', y(p[key]));
+        dots[k].setAttribute('visibility', 'visible');
+      });
+      tip.replaceChildren(
+        el('b', {}, p.date),
+        ...['visits', 'views'].map((key) =>
+          el(
+            'div',
+            { class: 'tip-row' },
+            el('i', { style: `background:${INS[key].color}` }),
+            el('strong', {}, fmt(p[key])),
+            el('span', {}, INS[key].label),
+          ),
+        ),
+      );
+      tip.hidden = false;
+      const left = (x(i) / W) * wrap.clientWidth;
+      tip.style.left = `${Math.min(Math.max(left, 90), wrap.clientWidth - 90)}px`;
+    };
+    const hide = () => {
+      cross.setAttribute('visibility', 'hidden');
+      dots.forEach((c) => c.setAttribute('visibility', 'hidden'));
+      tip.hidden = true;
+      current = -1;
+    };
+    hit.addEventListener('pointermove', (e) => {
+      const r = g.getBoundingClientRect();
+      const px = ((e.clientX - r.left) / r.width) * W;
+      show(Math.round(((px - pad.l) / iw) * (n - 1)));
+    });
+    hit.addEventListener('pointerleave', hide);
+    hit.addEventListener('focus', () => show(n - 1));
+    hit.addEventListener('blur', hide);
+    hit.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(Math.max(0, (current < 0 ? n - 1 : current) - 1));
+      else if (e.key === 'ArrowRight') show(Math.min(n - 1, (current < 0 ? 0 : current) + 1));
+      else return;
+      e.preventDefault();
+    });
+    return wrap;
+  }
+  function barList(title, list, total, color) {
+    const max = Math.max(1, ...list.map((r) => r.visits));
+    return el(
+      'section',
+      { class: 'ins-card' },
+      el('h2', {}, title),
+      list.length
+        ? el(
+            'ol',
+            { class: 'bars' },
+            ...list.map((r) =>
+              el(
+                'li',
+                { title: `${r.label}: ${fmt(r.visits)} visits, ${fmt(r.views)} page views` },
+                el('span', { class: 'bar-label' }, r.label || '—'),
+                el(
+                  'span',
+                  { class: 'bar-track' },
+                  el('i', {
+                    style: `width:${Math.max(2, (r.visits / max) * 100)}%;background:${color}`,
+                  }),
+                ),
+                el('span', { class: 'bar-value' }, fmt(r.visits)),
+                el(
+                  'span',
+                  { class: 'bar-share' },
+                  total ? `${Math.round((r.visits / total) * 100)}%` : '',
+                ),
+              ),
+            ),
+          )
+        : el('p', { class: 'muted' }, 'Nothing in this period.'),
+    );
+  }
+  function segmented(title, list, total) {
+    const shades = ['#a8781a', '#2a6fa8', '#6b6256', '#b9ab8f'];
+    const parts = list.slice(0, 4);
+    return el(
+      'section',
+      { class: 'ins-card' },
+      el('h2', {}, title),
+      parts.length
+        ? el(
+            'div',
+            {},
+            el(
+              'div',
+              {
+                class: 'segments',
+                role: 'img',
+                'aria-label': parts
+                  .map((p) => `${p.label} ${Math.round((p.visits / total) * 100)}%`)
+                  .join(', '),
+              },
+              ...parts.map((p, i) => {
+                const share = total ? p.visits / total : 0;
+                return el(
+                  'span',
+                  {
+                    style: `flex:${Math.max(share, 0.001)};background:${shades[i]}`,
+                    title: `${p.label}: ${fmt(p.visits)} visits (${Math.round(share * 100)}%)`,
+                  },
+                  share >= 0.12 ? `${Math.round(share * 100)}%` : '',
+                );
+              }),
+            ),
+            el(
+              'ul',
+              { class: 'legend' },
+              ...parts.map((p, i) =>
+                el('li', {}, el('i', { style: `background:${shades[i]}` }), p.label),
+              ),
+            ),
+          )
+        : el('p', { class: 'muted' }, 'Nothing in this period.'),
+    );
+  }
+  function insightTables(d) {
+    const t = (title, head, rows) =>
+      el(
+        'section',
+        { class: 'ins-card' },
+        el('h2', {}, title),
+        el(
+          'table',
+          { class: 'log-table ins-table' },
+          el('thead', {}, el('tr', {}, ...head.map((h) => el('th', {}, h)))),
+          el('tbody', {}, ...rows.map((r) => el('tr', {}, ...r.map((c) => el('td', {}, c))))),
+        ),
+      );
+    return el(
+      'div',
+      { class: 'ins-grid' },
+      t(
+        'Per day',
+        ['Date', 'Visits', 'Page views'],
+        d.byDay.map((x) => [x.date, fmt(x.visits), fmt(x.views)]),
+      ),
+      t(
+        'Pages',
+        ['Page', 'Visits', 'Page views'],
+        d.pages.map((x) => [x.label, fmt(x.visits), fmt(x.views)]),
+      ),
+      t(
+        'Sources',
+        ['Site', 'Visits'],
+        d.referrers.map((x) => [x.label, fmt(x.visits)]),
+      ),
+      t(
+        'Countries',
+        ['Country', 'Visits'],
+        d.countries.map((x) => [x.label, fmt(x.visits)]),
+      ),
+      t(
+        'Devices',
+        ['Device', 'Visits'],
+        d.devices.map((x) => [x.label, fmt(x.visits)]),
+      ),
+    );
+  }
+  function renderInsights() {
+    const d = state.insights;
+    const stale = d && d.days !== state.insightDays;
+    const loading = !d && !state.insightsError;
+    const periodLabel = `${state.insightDays} days`;
+    const range = el(
+      'div',
+      { class: 'range', role: 'group', 'aria-label': 'Period' },
+      ...[7, 30, 90].map((k) =>
+        el(
+          'button',
+          {
+            type: 'button',
+            'aria-pressed': String(state.insightDays === k),
+            onclick: () => showInsights(k),
+          },
+          `${k} days`,
+        ),
+      ),
+    );
+    const view = el(
+      'div',
+      { class: 'range', role: 'group', 'aria-label': 'View' },
+      ...[
+        ['chart', 'Charts'],
+        ['table', 'Table'],
+      ].map(([k, label]) =>
+        el(
+          'button',
+          {
+            type: 'button',
+            'aria-pressed': String((state.insightsView || 'chart') === k),
+            onclick: () => {
+              state.insightsView = k;
+              renderInsights();
+            },
+          },
+          label,
+        ),
+      ),
+    );
+    let body;
+    if (loading) {
+      body = el(
+        'div',
+        { 'aria-hidden': 'true' },
+        el(
+          'div',
+          { class: 'tiles' },
+          ...[0, 1, 2, 3].map(() =>
+            el(
+              'div',
+              { class: 'tile' },
+              el('span', { class: 'skel skel-line', style: 'width:40%' }),
+              el('span', { class: 'skel skel-title' }),
+            ),
+          ),
+        ),
+        el('span', { class: 'skel', style: 'display:block;height:260px' }),
+      );
+    } else if (!d) {
+      body = el(
+        'div',
+        { class: 'insight-note' },
+        el(
+          'p',
+          {},
+          state.insightsUnconfigured
+            ? 'Insights are not switched on yet.'
+            : 'Insights could not be loaded.',
+        ),
+        el('p', { class: 'muted' }, state.insightsError),
+        state.insightsUnconfigured
+          ? el(
+              'p',
+              { class: 'muted' },
+              'A superadmin sets this up once: a Cloudflare Web Analytics site for the domain, its token in the site data, its site tag and an analytics-reading API token on the Worker. The steps are in docs/ADMIN-SETUP.md.',
+            )
+          : null,
+      );
+    } else {
+      const perVisit = d.totals.visits ? d.totals.views / d.totals.visits : 0;
+      const tiles = el(
+        'div',
+        { class: 'tiles' },
+        statTile({
+          label: 'Visits',
+          value: fmt(d.totals.visits),
+          deltaValue: delta(d.totals.visits, d.previous?.visits),
+          periodLabel,
+          spark: d.byDay.map((x) => x.visits),
+          color: INS.visits.color,
+        }),
+        statTile({
+          label: 'Page views',
+          value: fmt(d.totals.views),
+          deltaValue: delta(d.totals.views, d.previous?.views),
+          periodLabel,
+          spark: d.byDay.map((x) => x.views),
+          color: INS.views.color,
+        }),
+        statTile({ label: 'Pages per visit', value: perVisit.toFixed(1) }),
+        statTile({ label: 'Visits a day', value: fmt(Math.round(d.totals.visits / d.days)) }),
+      );
+      const legend = el(
+        'ul',
+        { class: 'legend' },
+        ...['visits', 'views'].map((k) =>
+          el(
+            'li',
+            {},
+            el('i', { class: 'key-line', style: `background:${INS[k].color}` }),
+            INS[k].label,
+          ),
+        ),
+      );
+      const chartCard = el(
+        'section',
+        { class: 'ins-card ins-main' },
+        el('div', { class: 'card-head' }, el('h2', {}, 'Per day'), legend),
+        el('div', { class: 'chart-slot' }),
+      );
+      const grid = el(
+        'div',
+        { class: 'ins-grid' },
+        barList('Pages', d.pages, d.totals.visits, INS.visits.color),
+        barList('Sources', d.referrers, d.totals.visits, INS.views.color),
+        barList('Countries', d.countries, d.totals.visits, INS.visits.color),
+        segmented(
+          'Devices',
+          d.devices,
+          d.devices.reduce((n, x) => n + x.visits, 0),
+        ),
+      );
+      body = el(
+        'div',
+        { class: stale ? 'refetching' : '' },
+        tiles,
+        (state.insightsView || 'chart') === 'table'
+          ? insightTables(d)
+          : el('div', {}, chartCard, grid),
+      );
+      requestAnimationFrame(() => {
+        const slot = $('.chart-slot');
+        if (slot) slot.replaceChildren(lineChart(d, slot.clientWidth));
+      });
+    }
+    $('#main').replaceChildren(
+      el(
+        'div',
+        { class: 'head' },
+        el(
+          'div',
+          {},
+          el('p', { class: 'eyebrow' }, 'Website'),
+          el('h1', {}, 'Insights'),
+          el(
+            'p',
+            { class: 'muted' },
+            d
+              ? `${d.from.slice(0, 10)} to ${d.to.slice(0, 10)} · measured without cookies by Cloudflare Web Analytics · bots left out`
+              : 'Who is reading the site, measured without cookies by Cloudflare Web Analytics. Bots are left out.',
+          ),
+        ),
+        el('div', { class: 'actions' }, range, view),
+      ),
+      body,
+    );
+    renderSections();
   }
 
   /* ---------- log (superadmin) ---------- */
@@ -390,6 +981,7 @@
         'Retake',
       );
       const camNote = el('small', { class: 'muted' }, 'Starting the camera…');
+      const go = el('button', { class: 'btn', type: 'submit' }, 'Continue');
       let stream = null;
       let photo = null;
       const stop = () => {
@@ -403,7 +995,16 @@
             audio: false,
           });
           video.srcObject = stream;
-          camNote.textContent = 'A photograph is kept in the log with your name.';
+          take.disabled = true;
+          video.addEventListener(
+            'playing',
+            () => {
+              take.disabled = false;
+              camNote.textContent =
+                'Take a photograph to continue; it is kept in the log with your name.';
+            },
+            { once: true },
+          );
         } catch {
           cam.hidden = true;
           take.hidden = true;
@@ -411,10 +1012,23 @@
         }
       })();
       take.addEventListener('click', () => {
-        if (!stream) return;
+        if (!stream || video.readyState < 2) {
+          note.textContent = 'The camera is still starting; try again in a moment.';
+          return;
+        }
         canvas.width = 320;
         canvas.height = Math.round((320 * (video.videoHeight || 480)) / (video.videoWidth || 640));
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        const ctx2d = canvas.getContext('2d');
+        ctx2d.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // A frame the camera has not exposed yet is black: refuse it.
+        const px = ctx2d.getImageData(0, 0, canvas.width, canvas.height).data;
+        let sum = 0;
+        for (let i = 0; i < px.length; i += 16) sum += px[i] + px[i + 1] + px[i + 2];
+        if (sum / ((px.length / 16) * 3) < 8) {
+          note.textContent = 'That frame came out black. Give the camera a second and try again.';
+          return;
+        }
+        note.textContent = '';
         photo = canvas.toDataURL('image/jpeg', 0.8);
         shot.src = photo;
         shot.hidden = false;
@@ -435,16 +1049,28 @@
         el('div', { class: 'f' }, el('label', { for: 'who-name' }, 'Name'), name),
         cam,
         el('div', { class: 'cam-tools' }, take, retake, camNote),
-        el('button', { class: 'btn', type: 'submit' }, 'Continue'),
+        go,
         note,
       );
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (go.disabled) return;
         const who = name.value.trim();
-        if (!who) return (note.textContent = 'Enter your name.');
-        if (stream && !photo) {
-          take.click();
+        if (!who) {
+          note.textContent = 'Enter your name.';
+          name.focus();
+          return;
         }
+        // With a camera, the photograph is part of the record: no photo, no entry.
+        if (stream && !photo) {
+          note.textContent = 'Take your photograph first.';
+          take.focus();
+          return;
+        }
+        note.textContent = '';
+        go.disabled = true;
+        go.classList.add('is-busy');
+        go.textContent = 'Signing in…';
         try {
           await api('/session', { method: 'POST', body: JSON.stringify({ name: who, photo }) });
           try {
@@ -457,6 +1083,9 @@
           resolve();
         } catch (x) {
           note.textContent = x.message;
+          go.disabled = false;
+          go.classList.remove('is-busy');
+          go.textContent = 'Continue';
         }
       });
       $('#result-body').replaceChildren(
@@ -498,13 +1127,30 @@
   );
 
   /* ---------- users (superadmin) ---------- */
-  async function changeUser(body, note, button) {
-    note.textContent = '';
-    const label = button ? button.textContent : '';
-    if (button) {
-      button.disabled = true;
-      button.textContent = 'Saving…';
-    }
+  // The table changes the moment you act; the server's answer then confirms
+  // it, or the previous list comes back with the reason.
+  async function changeUser(body) {
+    const before = state.users;
+    const email = String(body.email || '')
+      .trim()
+      .toLowerCase();
+    if (body.action === 'remove') state.users = before.filter((u) => u.email !== email);
+    else if (body.action === 'role')
+      state.users = before.map((u) => (u.email === email ? { ...u, role: body.role } : u));
+    else if (body.action === 'invite')
+      state.users = [
+        ...before,
+        { email, role: body.role, invitedBy: state.email, invitedAt: new Date().toISOString() },
+      ];
+    state.usersBusy =
+      body.action === 'remove'
+        ? `Removing ${email}…`
+        : body.action === 'invite'
+          ? `Inviting ${email}…`
+          : `Saving ${email}…`;
+    state.usersError = '';
+    state.usersPending = '';
+    renderUsers();
     try {
       const r = await api('/users', { method: 'POST', body: JSON.stringify(body) });
       if (Array.isArray(r.users)) state.users = r.users;
@@ -515,14 +1161,12 @@
       ]
         .filter(Boolean)
         .join(' ');
-      renderUsers();
     } catch (e) {
-      note.textContent = e.message;
-      if (button) {
-        button.disabled = false;
-        button.textContent = label;
-      }
+      state.users = before;
+      state.usersError = e.message;
     }
+    state.usersBusy = '';
+    if (state.view === 'users') renderUsers();
   }
   async function showUsers() {
     state.view = 'users';
@@ -535,7 +1179,8 @@
     if (state.view === 'users') renderUsers();
   }
   function renderUsers() {
-    const note = el('p', { class: 'signin-error', role: 'alert' });
+    const note = el('p', { class: 'signin-error', role: 'alert' }, state.usersError || '');
+    const busy = Boolean(state.usersBusy);
     const email = el('input', {
       type: 'email',
       id: 'invite-email',
@@ -548,7 +1193,11 @@
       el('option', { value: 'admin' }, 'Admin — add and update projects'),
       el('option', { value: 'superadmin' }, 'Superadmin — everything, including users and the log'),
     );
-    const inviteBtn = el('button', { class: 'btn', type: 'submit' }, 'Invite');
+    const inviteBtn = el(
+      'button',
+      { class: 'btn', type: 'submit', disabled: busy ? '' : null },
+      'Invite',
+    );
     const form = el(
       'form',
       { class: 'invite' },
@@ -570,11 +1219,7 @@
     );
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      changeUser(
-        { action: 'invite', email: email.value.trim(), role: role.value },
-        note,
-        inviteBtn,
-      );
+      changeUser({ action: 'invite', email: email.value.trim(), role: role.value });
     });
     const main = $('#main');
     main.replaceChildren(
@@ -591,6 +1236,7 @@
             { class: 'muted' },
             'Who can sign in to the admin, and what they may do. Admins add and update projects; superadmins can do everything, see the log and manage users.',
           ),
+          busy ? el('p', { class: 'pending-note' }, state.usersBusy) : null,
           state.usersPending ? el('p', { class: 'pending-note' }, state.usersPending) : null,
         ),
       ),
@@ -622,8 +1268,9 @@
                 return o;
               }),
             );
+            sel.disabled = busy;
             sel.addEventListener('change', () =>
-              changeUser({ action: 'role', email: u.email, role: sel.value }, note),
+              changeUser({ action: 'role', email: u.email, role: sel.value }),
             );
             return el(
               'tr',
@@ -652,11 +1299,12 @@
                       {
                         class: 'btn btn-danger btn-sm',
                         type: 'button',
+                        disabled: busy ? '' : null,
                         onclick: () =>
                           confirmBox(
                             `Remove ${u.email}?`,
                             'They can no longer sign in to the admin.',
-                            () => changeUser({ action: 'remove', email: u.email }, note),
+                            () => changeUser({ action: 'remove', email: u.email }),
                           ),
                       },
                       'Remove',
@@ -696,6 +1344,7 @@
     state.view = 'section';
     state.editing = key;
     state.current = key;
+    if (state.tab === 'projects') writePlace();
     const s = state.sections[key];
     const items = state.projects.filter((p) => p.group === key);
     const main = $('#main');
@@ -773,6 +1422,9 @@
       input,
       hint ? el('small', {}, hint) : null,
     );
+    // A required field that is already empty is shown as such from the start,
+    // so "Take me there" lands on a marked field.
+    if (props.required && !String(props.value ?? '').trim()) wrap.classList.add('invalid');
     return wrap;
   }
 
@@ -2067,6 +2719,87 @@
       return `/${state.editing}/`;
     return '/';
   }
+  /* ---------- what the server would refuse, caught here first ----------
+     Mirrors the Worker's rules for the things an editor can fix in the form,
+     so a missing alt text is pointed at, not reported after a round trip. */
+  const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  function localProblems() {
+    const out = [];
+    const need = (ok, text, go) => {
+      if (!ok) out.push({ text, go });
+    };
+    Object.entries(state.sections).forEach(([key, sec]) => {
+      const go = () => editSection(key);
+      for (const f of ['eyebrow', 'title', 'lede'])
+        need(String(sec?.[f] ?? '').trim(), `Work "${workName(key)}" is missing its ${f}`, go);
+      need(sec?.banner, `Work "${workName(key)}" has no banner photograph`, go);
+    });
+    (state.home?.works || []).forEach((w, i) => {
+      const go = () => {
+        state.openWork = i;
+        showTab('home');
+      };
+      need(String(w?.title ?? '').trim(), `Homepage work ${i + 1} is missing its title`, go);
+      need(String(w?.eyebrow ?? '').trim(), `Homepage work ${i + 1} is missing its eyebrow`, go);
+      need(
+        String(w?.image?.alt ?? '').trim(),
+        `Homepage work ${i + 1} (${w?.title || 'untitled'}) needs alt text for its image`,
+        go,
+      );
+    });
+    const slugs = new Set();
+    state.projects.forEach((pr, i) => {
+      const name = pr?.title || pr?.slug || `#${i + 1}`;
+      const go = () => editProject(pr);
+      for (const f of ['title', 'slug', 'scale', 'description'])
+        need(String(pr?.[f] ?? '').trim(), `Project "${name}" is missing its ${f}`, go);
+      need(
+        !pr?.slug || SLUG_RE.test(pr.slug),
+        `Project "${name}": the slug must be lowercase letters, digits and hyphens`,
+        go,
+      );
+      need(!slugs.has(pr?.slug), `Project "${name}": the slug ${pr?.slug} is already used`, go);
+      slugs.add(pr?.slug);
+      need(pr?.images?.length, `Project "${name}" needs at least one photograph`, go);
+      (pr?.images || []).forEach((img, j) =>
+        need(
+          String(img?.alt ?? '').trim(),
+          `Project "${name}": photograph ${j + 1} needs alt text`,
+          go,
+        ),
+      );
+    });
+    return out;
+  }
+  function showProblems(problems, verb) {
+    const first = problems[0];
+    $('#result-body').replaceChildren(
+      el('h2', {}, `Finish these before ${verb}`),
+      el('p', { class: 'muted' }, 'The site needs every field below. Nothing has been sent.'),
+      el(
+        'ul',
+        {},
+        ...problems.slice(0, 12).map((pr) => el('li', {}, pr.text)),
+        problems.length > 12 ? el('li', {}, `and ${problems.length - 12} more`) : null,
+      ),
+    );
+    $('#result-close').hidden = false;
+    $('#result-close').disabled = false;
+    $('#result-close').textContent = 'Take me there';
+    $('#result-close').onclick = () => {
+      closeDialog();
+      if (first.go) first.go();
+      setTimeout(() => {
+        const bad = $('.f.invalid input, .f.invalid textarea');
+        if (bad) {
+          bad.scrollIntoView({ block: 'center' });
+          bad.focus();
+        }
+      }, 50);
+    };
+    if (!$('#result').open) $('#result').showModal();
+  }
+
   function payload() {
     return {
       projects: state.projects,
@@ -2079,12 +2812,97 @@
     };
   }
   const openTab = () => window.open('', '_blank');
+  let waitTimer = null;
   const sendTo = (tab, url) => {
+    clearInterval(waitTimer);
+    waitTimer = null;
     if (tab) tab.location.replace(url);
     else window.location.assign(url);
   };
+  // The tab that will show the preview, while it is being built: the mark,
+  // a moving bar, the time so far, and a line of what the studio might be up
+  // to, drawn from a shuffled list so no line comes round twice in a row.
+  const WAIT_LINES = [
+    'Preparing the clay…',
+    'Mixing the colours…',
+    'Sharpening the chisels…',
+    'Warming the kiln…',
+    'Polishing the bronze…',
+    'Measuring twice…',
+    'Setting the stones…',
+    'Hanging the frames…',
+    'Dusting the gallery…',
+    'Lighting the lamps…',
+    'Rolling out the carpet…',
+    'Tuning the scaffolding…',
+    'Sweeping the workshop floor…',
+    'Sketching the outline…',
+    'Carving the details…',
+    'Letting the plaster set…',
+  ];
   const waiting = (tab, text) => {
-    if (tab) tab.document.write(`<p style="font:16px/1.5 system-ui;padding:24px">${text}</p>`);
+    if (!tab) return;
+    clearInterval(waitTimer);
+    const origin = window.location.origin;
+    tab.document.open();
+    tab.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Building the preview</title>
+<style>
+html,body{height:100%;margin:0}
+body{display:grid;place-items:center;background:#f5f1ea;color:#1a1816;font:300 16px/1.6 "DM Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.card{width:min(440px,calc(100% - 48px));text-align:center}
+.mark{width:120px;aspect-ratio:2856/1479;margin:0 auto 28px;background:#1a1816;-webkit-mask:url(${origin}/assets/img/logo.svg) no-repeat center/contain;mask:url(${origin}/assets/img/logo.svg) no-repeat center/contain}
+h1{font:400 1.6rem/1.2 Georgia,serif;margin:0 0 10px}
+p{margin:0 0 22px;color:#6d665c}
+.bar{height:3px;background:#e6e0d6;overflow:hidden;border-radius:2px}
+.bar i{display:block;height:100%;width:40%;background:linear-gradient(90deg,#b08d3f,#d6b35a,#b08d3f);animation:slide 1.3s ease-in-out infinite}
+@keyframes slide{from{transform:translateX(-120%)}to{transform:translateX(300%)}}
+.line{margin:18px 0 6px;min-height:1.6em;color:#1a1816;transition:opacity .3s}
+.time{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#a99c7d;font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){.bar i{animation:none;width:100%}}
+</style></head><body><div class="card"><div class="mark"></div>
+<h1>Building the preview</h1><p id="text"></p>
+<div class="bar"><i></i></div><div class="line" id="line"></div><div class="time" id="time">0:00</div>
+</div></body></html>`);
+    tab.document.close();
+    const doc = tab.document;
+    doc.getElementById('text').textContent = text;
+    const started = Date.now();
+    let queue = [];
+    let last = '';
+    const next = () => {
+      if (!queue.length) {
+        queue = WAIT_LINES.slice();
+        for (let i = queue.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [queue[i], queue[j]] = [queue[j], queue[i]];
+        }
+        if (queue[0] === last) queue.push(queue.shift());
+      }
+      last = queue.shift();
+      return last;
+    };
+    const line = doc.getElementById('line');
+    const time = doc.getElementById('time');
+    line.textContent = next();
+    let ticks = 0;
+    waitTimer = setInterval(() => {
+      if (tab.closed || !tab.document.getElementById('time')) {
+        clearInterval(waitTimer);
+        waitTimer = null;
+        return;
+      }
+      const s = Math.floor((Date.now() - started) / 1000);
+      time.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+      ticks += 1;
+      if (ticks % 3 === 0) {
+        line.style.opacity = '0';
+        setTimeout(() => {
+          line.textContent = next();
+          line.style.opacity = '1';
+        }, 300);
+      }
+    }, 1000);
   };
   const sleep = (ms) => new Promise((ok) => setTimeout(ok, ms));
 
@@ -2099,7 +2917,7 @@
   async function cloudflarePreviewUrl(number, tab) {
     waiting(
       tab,
-      'Cloudflare is building your proposed change. This page will open the preview as soon as it is ready — usually two to three minutes.',
+      'Your proposed change is being built. The preview opens here as soon as it is ready, usually within two to three minutes.',
     );
     for (let i = 0; i < 40; i += 1) {
       const r = await api(`/preview-url/${number}`);
@@ -2112,6 +2930,10 @@
   /* Look only: the top-bar button. */
   async function previewCurrent() {
     const btn = $('#preview-btn');
+    if (state.dirty) {
+      const problems = localProblems();
+      if (problems.length) return showProblems(problems, 'previewing');
+    }
     const tab = openTab();
     btn.disabled = true;
     try {
@@ -2156,6 +2978,10 @@
     onReject,
   }) {
     const note = el('p', { class: 'signin-error', role: 'alert' });
+    const accept = el('button', { class: 'btn', type: 'button' }, acceptLabel);
+    const reject = el('button', { class: 'btn btn-ghost', type: 'button' }, rejectLabel);
+    accept.addEventListener('click', decide(accept, [reject], onAccept, note));
+    reject.addEventListener('click', decide(reject, [accept], onReject, note));
     $('#result-body').replaceChildren(
       el('h2', {}, title),
       el('p', {}, text),
@@ -2170,20 +2996,28 @@
             ),
           )
         : null,
-      el(
-        'div',
-        { class: 'signin-form' },
-        el('button', { class: 'btn', type: 'button', onclick: () => onAccept(note) }, acceptLabel),
-        el(
-          'button',
-          { class: 'btn btn-ghost', type: 'button', onclick: () => onReject(note) },
-          rejectLabel,
-        ),
-      ),
+      el('div', { class: 'signin-form' }, accept, reject),
       note,
     );
     $('#result-close').hidden = true;
     $('#result').showModal();
+  }
+  // A decision button spins and holds the other one until the server answers.
+  function decide(button, others, run, note) {
+    return async () => {
+      if (button.disabled) return;
+      note.textContent = '';
+      button.disabled = true;
+      button.classList.add('is-busy');
+      for (const o of others) o.disabled = true;
+      try {
+        await run(note);
+      } finally {
+        button.disabled = false;
+        button.classList.remove('is-busy');
+        for (const o of others) o.disabled = false;
+      }
+    };
   }
   function closeDialog() {
     state.dialogLocked = false;
@@ -2195,6 +3029,7 @@
   }
   function doneDialog(title, lines) {
     $('#result-close').hidden = false;
+    $('#result-close').disabled = false;
     $('#result-body').replaceChildren(el('h2', {}, title), ...lines.map((l) => el('p', {}, l)));
     $('#result-close').textContent = 'Close';
     $('#result-close').onclick = () => $('#result').close();
@@ -2272,8 +3107,8 @@
             'div',
             { class: 'signin-form' },
             el(
-              'a',
-              { class: 'btn', href: '/cdn-cgi/access/logout' },
+              'button',
+              { class: 'btn', type: 'button', onclick: () => accessSignOut() },
               err.status === 403 ? 'Sign in with another account' : 'Sign in',
             ),
           ),
@@ -2306,8 +3141,19 @@
       }
       showSignIn({ demo: true, status: 401, expired: reason === 'expired' });
     } else {
-      window.location.assign('/cdn-cgi/access/logout');
+      await accessSignOut();
     }
+  }
+  // Access's logout drops the browser on the site root. Clear the session
+  // without following its redirect, then go to the admin, where Access asks
+  // for a fresh sign-in and returns here afterwards.
+  async function accessSignOut() {
+    try {
+      await fetch('/cdn-cgi/access/logout', { credentials: 'include', redirect: 'manual' });
+    } catch {
+      /* the cookie is cleared by the response even when the redirect is opaque */
+    }
+    window.location.replace('/admin/');
   }
   function startSessionClock(ends) {
     stopSessionClock();
@@ -2359,6 +3205,8 @@
   /* ---------- Preview & publish ---------- */
   async function publish() {
     const btn = $('#save');
+    const problems = localProblems();
+    if (problems.length) return showProblems(problems, 'previewing');
     if (!$('#message').value.trim()) {
       $('#message').focus();
       return alertBox('Say what changed', 'One line, for the log and the commit.');
@@ -2511,6 +3359,7 @@
     });
     state.original = snapshot();
     state.adminFetchedAt = Date.now();
+    readPlace();
     $('#who').textContent = `${data.email} · ${data.role || 'admin'}`;
     if (data.sessionEnds) startSessionClock(Number(data.sessionEnds));
     document.body.classList.toggle('role-admin', data.role !== 'superadmin');
@@ -2536,9 +3385,15 @@
   $('#new-section').addEventListener('click', newWork);
   $('#preview-btn').addEventListener('click', previewCurrent);
   $('#signout').addEventListener('click', () => signOut('manual'));
+  window.addEventListener('hashchange', () => {
+    if (!state.email) return;
+    readPlace();
+    showTab(state.tab);
+  });
   $('#tab-home').addEventListener('click', () => showTab('home'));
   $('#tab-log').addEventListener('click', () => showTab('log'));
   $('#tab-users').addEventListener('click', () => showTab('users'));
+  $('#tab-insights').addEventListener('click', () => showTab('insights'));
   $('#tab-projects').addEventListener('click', () => showTab('projects'));
   $('#new-project').addEventListener('click', newProjectAnywhere);
   $('#save').addEventListener('click', publish);
