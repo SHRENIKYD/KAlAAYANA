@@ -35,7 +35,9 @@ secrets; the Access policy itself must also allow those emails.
 GitHub → Settings → Developer settings → Fine-grained tokens → Generate:
 
 - Repository access: **only this repository**.
-- Permissions: **Contents: Read and write**, **Pull requests: Read and write**.
+- Permissions: **Contents: Read and write**, **Pull requests: Read and write**,
+  **Checks: Read-only** (the admin reads Cloudflare's build result for a
+  proposal from it, to open the preview the moment it is built).
 - Expiry: your choice; set a reminder to rotate it.
 
 ### 3. Store the token as a Worker secret

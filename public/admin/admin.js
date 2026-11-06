@@ -3052,119 +3052,25 @@
     waitType = null;
   }
   const openTab = () => {
-    const tab = window.open('', '_blank');
-    waiting(tab, 'Preparing your changes…');
-    return tab;
+    waiting(null, 'Preparing your changes…');
+    return window.open('/admin/building-preview/', '_blank');
   };
   const sendTo = (tab, url) => {
     stopWaiting();
-    if (tab) tab.location.replace(url);
-    else window.location.assign(url);
-  };
-  // The tab that will show the preview, while it is being built: the mark,
-  // a moving bar, the time so far, and a line of what the studio might be up
-  // to, drawn from a shuffled list so no line comes round twice in a row.
-  const WAIT_LINES = [
-    'Preparing the clay…',
-    'Mixing the colours…',
-    'Sharpening the chisels…',
-    'Warming the kiln…',
-    'Polishing the bronze…',
-    'Measuring twice…',
-    'Setting the stones…',
-    'Hanging the frames…',
-    'Dusting the gallery…',
-    'Lighting the lamps…',
-    'Rolling out the carpet…',
-    'Tuning the scaffolding…',
-    'Sweeping the workshop floor…',
-    'Sketching the outline…',
-    'Carving the details…',
-    'Letting the plaster set…',
-  ];
-  // The preview tab's page: drawn the moment the tab opens, so it is never
-  // blank, then only its message changes as the work moves on. The studio
-  // lines are typed out, held, erased and replaced, from a shuffled list.
-  const waiting = (tab, text) => {
-    if (!tab || tab.closed) return;
-    let doc;
+    if (!tab) return window.location.assign(url);
+    // The building page may already have moved itself to the preview, which
+    // is on another origin; reading its location then throws. Leave it be.
     try {
-      doc = tab.document;
+      if (tab.location.pathname !== '/admin/building-preview/') return;
     } catch {
       return;
     }
-    const existing = doc.getElementById('text');
-    if (existing) {
-      existing.textContent = text;
-      return;
-    }
-    stopWaiting();
-    const origin = window.location.origin;
-    doc.open();
-    doc.write(`<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Building the preview</title>
-<style>
-html,body{height:100%;margin:0}
-body{display:grid;place-items:center;background:#f5f1ea;color:#1a1816;font:300 16px/1.6 "DM Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-.card{width:min(440px,calc(100% - 48px));text-align:center}
-.mark{width:120px;aspect-ratio:2856/1479;margin:0 auto 28px;background:#1a1816;-webkit-mask:url(${origin}/assets/img/logo.svg) no-repeat center/contain;mask:url(${origin}/assets/img/logo.svg) no-repeat center/contain}
-h1{font:400 1.6rem/1.2 Georgia,serif;margin:0 0 10px}
-p{margin:0 0 22px;color:#6d665c}
-.bar{height:3px;background:#e6e0d6;overflow:hidden;border-radius:2px}
-.bar i{display:block;height:100%;width:40%;background:linear-gradient(90deg,#b08d3f,#d6b35a,#b08d3f);animation:slide 1.3s ease-in-out infinite}
-@keyframes slide{from{transform:translateX(-120%)}to{transform:translateX(300%)}}
-.line{margin:18px 0 6px;min-height:1.6em;color:#1a1816;white-space:pre}
-.caret{display:inline-block;width:1px;height:1.05em;margin-left:2px;vertical-align:-.15em;background:#1a1816;animation:blink 1s steps(1) infinite}
-@keyframes blink{50%{opacity:0}}
-.time{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#a99c7d;font-variant-numeric:tabular-nums}
-@media(prefers-reduced-motion:reduce){.bar i{animation:none;width:100%}.caret{animation:none}}
-</style></head><body><div class="card"><div class="mark"></div>
-<h1>Building the preview</h1><p id="text"></p>
-<div class="bar"><i></i></div><div class="line"><span id="line"></span><span class="caret"></span></div><div class="time" id="time">0:00</div>
-</div></body></html>`);
-    doc.close();
-    doc.getElementById('text').textContent = text;
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const started = Date.now();
-    let queue = [];
-    let last = '';
-    const next = () => {
-      if (!queue.length) {
-        queue = WAIT_LINES.slice();
-        for (let i = queue.length - 1; i > 0; i -= 1) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [queue[i], queue[j]] = [queue[j], queue[i]];
-        }
-        if (queue[0] === last) queue.push(queue.shift());
-      }
-      last = queue.shift();
-      return last;
-    };
-    const line = doc.getElementById('line');
-    const time = doc.getElementById('time');
-    const alive = () => !tab.closed && tab.document.getElementById('time') === time;
-    waitTimer = setInterval(() => {
-      if (!alive()) return stopWaiting();
-      const s = Math.floor((Date.now() - started) / 1000);
-      time.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-    }, 1000);
-    const later = (fn, ms) => {
-      waitType = setTimeout(() => (alive() ? fn() : stopWaiting()), ms);
-    };
-    const type = (word, i = 0) => {
-      line.textContent = word.slice(0, i);
-      if (i < word.length) later(() => type(word, i + 1), 45 + Math.random() * 40);
-      else later(() => erase(word), 1700);
-    };
-    const erase = (word, i = word.length) => {
-      line.textContent = word.slice(0, i);
-      if (i > 0) later(() => erase(word, i - 1), 18);
-      else later(() => type(next()), 250);
-    };
-    if (reduced) {
-      line.textContent = next();
-      waitType = setInterval(() => (alive() ? (line.textContent = next()) : stopWaiting()), 3000);
-    } else type(next());
+    tab.location.replace(url);
+  };
+  // The preview tab opens on the admin's own "building the preview" page,
+  // which reads the current step from here; nothing is written into it.
+  const waiting = (tab, text) => {
+    window.__previewMessage = text;
   };
 
   const sleep = (ms) => new Promise((ok) => setTimeout(ok, ms));
@@ -3177,19 +3083,33 @@ p{margin:0 0 22px;color:#6d665c}
     const r = await api('/preview', { method: 'POST', body: JSON.stringify(payload()) });
     return r.url.replace(/\/$/, '') + previewPath();
   }
+  const PREVIEW_FALLBACK_MS = 150000;
   async function cloudflarePreviewUrl(pending, tab) {
     waiting(
       tab,
       'Your proposed change is being built. The preview opens here as soon as it is ready, usually within two to three minutes.',
     );
+    // The building page polls too and opens the preview itself, so it does
+    // not depend on this tab, which the browser may pause while it is hidden.
+    window.__previewReadyUrl = null;
+    window.__previewJob = { branch: pending.branch, commit: pending.commit, path: previewPath() };
     const q = `branch=${encodeURIComponent(pending.branch)}&commit=${encodeURIComponent(pending.commit)}`;
-    for (let i = 0; i < 40; i += 1) {
-      const r = await api(`/preview-ready?${q}`);
-      if (r.ready && r.url) return r.url.replace(/\/$/, '') + previewPath();
-      if (r.failed) return null;
-      await sleep(10000);
+    const began = Date.now();
+    try {
+      for (let i = 0; i < 40; i += 1) {
+        if (window.__previewReadyUrl) return window.__previewReadyUrl;
+        const r = await api(`/preview-ready?${q}`);
+        if (r.ready && r.url) return r.url.replace(/\/$/, '') + previewPath();
+        if (r.failed) return null;
+        // Build status unreadable: open the known address after a build's usual length.
+        if (r.unknown && r.url && Date.now() - began >= PREVIEW_FALLBACK_MS)
+          return r.url.replace(/\/$/, '') + previewPath();
+        await sleep(10000);
+      }
+      return window.__previewReadyUrl || null;
+    } finally {
+      window.__previewJob = null;
     }
-    return null;
   }
 
   /* Look only: the top-bar button. */

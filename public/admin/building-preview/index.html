@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Building the preview — Kalaayana Studios</title>
+    <link rel="icon" type="image/png" href="/assets/img/favicon.png?v=2" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        display: grid;
+        place-items: center;
+        background: #f5f1ea;
+        color: #1a1816;
+        font:
+          300 16px/1.6 'DM Sans',
+          system-ui,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .card {
+        width: min(440px, calc(100% - 48px));
+        text-align: center;
+      }
+      .mark {
+        width: 120px;
+        aspect-ratio: 2856 / 1479;
+        margin: 0 auto 28px;
+        background: #1a1816;
+        -webkit-mask: url('/assets/img/logo.svg') no-repeat center / contain;
+        mask: url('/assets/img/logo.svg') no-repeat center / contain;
+      }
+      h1 {
+        font:
+          400 2rem/1.15 'Instrument Serif',
+          Georgia,
+          serif;
+        margin: 0 0 10px;
+      }
+      p {
+        margin: 0 0 22px;
+        color: #6d665c;
+        min-height: 3.2em;
+      }
+      .bar {
+        height: 3px;
+        background: #e6e0d6;
+        overflow: hidden;
+        border-radius: 2px;
+      }
+      .bar i {
+        display: block;
+        height: 100%;
+        width: 40%;
+        background: linear-gradient(90deg, #b08d3f, #d6b35a, #b08d3f);
+        animation: slide 1.3s ease-in-out infinite;
+      }
+      @keyframes slide {
+        from {
+          transform: translateX(-120%);
+        }
+        to {
+          transform: translateX(300%);
+        }
+      }
+      .line {
+        margin: 18px 0 6px;
+        min-height: 1.6em;
+        white-space: pre;
+      }
+      .caret {
+        display: inline-block;
+        width: 1px;
+        height: 1.05em;
+        margin-left: 2px;
+        vertical-align: -0.15em;
+        background: #1a1816;
+        animation: blink 1s steps(1) infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      .time {
+        font-size: 0.8rem;
+        letter-spacing: 0.14em;
+        color: #a99c7d;
+        font-variant-numeric: tabular-nums;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .bar i {
+          animation: none;
+          width: 100%;
+        }
+        .caret {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card" aria-live="polite">
+      <div class="mark" aria-label="Kalaayana Studios" role="img"></div>
+      <h1>Building the preview</h1>
+      <p id="text">Preparing your changes…</p>
+      <div class="bar" aria-hidden="true"><i></i></div>
+      <div class="line" aria-hidden="true"><span id="line"></span><span class="caret"></span></div>
+      <div class="time" id="time" aria-hidden="true">0:00</div>
+    </main>
+    <script src="/admin/building-preview/building.js" defer></script>
+  </body>
+</html>

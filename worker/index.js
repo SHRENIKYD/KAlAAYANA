@@ -321,8 +321,18 @@ async function handleApi(request, env) {
         build && build.status === 'completed' && build.conclusion !== 'success',
       );
       return json({ ready, failed, url: ready ? `https://${previewHost}` : null });
-    } catch {
-      return json({ ready: false, url: null });
+    } catch (e) {
+      // The GitHub token cannot read checks (it needs "Checks: Read-only").
+      // The preview address is known from the branch, so the admin waits a
+      // build's usual length and opens it.
+      return json({
+        ready: false,
+        unknown: true,
+        url: `https://${previewHost}`,
+        reason: /\b403\b/.test(e.message)
+          ? 'build status not readable with this token'
+          : 'build status not available yet',
+      });
     }
   }
 
