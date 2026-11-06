@@ -72,9 +72,17 @@ Its root serves the site under development — the build swaps `index.html` and
 there at `/coming-soon.html`. Cloudflare Access sits in front, so only
 permitted accounts and email addresses can open it.
 
-Production is unaffected by that swap: `kalaayanastudios.com` serves the
-holding page at its root until a release deliberately changes which file is
-`index.html`.
+Production is unaffected by that swap until launch. `kalaayanastudios.com`
+serves the holding page at its root, and every other page is `noindex`, while
+the `LIVE` file is absent from the repo root.
+
+**Launching the site.** Create an empty `LIVE` file at the repo root on
+`develop`, in the same PR that removes `FREEZE`, and merge `develop` into
+`main`. From then on every build — staging, production and rollback — serves
+the full site at `/`, moves the holding page to `/coming-soon/` (noindex),
+marks every page indexable, claims `https://kalaayanastudios.com/` as the
+canonical origin and lists every route in `sitemap.xml`. `scripts/check.py`
+enforces each of those in both states, so a build cannot half-launch.
 
 ## Building locally
 

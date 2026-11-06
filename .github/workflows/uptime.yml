@@ -1,0 +1,37 @@
+name: Production uptime
+
+# Confirms kalaayanastudios.com is answering and serving the version on main.
+# A failed run emails the repository owner; nothing about visitors is recorded.
+# GitHub pauses scheduled workflows after 60 days without repository activity.
+
+on:
+  schedule:
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Live site matches main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: main
+
+      - name: Compare the live version with main
+        run: |
+          expected="$(tr -d '[:space:]' < VERSION)"
+          for attempt in 1 2 3 4; do
+            code="$(curl -sS -o /tmp/home.html -w '%{http_code}' --max-time 20 "https://kalaayanastudios.com/?u=$RANDOM" || echo 000)"
+            live="$(curl -sS --max-time 20 "https://kalaayanastudios.com/version.json?u=$RANDOM" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("version",""))' 2>/dev/null || echo unreadable)"
+            echo "attempt $attempt: home $code, live version ${live:-none}, main $expected"
+            if [ "$code" = "200" ] && [ "$live" = "$expected" ] && grep -q 'name="version"' /tmp/home.html; then
+              echo "OK"; exit 0
+            fi
+            [ "$attempt" = 4 ] || sleep 180
+          done
+          echo "::error::kalaayanastudios.com is down or not serving main's version ($expected)"
+          exit 1

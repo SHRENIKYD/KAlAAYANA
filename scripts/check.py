@@ -38,22 +38,76 @@ except FileNotFoundError:
 if version and not re.fullmatch(r'(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.\d{1,2}', version):
     bad('VERSION must use MAJOR.MINOR.PATCH with patch 00 through 99: %r' % version)
 
-# 3. The public entry point must declare its canonical origin and be indexable.
+# 3. Indexing follows the LIVE marker. Before launch only the holding page is
+#    indexable. After it, the holding page (served at /coming-soon/ once stamped)
+#    is the only noindex route, the full site claims the canonical origin, and
+#    every other page is indexable. Legacy .html aliases always stay noindex.
+#    Checked by exclusion, so a route added later is covered automatically.
+live = os.path.exists('LIVE')
+def page_text(page): return open(os.path.join(OUT, page), encoding='utf-8').read()
+def is_alias(page):
+    return page.endswith('.html') and not page.endswith('index.html') and \
+        os.path.exists(os.path.join(OUT, page[:-5], 'index.html'))
+# Files copied verbatim from public/ (design mockups) are not site routes and
+# must never enter search, live or not.
+def is_static(page): return os.path.exists(os.path.join('public', page))
+
 if 'index.html' in html:
-    home = open(os.path.join(OUT, 'index.html'), encoding='utf-8').read()
+    home = page_text('index.html')
     if 'rel="canonical"' not in home:
         bad('index.html has no canonical link')
-    if not staging and 'noindex' in home:
+    if not staging and not live and 'noindex' in home:
         bad('index.html is marked noindex — it is the public page')
+    if live and 'noindex' not in home:
+        bad('index.html (holding page) must be noindex once LIVE exists')
 
-# 4. Staged pages must stay out of search. Every page except the public entry
-#    point is staged, so this is checked by exclusion — a new route added later
-#    is covered without anyone remembering to list it here.
+if live and 'preview/index.html' in html:
+    public = page_text('preview/index.html')
+    if 'noindex' in public:
+        bad('preview/index.html is marked noindex but is the public site once LIVE exists')
+    if 'rel="canonical" href="https://kalaayanastudios.com/"' not in public:
+        bad('preview/index.html must claim the canonical origin once LIVE exists')
+
 for page in sorted(html):
-    if page == 'index.html' and not staging:
+    text = page_text(page)
+    if is_alias(page) or is_static(page):
+        if 'noindex' not in text:
+            bad('%s is not a site route and must be noindex' % page)
         continue
-    if 'noindex' not in open(os.path.join(OUT, page), encoding='utf-8').read():
-        bad('%s is not marked noindex but is not the public page' % page)
+    if live:
+        if page != 'index.html' and 'noindex' in text:
+            bad('%s is marked noindex but the site is live' % page)
+    else:
+        if page == 'index.html' and not staging:
+            continue
+        if 'noindex' not in text:
+            bad('%s is not marked noindex but is not the public page' % page)
+
+# 4. The sitemap must exist and list exactly the indexable routes.
+sitemap_path = os.path.join(OUT, 'sitemap.xml')
+if not os.path.exists(sitemap_path):
+    bad('sitemap.xml is missing from the build')
+else:
+    listed = set(re.findall(r'<loc>https://kalaayanastudios\.com(/[^<]*)</loc>', open(sitemap_path, encoding='utf-8').read()))
+    expected = set()
+    for page in html:
+        if not page.endswith('index.html') or 'noindex' in page_text(page):
+            continue
+        route = '/' + page[:-len('index.html')]
+        if live and route == '/preview/':
+            route = '/'
+        expected.add(route)
+    for route in sorted(expected - listed):
+        bad('sitemap.xml does not list indexable route %s' % route)
+    for route in sorted(listed - expected):
+        bad('sitemap.xml lists %s, which is not an indexable route' % route)
+
+# 4b. Every page carries its Content Security Policy.
+for page in html:
+    if '<meta http-equiv="Content-Security-Policy"' not in page_text(page):
+        bad('%s has no Content-Security-Policy meta' % page)
+if os.path.exists(os.path.join(OUT, '_headers')) and '__SCRIPT_HASHES__' in open(os.path.join(OUT, '_headers'), encoding='utf-8').read():
+    bad('_headers still carries the script hash placeholder')
 
 # 5. Content data must be well formed — a malformed project must fail the build,
 #    not reach a visitor. Presentation is not consulted; this checks data alone.

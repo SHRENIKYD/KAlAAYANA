@@ -6,6 +6,7 @@
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import site from '../data/site.json';
+import { LIVE } from '../lib/live';
 import hero from '../images/hero-hanuman.jpg';
 import holdingCss from '../styles/holding.css?raw';
 
@@ -15,7 +16,7 @@ const title = 'Kalaayana Studios — Monumental Sculpture & Temple Architecture'
 const description = `${site.description.replace(/\.$/, '')}. Website coming soon.`;
 ---
 
-<Base {title} {description} indexable fonts={fonts}>
+<Base {title} {description} indexable={!LIVE} fonts={fonts}>
   <style slot="head" is:inline set:html={holdingCss} />
 
   <main class="stage">

@@ -22,10 +22,10 @@ built="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 [[ -n "$version" ]] || { echo "VERSION is empty"; exit 1; }
 
 # Staging is where the site is built and reviewed, so it serves the site under
-# development at its root. Production keeps the holding page there until a
-# release deliberately swaps them. Guarded on the environment name: only
-# "staging" swaps, so production and rollback builds are untouched.
-if [[ "$environment" == "staging" && -f "$out/preview/index.html" && -f "$out/index.html" ]]; then
+# development at its root. Production keeps the holding page there until the
+# LIVE marker exists at the repo root: from then on every environment serves
+# the full site at its root, and the holding page moves to /coming-soon/.
+if [[ ( "$environment" == "staging" || -f LIVE ) && -f "$out/preview/index.html" && -f "$out/index.html" ]]; then
   mkdir -p "$out/coming-soon"
   mv "$out/index.html" "$out/coming-soon/index.html"
   cp "$out/preview/index.html" "$out/index.html"
@@ -35,7 +35,7 @@ if [[ "$environment" == "staging" && -f "$out/preview/index.html" && -f "$out/in
   while IFS= read -r -d '' page; do
     sed -i 's#href="/preview/#href="/#g' "$page"
   done < <(find "$out" -type f -name '*.html' -print0)
-  echo "staging: serving the site under development at / (holding page at /coming-soon/)"
+  echo "$environment: serving the full site at / (holding page at /coming-soon/)"
 fi
 
 while IFS= read -r -d '' f; do

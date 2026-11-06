@@ -10,6 +10,25 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.18] - Unreleased
+
+### Added
+- Enforced Content Security Policy on every page: inline scripts are hashed at
+  build time, so the policy ships as a `<meta>` tag that GitHub Pages can serve
+  and as a Cloudflare header. `img-src` no longer admits arbitrary HTTPS hosts.
+- Generated `sitemap.xml` listing exactly the indexable routes.
+- `LIVE` launch marker. While absent, only the holding page is indexable; once
+  present every build serves the full site at `/`, every page is indexable and
+  the holding page moves to `/coming-soon/`.
+- Production deploys now wait for the live `version.json` to match before
+  tagging a release, and a scheduled check confirms the site is up and on
+  main's version twice an hour.
+
+### Changed
+- Story paragraphs from `site.json` keep emphasis tags only before rendering.
+- The studio map embed sends only the origin as referrer.
+
+
 ## [1.2.17] - Unreleased
 
 ### Added

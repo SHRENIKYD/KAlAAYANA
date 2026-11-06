@@ -5,12 +5,19 @@
  * the approach line alone. Read, not retyped.
  */
 import site from '../data/site.json';
+import { LIVE } from '../lib/live';
 import Seo from '../components/Seo.astro';
 import { Image } from 'astro:assets';
 import { photo, photoWidths } from '../lib/photos';
 import PolicyLinks from '../components/PolicyLinks.astro';
 import ArtistCarousel from '../components/ArtistCarousel.astro';
 import ClientMarquee from '../components/ClientMarquee.astro';
+
+// Story paragraphs are authored in site.json with emphasis only. Anything else
+// is dropped before it reaches set:html, so content edits cannot add script.
+const story = site.story.map((paragraph) =>
+  paragraph.replace(/<(?!\/?(?:strong|em|b|i)\s*>)[^>]*>/gi, ''),
+);
 ---
 
 <!doctype html>
@@ -19,12 +26,13 @@ import ClientMarquee from '../components/ClientMarquee.astro';
     <script is:inline src="/motion/diagnostics.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="robots" content="noindex,nofollow" />
+    {!LIVE && <meta name="robots" content="noindex,nofollow" />}
     <meta name="description" content={site.description} />
     <title>Kalaayana Studios | Sculpture, Murals &amp; Temple Architecture in Bengaluru</title>
     <Seo
       title="Kalaayana Studios | Sculpture, Murals & Temple Architecture in Bengaluru"
       description={site.description}
+      path={LIVE ? '/' : undefined}
     />
     <link rel="icon" type="image/png" href="/assets/img/favicon.png?v=2" />
     <link rel="stylesheet" href="/motion/styles.css" />
@@ -274,7 +282,7 @@ import ClientMarquee from '../components/ClientMarquee.astro';
         <div class="story-grid">
           <h2 class="story-title">Our story</h2>
           <div class="story-main">
-            {site.story.map((paragraph) => (
+            {story.map((paragraph) => (
               <p set:html={paragraph} />
             ))}
             <p class="story-sign">Team, Kalaayana Studios</p>
@@ -399,7 +407,7 @@ import ClientMarquee from '../components/ClientMarquee.astro';
               title="Map of the studio address in BM Kaval, Kengeri"
               src={`https://maps.google.com/maps?q=${encodeURIComponent(site.contact.address.join(' '))}&output=embed`}
               loading="lazy"
-              referrerpolicy="no-referrer-when-downgrade"
+              referrerpolicy="strict-origin-when-cross-origin"
               allowfullscreen
             ></iframe>
           </div>

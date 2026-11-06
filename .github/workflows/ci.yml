@@ -58,3 +58,4 @@ jobs:
           ./scripts/stamp.sh ci "${{ github.sha }}" "${{ github.ref_name }}"
           test -f dist/version.json
           grep -q 'name="version"' dist/index.html
+          python3 scripts/csp.py --verify
