@@ -774,11 +774,11 @@
           'div',
           {},
           el('p', { class: 'eyebrow' }, 'Homepage'),
-          el('h1', {}, 'Works'),
+          el('h1', {}, 'Collection tiles'),
           el(
             'p',
             { class: 'muted' },
-            'The features under WORKS on the homepage, in this order. Each links to a section or to Collectables.',
+            'The tiles under WORKS on the homepage, one per collection, in this order. To add a piece of work, create a project in its section instead.',
           ),
         ),
         el(
@@ -807,7 +807,7 @@
                 list.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'start' });
               },
             },
-            '+ New feature',
+            '+ Add a tile',
           ),
         ),
       ),
@@ -1020,6 +1020,30 @@
     );
     renderBanner();
     renderSections();
+  }
+
+  function newProjectAnywhere() {
+    const keys = Object.keys(state.sections);
+    if (!keys.length)
+      return alertBox('Create a section first', 'A project lives inside a section.');
+    const sel = el(
+      'select',
+      { id: 'np-section' },
+      ...keys.map((k) => el('option', { value: k }, state.sections[k].title)),
+    );
+    $('#result-body').replaceChildren(
+      el('h2', {}, 'New project'),
+      el('p', { class: 'muted' }, 'Which section does this work belong to?'),
+      el('div', { class: 'f' }, el('label', { for: 'np-section' }, 'Section'), sel),
+    );
+    $('#result-close').textContent = 'Create';
+    $('#result-close').onclick = () => {
+      $('#result').close();
+      $('#result-close').textContent = 'Close';
+      $('#result-close').onclick = () => $('#result').close();
+      newProject(sel.value);
+    };
+    $('#result').showModal();
   }
 
   function newSection() {
@@ -1314,6 +1338,7 @@
   }
 
   $('#new-section').addEventListener('click', newSection);
+  $('#new-project').addEventListener('click', newProjectAnywhere);
   $('#save').addEventListener('click', save);
   $('#discard').addEventListener('click', () =>
     confirmBox('Discard all unsaved changes?', 'Everything since the last save is lost.', load),

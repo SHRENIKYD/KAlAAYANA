@@ -64,7 +64,8 @@ Open `https://<staging host>/admin/`, sign in through Access.
   project photograph with _Use an existing photograph_, or uploaded. Choosing
   an existing one copies it into the section's banner slot; the original stays
   with its project.
-- **Homepage** (top of the sidebar) is the WORKS list: order, eyebrow, title,
+- **+ New project** (sidebar) asks for the section, then opens a blank project.
+- **Homepage** (top of the sidebar) is the list of collection tiles under WORKS — one per section, not individual projects: order, eyebrow, title,
   link target, link text and photograph for each feature, plus **framing** —
   click the photograph where the subject is and the desktop and phone crops
   follow. Section banners have the same framing control.
