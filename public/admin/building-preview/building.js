@@ -1,27 +1,28 @@
 /* The page the admin opens while a preview is built. The admin tab that
    opened it writes the current step to window.__previewMessage; this page
-   shows it, keeps the elapsed time, and types the studio's lines out one at
-   a time from a shuffled list, never the same line twice in a row. When the
+   shows it, keeps the elapsed time, and shows the studio's words in the
+   style of Claude Code's thinking line. When the
    preview is ready the admin sends this tab to it. */
 (function () {
   var LINES = [
-    'Preparing the clay…',
-    'Mixing the colours…',
-    'Sharpening the chisels…',
-    'Warming the kiln…',
-    'Polishing the bronze…',
-    'Measuring twice…',
-    'Setting the stones…',
-    'Hanging the frames…',
-    'Dusting the gallery…',
-    'Lighting the lamps…',
-    'Rolling out the carpet…',
-    'Tuning the scaffolding…',
-    'Sweeping the workshop floor…',
-    'Sketching the outline…',
-    'Carving the details…',
-    'Letting the plaster set…',
+    'Sculpting',
+    'Chiselling',
+    'Moulding',
+    'Casting',
+    'Gilding',
+    'Polishing',
+    'Carving',
+    'Sketching',
+    'Firing the kiln',
+    'Plastering',
+    'Burnishing',
+    'Etching',
+    'Glazing',
+    'Framing',
+    'Mixing colours',
+    'Measuring twice',
   ];
+  var GLYPHS = ['·', '✢', '✳', '✶', '✻', '✽', '✻', '✶', '✳', '✢'];
   var text = document.getElementById('text');
   var line = document.getElementById('line');
   var time = document.getElementById('time');
@@ -38,7 +39,7 @@
   }
   setInterval(function () {
     var s = Math.floor((Date.now() - started) / 1000);
-    time.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    time.textContent = '(' + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + ')';
     message();
   }, 500);
   message();
@@ -102,35 +103,23 @@
     last = queue.shift();
     return last;
   }
-  function type(word, i) {
-    line.textContent = word.slice(0, i);
-    if (i < word.length)
-      setTimeout(
-        function () {
-          type(word, i + 1);
-        },
-        45 + Math.random() * 40,
-      );
-    else
-      setTimeout(function () {
-        erase(word, word.length);
-      }, 1700);
-  }
-  function erase(word, i) {
-    line.textContent = word.slice(0, i);
-    if (i > 0)
-      setTimeout(function () {
-        erase(word, i - 1);
-      }, 18);
-    else
-      setTimeout(function () {
-        type(next(), 0);
-      }, 250);
-  }
-  if (reduced) {
-    line.textContent = next();
+  /* Claude Code's thinking line: a turning star, a word with light passing
+     over it, and the time so far. A new word every few seconds, never the
+     same one twice in a row. */
+  var glyph = document.getElementById('glyph');
+  line.textContent = next() + '…';
+  if (!reduced) {
+    var g = 0;
     setInterval(function () {
-      line.textContent = next();
-    }, 3000);
-  } else type(next(), 0);
+      g = (g + 1) % GLYPHS.length;
+      glyph.textContent = GLYPHS[g];
+    }, 120);
+  }
+  setInterval(function () {
+    line.classList.add('swap');
+    setTimeout(function () {
+      line.textContent = next() + '…';
+      line.classList.remove('swap');
+    }, 200);
+  }, 3500);
 })();

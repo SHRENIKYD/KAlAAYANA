@@ -157,6 +157,9 @@ body.busy .bar::after {
   background: var(--panel);
   border: 1px solid var(--line);
   padding: 12px;
+  min-height: 88px;
+  box-sizing: border-box;
+  margin-bottom: 14px;
 }
 .skel-sq {
   width: 56px;
@@ -164,6 +167,77 @@ body.busy .bar::after {
 }
 .skel-lines .skel-line {
   margin: 6px 0;
+}
+.skel-flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+.skel-box {
+  display: block;
+  flex: none;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-sizing: border-box;
+}
+.skel-btn-dark {
+  flex: none;
+  background: linear-gradient(90deg, #cfc6b8 25%, #ddd6ca 50%, #cfc6b8 75%);
+  background-size: 200% 100%;
+}
+.skel-row-on {
+  background: var(--panel);
+  border-left: 2px solid var(--line);
+}
+.skel-urow {
+  display: grid;
+  grid-template-columns: 291px 163px 157px 1fr 80px;
+  align-items: center;
+  min-height: 56px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--line);
+}
+.skel-urow:first-child {
+  min-height: 38px;
+}
+.skel-filter {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr) 1fr;
+  gap: 16px;
+  align-items: end;
+  margin-top: 40px;
+  padding: 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+.skel-logrow {
+  display: grid;
+  grid-template-columns: 150px 90px 220px 1fr;
+  gap: 16px;
+  align-items: center;
+  margin-top: 4px;
+  padding: 14px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.skel-logrow:first-of-type {
+  margin-top: 20px;
+}
+@media (max-width: 760px) {
+  .skel-urow {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .skel-filter {
+    grid-template-columns: 1fr 1fr;
+  }
+  .skel-logrow {
+    grid-template-columns: 1fr auto;
+  }
+}
+.bar-site {
+  margin-left: 12px;
+  white-space: nowrap;
 }
 .skel-table {
   margin-top: 24px;
@@ -1730,9 +1804,13 @@ body.signin .main {
     margin-left: 0;
     flex: 0 0 auto;
   }
-  #signout {
+  .bar-site {
     order: 4;
     margin-left: auto;
+  }
+  #signout {
+    order: 4;
+    margin-left: 8px;
   }
   .bar-user {
     order: 5;

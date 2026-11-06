@@ -74,28 +74,43 @@
           transform: translateX(300%);
         }
       }
-      .line {
-        margin: 18px 0 6px;
-        min-height: 1.6em;
-        white-space: pre;
+      .think {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 10px;
+        margin: 22px 0 0;
+        font-size: 1.02rem;
+        white-space: nowrap;
       }
-      .caret {
+      .glyph {
         display: inline-block;
-        width: 1px;
-        height: 1.05em;
-        margin-left: 2px;
-        vertical-align: -0.15em;
-        background: #1a1816;
-        animation: blink 1s steps(1) infinite;
+        width: 1em;
+        text-align: center;
+        color: #b08d3f;
+        font-size: 1.15em;
       }
-      @keyframes blink {
-        50% {
-          opacity: 0;
+      .word {
+        background: linear-gradient(90deg, #a07d32 0 38%, #f1d892 50%, #a07d32 62% 100%);
+        background-size: 250% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: sweep 2s linear infinite;
+        transition: opacity 0.2s ease;
+      }
+      .word.swap {
+        opacity: 0;
+      }
+      @keyframes sweep {
+        from {
+          background-position: 100% 0;
+        }
+        to {
+          background-position: 0 0;
         }
       }
       .time {
-        font-size: 0.8rem;
-        letter-spacing: 0.14em;
+        font-size: 0.85rem;
         color: #a99c7d;
         font-variant-numeric: tabular-nums;
       }
@@ -104,8 +119,9 @@
           animation: none;
           width: 100%;
         }
-        .caret {
+        .word {
           animation: none;
+          color: #a07d32;
         }
       }
     </style>
@@ -116,8 +132,10 @@
       <h1>Building the preview</h1>
       <p id="text">Preparing your changes…</p>
       <div class="bar" aria-hidden="true"><i></i></div>
-      <div class="line" aria-hidden="true"><span id="line"></span><span class="caret"></span></div>
-      <div class="time" id="time" aria-hidden="true">0:00</div>
+      <div class="think" aria-hidden="true">
+        <span class="glyph" id="glyph">✻</span><span class="word" id="line">Sculpting…</span
+        ><span class="time" id="time">(0:00)</span>
+      </div>
     </main>
     <script src="/admin/building-preview/building.js" defer></script>
   </body>

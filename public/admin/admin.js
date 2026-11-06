@@ -126,6 +126,7 @@
     state.dirty = snapshot() !== state.original;
     const bar = $('#savebar');
     bar.hidden = !state.dirty;
+    $('#preview-btn').hidden = !state.dirty;
     const n = Object.keys(state.uploads).length + Object.keys(state.banners).length;
     $('#pending-summary').textContent = state.dirty
       ? `Unsaved changes${n ? ` · ${n} new image${n > 1 ? 's' : ''}` : ''}`
@@ -3627,78 +3628,162 @@
   /* ---------- boot ---------- */
   /* ---------- skeleton while the content loads ---------- */
   /* The first-load skeleton takes the shape of the tab in the address. */
+  /* The loading state of each tab drawn in that tab's own layout: the same
+     heading, buttons, rows, boxes and columns, as grey shapes. */
   function skeleton() {
     readPlace();
     const tab = state.tab;
     for (const t of TABS) document.body.classList.toggle(`tab-${t}`, tab === t);
-    const line = (w) => el('span', { class: 'skel skel-line', style: `width:${w}` });
-    const card = (h) =>
-      el(
-        'div',
-        { class: 'skel-card' },
-        el('span', { class: 'skel skel-thumb', style: `height:${h}px` }),
-        line('70%'),
-        line('40%'),
-      );
-    const row = (cols) => el('div', { class: 'skel-trow' }, ...cols.map((w) => line(w)));
-    const head = [line('120px'), el('span', { class: 'skel skel-title' }), line('60%')];
+    const line = (w, h = 12, css = '') =>
+      el('span', { class: 'skel skel-line', style: `width:${w};height:${h}px;${css}` });
+    const box = (w, h, css = '') =>
+      el('span', { class: 'skel-box', style: `width:${w};height:${h}px;${css}` });
+    const btn = (w, dark) =>
+      el('span', {
+        class: dark ? 'skel skel-btn-dark' : 'skel-box',
+        style: `width:${w}px;height:45px`,
+      });
+    const row = (css, ...kids) => el('div', { class: 'skel-flex', style: css }, ...kids);
+    const head = (title, lede, extra) => [
+      line('90px', 10, 'margin:0 0 18px'),
+      el('span', { class: 'skel skel-title', style: `width:${title}` }),
+      row(
+        'justify-content:space-between;align-items:center',
+        line(lede, 12, 'margin:0'),
+        extra || '',
+      ),
+    ];
+    $('#session').replaceChildren(line('92px', 10, 'margin:0'));
+    $('#who').replaceChildren(line('260px', 10, 'margin:0'));
     let body;
     if (tab === 'home')
       body = [
-        ...head,
-        el(
-          'div',
-          { class: 'skel-works' },
-          ...[1, 2, 3, 4, 5].map(() =>
-            el(
-              'div',
-              { class: 'skel-work' },
-              el('span', { class: 'skel skel-sq' }),
-              el('span', { class: 'skel-lines' }, line('40%'), line('28%')),
+        ...head('100px', '82%'),
+        row('margin:40px 0 28px;gap:10px', btn(136), btn(130, true)),
+        ...[120, 90, 80, 150, 140].map((w) =>
+          el(
+            'div',
+            { class: 'skel-work' },
+            el('span', { class: 'skel skel-sq' }),
+            row(
+              'align-items:center;gap:16px',
+              line('14px', 10, 'margin:0'),
+              el('span', { class: 'skel-lines' }, line(`${w}px`, 16), line(`${w + 40}px`, 10)),
             ),
           ),
         ),
       ];
-    else if (tab === 'users')
-      body = [
-        ...head,
+    else if (tab === 'users') {
+      const user = (w, dark) =>
         el(
           'div',
-          { class: 'skel-table' },
-          ...[1, 2, 3].map(() => row(['34%', '18%', '18%', '22%'])),
+          { class: 'skel-urow' },
+          line(`${w}px`, 12, 'margin:0'),
+          box('139px', 36),
+          dark ? line('50px', 12, 'margin:0') : box('133px', 36),
+          line('150px', 12, 'margin:0'),
+          dark ? el('span') : box('72px', 31, 'margin-left:auto'),
+        );
+      body = [
+        ...head('90px', '81%'),
+        el(
+          'div',
+          { class: 'skel-table', style: 'margin-top:40px' },
+          el(
+            'div',
+            { class: 'skel-urow' },
+            ...['40px', '34px', '96px', '50px'].map((w) => line(w, 9, 'margin:0')),
+          ),
+          user(150),
+          user(200, true),
+          user(130),
+          user(140),
         ),
-        el('span', { class: 'skel skel-title', style: 'width:200px;height:28px;margin-top:36px' }),
-        row(['40%', '40%']),
+        line('120px', 22, 'margin:44px 0 26px'),
+        row(
+          'gap:22px;align-items:flex-end',
+          el(
+            'div',
+            { style: 'width:349px' },
+            line('40px', 9),
+            box('100%', 40, 'border-width:0 0 1px'),
+          ),
+          el(
+            'div',
+            { style: 'width:349px' },
+            line('34px', 9),
+            box('100%', 40, 'border-width:0 0 1px'),
+          ),
+        ),
+        row('margin-top:16px', btn(79, true)),
       ];
-    else if (tab === 'log')
+    } else if (tab === 'log')
       body = [
-        ...head,
-        row(['14%', '14%', '14%', '14%', '14%']),
+        ...head('60px', '55%'),
         el(
           'div',
-          { class: 'skel-table' },
-          ...[1, 2, 3, 4, 5, 6].map(() => row(['16%', '10%', '26%', '40%'])),
+          { class: 'skel-filter' },
+          ...['40px', '24px', '36px', '36px', '50px'].map((w) =>
+            el('div', {}, line(w, 9), box('100%', 34, 'border-width:0 0 1px')),
+          ),
+          el('div', {}, box('100%', 30), line('110px', 12, 'margin-top:26px')),
+        ),
+        ...[1, 2, 3, 4, 5].map((i) =>
+          el(
+            'div',
+            { class: 'skel-logrow' },
+            el('span', {}, line('130px'), line('30px')),
+            box('62px', 24),
+            el('span', {}, line('150px'), line('170px')),
+            el('span', {}, line(i % 2 ? '96%' : '40%'), i % 2 ? line('80%') : ''),
+          ),
         ),
       ];
     else if (tab === 'insights')
       body = [
-        ...head,
+        ...head('130px', '52%', row('gap:20px', box('243px', 38), box('153px', 38))),
         el(
           'div',
-          { class: 'tiles' },
+          { class: 'tiles', style: 'margin-top:28px' },
           ...[0, 1, 2, 3].map(() =>
-            el('div', { class: 'tile' }, line('40%'), el('span', { class: 'skel skel-title' })),
+            el(
+              'div',
+              { class: 'tile' },
+              line('40%', 10),
+              el('span', { class: 'skel skel-title', style: 'width:55%' }),
+            ),
           ),
         ),
-        el('span', { class: 'skel', style: 'display:block;height:260px' }),
+        el('span', { class: 'skel', style: 'display:block;height:260px;margin-top:20px' }),
       ];
     else {
       $('#sections').replaceChildren(
-        ...[72, 58, 64, 48, 66].map((w) =>
-          el('div', { class: 'skel-row' }, line(`${w}%`), line('14px')),
+        ...[120, 150, 70, 60, 110].map((w, i) =>
+          el(
+            'div',
+            { class: `skel-row${i === 0 ? ' skel-row-on' : ''}` },
+            line(`${w}px`, 14),
+            line('10px', 10),
+          ),
         ),
       );
-      body = [...head, el('div', { class: 'grid' }, ...[260, 180, 220, 300, 200, 240].map(card))];
+      body = [
+        ...head('280px', '72%'),
+        row('margin:40px 0 28px;gap:10px', btn(105), btn(137, true)),
+        el(
+          'div',
+          { class: 'grid' },
+          ...[400, 400, 400, 300, 360, 260].map((h) =>
+            el(
+              'div',
+              { class: 'skel-card' },
+              el('span', { class: 'skel skel-thumb', style: `height:${h}px` }),
+              line('70%'),
+              line('40%'),
+            ),
+          ),
+        ),
+      ];
     }
     $('#main').replaceChildren(
       el('div', { class: 'skel-page', 'aria-hidden': 'true' }, ...body),
