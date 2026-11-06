@@ -239,7 +239,7 @@ async function handleApi(request, env) {
     const found = comments
       .map((c) => c.body || '')
       .join('\n')
-      .match(/https:\/\/[\w.-]+\.workers\.dev[^\s)>"]*/);
+      .match(/https:\/\/[\w.-]+\.workers\.dev[^\s)>"']*/);
     return json({ url: found ? found[0] : null });
   }
 
