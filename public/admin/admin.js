@@ -3042,11 +3042,22 @@
       message: $('#message').value,
     };
   }
-  const openTab = () => window.open('', '_blank');
   let waitTimer = null;
-  const sendTo = (tab, url) => {
+  let waitType = null;
+  function stopWaiting() {
     clearInterval(waitTimer);
+    clearTimeout(waitType);
+    clearInterval(waitType);
     waitTimer = null;
+    waitType = null;
+  }
+  const openTab = () => {
+    const tab = window.open('', '_blank');
+    waiting(tab, 'Preparing your changes…');
+    return tab;
+  };
+  const sendTo = (tab, url) => {
+    stopWaiting();
     if (tab) tab.location.replace(url);
     else window.location.assign(url);
   };
@@ -3071,12 +3082,26 @@
     'Carving the details…',
     'Letting the plaster set…',
   ];
+  // The preview tab's page: drawn the moment the tab opens, so it is never
+  // blank, then only its message changes as the work moves on. The studio
+  // lines are typed out, held, erased and replaced, from a shuffled list.
   const waiting = (tab, text) => {
-    if (!tab) return;
-    clearInterval(waitTimer);
+    if (!tab || tab.closed) return;
+    let doc;
+    try {
+      doc = tab.document;
+    } catch {
+      return;
+    }
+    const existing = doc.getElementById('text');
+    if (existing) {
+      existing.textContent = text;
+      return;
+    }
+    stopWaiting();
     const origin = window.location.origin;
-    tab.document.open();
-    tab.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8">
+    doc.open();
+    doc.write(`<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>Building the preview</title>
 <style>
 html,body{height:100%;margin:0}
@@ -3088,16 +3113,18 @@ p{margin:0 0 22px;color:#6d665c}
 .bar{height:3px;background:#e6e0d6;overflow:hidden;border-radius:2px}
 .bar i{display:block;height:100%;width:40%;background:linear-gradient(90deg,#b08d3f,#d6b35a,#b08d3f);animation:slide 1.3s ease-in-out infinite}
 @keyframes slide{from{transform:translateX(-120%)}to{transform:translateX(300%)}}
-.line{margin:18px 0 6px;min-height:1.6em;color:#1a1816;transition:opacity .3s}
+.line{margin:18px 0 6px;min-height:1.6em;color:#1a1816;white-space:pre}
+.caret{display:inline-block;width:1px;height:1.05em;margin-left:2px;vertical-align:-.15em;background:#1a1816;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
 .time{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#a99c7d;font-variant-numeric:tabular-nums}
-@media(prefers-reduced-motion:reduce){.bar i{animation:none;width:100%}}
+@media(prefers-reduced-motion:reduce){.bar i{animation:none;width:100%}.caret{animation:none}}
 </style></head><body><div class="card"><div class="mark"></div>
 <h1>Building the preview</h1><p id="text"></p>
-<div class="bar"><i></i></div><div class="line" id="line"></div><div class="time" id="time">0:00</div>
+<div class="bar"><i></i></div><div class="line"><span id="line"></span><span class="caret"></span></div><div class="time" id="time">0:00</div>
 </div></body></html>`);
-    tab.document.close();
-    const doc = tab.document;
+    doc.close();
     doc.getElementById('text').textContent = text;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const started = Date.now();
     let queue = [];
     let last = '';
@@ -3115,26 +3142,31 @@ p{margin:0 0 22px;color:#6d665c}
     };
     const line = doc.getElementById('line');
     const time = doc.getElementById('time');
-    line.textContent = next();
-    let ticks = 0;
+    const alive = () => !tab.closed && tab.document.getElementById('time') === time;
     waitTimer = setInterval(() => {
-      if (tab.closed || !tab.document.getElementById('time')) {
-        clearInterval(waitTimer);
-        waitTimer = null;
-        return;
-      }
+      if (!alive()) return stopWaiting();
       const s = Math.floor((Date.now() - started) / 1000);
       time.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-      ticks += 1;
-      if (ticks % 3 === 0) {
-        line.style.opacity = '0';
-        setTimeout(() => {
-          line.textContent = next();
-          line.style.opacity = '1';
-        }, 300);
-      }
     }, 1000);
+    const later = (fn, ms) => {
+      waitType = setTimeout(() => (alive() ? fn() : stopWaiting()), ms);
+    };
+    const type = (word, i = 0) => {
+      line.textContent = word.slice(0, i);
+      if (i < word.length) later(() => type(word, i + 1), 45 + Math.random() * 40);
+      else later(() => erase(word), 1700);
+    };
+    const erase = (word, i = word.length) => {
+      line.textContent = word.slice(0, i);
+      if (i > 0) later(() => erase(word, i - 1), 18);
+      else later(() => type(next()), 250);
+    };
+    if (reduced) {
+      line.textContent = next();
+      waitType = setInterval(() => (alive() ? (line.textContent = next()) : stopWaiting()), 3000);
+    } else type(next());
   };
+
   const sleep = (ms) => new Promise((ok) => setTimeout(ok, ms));
 
   async function demoPreviewUrl(tab) {

@@ -70,7 +70,8 @@ is a holding page. `1.0.0` marks the launch of the full site.
   a small detector served from the admin itself; the first-load skeleton takes
   the shape of the tab being opened. Every time the admin shows is the
   studio's local time in 12-hour form, and the log's date filters follow the
-  studio's days.
+  studio's days. The preview tab shows its loading page the moment it opens,
+  and its studio lines are typed out letter by letter.
 - Admin: a refresh keeps the tab and open work; sign-out returns to the admin
   sign-in; the sign-in photograph is required and never black; missing fields
   are listed and focused before a preview; the users table updates at once;
