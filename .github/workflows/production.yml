@@ -58,6 +58,7 @@ jobs:
         id: stamp
         run: |
           ./scripts/stamp.sh production "$GITHUB_SHA" "$GITHUB_REF_NAME"
+          test ! -e dist/admin || { echo "::error::content admin must not ship to production"; exit 1; }
           echo "version=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
@@ -69,11 +70,30 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
 
+  verify:
+    name: Confirm the live site serves this version
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Poll version.json until it matches
+        env:
+          VERSION: ${{ needs.deploy.outputs.version }}
+        run: |
+          # GitHub Pages caches for 600s, so allow the edge time to turn over.
+          for attempt in $(seq 1 14); do
+            live="$(curl -sS --max-time 20 "https://kalaayanastudios.com/version.json?u=$RANDOM" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("version",""))' 2>/dev/null || echo unreadable)"
+            echo "attempt $attempt: live ${live:-none}, deployed $VERSION"
+            [ "$live" = "$VERSION" ] && { echo "Live site serves v$VERSION"; exit 0; }
+            sleep 60
+          done
+          echo "::error::Deployment finished but kalaayanastudios.com still serves ${live:-nothing}, not v$VERSION"
+          exit 1
+
   release:
     permissions:
       contents: write
     name: Tag and release
-    needs: deploy
+    needs: [deploy, verify]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4

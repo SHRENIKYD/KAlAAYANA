@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "email": "shrenikyd@gmail.com",
+      "role": "superadmin",
+      "invitedBy": null,
+      "invitedAt": "2026-11-06T06:00:00Z"
+    },
+    {
+      "email": "contact@kalaayanastudios.com",
+      "role": "superadmin",
+      "invitedBy": null,
+      "invitedAt": "2026-11-06T06:00:00Z"
+    }
+  ]
+}

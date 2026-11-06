@@ -10,9 +10,38 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.18] - Unreleased
+
+### Added
+
+- Content admin at `/admin/` on staging: edit sections, projects and
+  photographs; each save commits to a branch and opens a pull request into
+  `develop`. Gated by Cloudflare Access and an email allow-list in the Worker;
+  stripped from production and rollback builds. Edits the homepage WORKS list
+  too, with a click-to-set framing point per photograph, and a local demo mode
+  with its own sign-in and a real-build preview.
+- Enforced Content Security Policy on every page: inline scripts are hashed at
+  build time, so the policy ships as a `<meta>` tag that GitHub Pages can serve
+  and as a Cloudflare header. `img-src` no longer admits arbitrary HTTPS hosts.
+- Generated `sitemap.xml` listing exactly the indexable routes.
+- `LIVE` launch marker. While absent, only the holding page is indexable; once
+  present every build serves the full site at `/`, every page is indexable and
+  the holding page moves to `/coming-soon/`.
+- Production deploys now wait for the live `version.json` to match before
+  tagging a release, and a scheduled check confirms the site is up and on
+  main's version twice an hour.
+
+### Changed
+
+- Shree Manjunatha temple cover and gallery use a straightened image with level
+  tiers and a vertical central axis (from #69); the original is retained.
+- Story paragraphs from `site.json` keep emphasis tags only before rendering.
+- The studio map embed sends only the origin as referrer.
+
 ## [1.2.17] - Unreleased
 
 ### Added
+
 - Shared canonical, Open Graph, Twitter and organisation metadata; staging stays noindex.
 - Privacy-safe, rate-limited browser diagnostics and recovery for contact drafts,
   policy popups and image previews. Policy requests time out after 15 seconds.
@@ -21,6 +50,7 @@ is a holding page. `1.0.0` marks the launch of the full site.
 - Cloudflare security headers and report-only Content Security Policy.
 
 ### Changed
+
 - Directory-based clean URLs throughout the website, with legacy .html redirects
   and aliases preserving query strings and fragments.
 - Updated dependency lockfile to resolve known audit findings.
@@ -29,12 +59,12 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 See [release-notes/1.2.17.md](release-notes/1.2.17.md).
 
-
 ## [1.2.16] - 2026-11-05
 
 Published staging prerelease at 6f6c3ec through PR #66. Production remains unchanged.
 
 ### Fixed
+
 - Pinterest-style masonry packing on all five project indexes: Temple Architecture,
   Portrait, Murals, Monumental and Other Installations. Shorter cards no longer
   leave fixed-row whitespace. Natural image proportions, titles and project links
@@ -48,12 +78,14 @@ See [release-notes/1.2.16.md](release-notes/1.2.16.md).
 Published staging prerelease at 9c28e17 through PR #65. Production remains unchanged.
 
 ### Added
+
 - Theme-matched continuous client logo strip with progressive colour near the
   centre, faded edges, hover/focus pause, client name labels and reduced motion.
 - Supplied client logos and corrected Chaaru Art Gallery naming; removed the
   duplicate Guruparampara client while keeping Sankara Eye Hospital separate.
 
 ### Changed
+
 - Straightened three temple/monument covers, retaining original photographs.
 - Removed two unwanted Madhvacharya gallery images and refined the remaining
   two-image layout without changing shared previews or navigation.
@@ -65,12 +97,14 @@ See [release-notes/1.2.15.md](release-notes/1.2.15.md) for scope and rollout che
 Published staging prerelease at d9d32b8 (PRs #63 and #64). CI passed; the latest Cloudflare build failed and live version verification remains pending. Production remains unchanged.
 
 ### Added
+
 - Collectables page with rounded, natural-height masonry cards, Hanuman views,
   seated sculptures, Karnataka Mathe and six enhanced framed relief images.
 - Shared image preview with side arrows, thumbnails, keyboard navigation,
   focus restoration and image-click opening across project galleries.
 
 ### Changed
+
 - Unified page gutters, larger project cards and centered one/two-image galleries.
 - Homepage Works follows row order, with the finished Shankaracharya mural cover
   and full-framed Collectables Hanuman; four-project indexes use two columns.
@@ -91,6 +125,7 @@ GitHub CI and Cloudflare build checks succeeded; live version.json was not
 independently verified. Production and FREEZE remain unchanged.
 
 #### Added
+
 - Wide Studio Journal artist carousel featuring Shilpi K. Narayana Rao,
   Vishal Kavatekar and Vinay Kumar S., with supplied biographies and roles.
 - Card presentation with centered side arrows, mobile swipe, keyboard controls,
@@ -102,6 +137,7 @@ independently verified. Production and FREEZE remain unchanged.
   for modified clicks and error recovery.
 
 #### Changed
+
 - Display finished artwork first for available mural and installation projects;
   updated Surya, Saraswathi, Siddaramaiah and Village Scenes image ordering.
 - Homepage Murals uses the supplied Shankaracharya photograph; Monumental uses
@@ -124,6 +160,7 @@ Staging prerelease. Production remains unchanged. Deployment verification is
 recorded separately in the GitHub Release; publishing a tag is not proof of deployment.
 
 ### Changed
+
 - Implemented the approved immersive architecture menu for desktop and mobile,
   with keyboard focus handling, Escape to close and working navigation.
 - Converted homepage Works to a desktop grid, retaining stacked mobile cards.
@@ -138,6 +175,7 @@ recorded separately in the GitHub Release; publishing a tag is not proof of depl
 - Added code-formatting configuration and commands.
 
 ### Added
+
 - Privacy, terms and commission/refund drafts, visibly pending final review and
   completion of grievance-contact designations.
 - Original font licence texts and installed software licence notices.
@@ -145,6 +183,7 @@ recorded separately in the GitHub Release; publishing a tag is not proof of depl
 - Version rollover command, historical release ledger and launch checklist.
 
 ### Release status
+
 - Staging prerelease: v1.2.12. The GitHub Release records its exact merged commit
   and actual CI/deployment status.
 - Production freeze limitations and launch blockers are in RELEASE_READINESS.md.
@@ -155,6 +194,7 @@ Staging image update. Published as a GitHub prerelease; production remains
 unchanged and frozen until 2026-11-07.
 
 ### Changed
+
 - Replaced the Ganesha homepage hero with AI-enhanced imagery, using separate
   portrait and landscape restorations instead of enlarging the phone crop on desktop.
 - Added optimized WebP variants for phone, tablet, laptop, desktop and ultrawide
@@ -164,13 +204,14 @@ unchanged and frozen until 2026-11-07.
   photographs. Desktop source is 1672 x 941 and phone source is 852 x 1846.
 
 ### Validation
+
 - Astro build and repository asset/catalog checks pass.
 - Production branch and FREEZE are unchanged. This prerelease targets staging only.
-
 
 ## [1.2.10] — 2026-10-27
 
 ### Added
+
 - A production freeze that is enforced rather than advised. The date lives in a
   `FREEZE` file at the repository root; `check.py` fails any pull request based
   on `main` while that date is in the future, and the check runs as the `Checks`
@@ -184,6 +225,7 @@ unchanged and frozen until 2026-11-07.
   no edit, and prints a reminder to delete the file once it has.
 
 ### Changed
+
 - The production freeze now blocks the deploys, not just the pull requests.
   **Deploy production** and **Rollback production** each begin with a `freeze`
   job that every other job depends on, so a manual `workflow_dispatch` is
@@ -231,6 +273,7 @@ unchanged and frozen until 2026-11-07.
   offset is neutral at every width.
 
 ### Removed
+
 - The loading screen. The homepage opened behind a full-screen cream panel
   carrying the Kannada mark, a "Shaping stories" caption and a counter that ran
   to 100 while nothing was being waited for — the count was driven by a timer,
@@ -244,6 +287,7 @@ release freeze in `FREEZE` remains 2026-11-07. No production tag or release is
 created by merging this update into `develop`.
 
 ### Added
+
 - Seven portrait projects: Bronze Portrait IV, V, VI, an unnumbered bronze
   portrait of a woman, Sri Madhvacharya, Dr. B. R. Ambedkar and Ananth Kumar.
 - 22 additional gallery photographs, bringing the catalog to 44 projects and
@@ -254,6 +298,7 @@ created by merging this update into `develop`.
   with quality 95 for project images and no artificial upscaling.
 
 ### Changed
+
 - Replaced the horizontal Works slider with five large vertically stacked,
   linked collection images. Enlarged WORKS and removed the empty introduction.
 - Unified homepage surfaces in warm cream; refined hero logo placement, reduced
@@ -270,17 +315,19 @@ created by merging this update into `develop`.
   original clay photographs; the discarded generated visualization is excluded.
 
 ### Removed
+
 - Header logos, scroll prompts, collection numbering and Kalaayana archive labels.
 - Project intro and metadata panels, image-count labels, photograph captions,
   oversized project heroes, next-project panels and end-of-collection panels.
 
 ### Validation
+
 - Astro production build and repository catalog/asset checks.
 - Production-freeze rejection verified for a simulated PR targeting main.
 - Changes are local/staging only; no production deployment or release requested.
 
-
 ### Changed
+
 - The Our Story section is the studio's story and its expertise, side by side.
   The display line "We transform earth, metal and memory…" is gone, and with it
   the "From first line / to final presence" caption that belonged to it. In its
@@ -310,6 +357,7 @@ created by merging this update into `develop`.
 ## [1.2.8] — 2026-09-16
 
 ### Improved
+
 - Reprocessed all eleven Sri Siddaramaiah project photographs to a consistent
   2K long edge using fidelity-safe Lanczos resampling, compression cleanup, and
   controlled sharpening for clearer high-density display without generative
@@ -326,6 +374,7 @@ created by merging this update into `develop`.
   with the studio address, phone numbers, Instagram, and navigation.
 
 ### Fixed
+
 - Removed the inactive cursor, incomplete gold image reveals, and hard-coded
   side counter; corrected section numbering and process comparison labels.
 - Restored the process and archive interactions by removing obsolete sound code
@@ -336,6 +385,7 @@ created by merging this update into `develop`.
 ## [1.2.7] — 2026-09-16
 
 ### Fixed
+
 - Project-detail images now render at higher quality and are never stretched
   beyond their intrinsic width, preventing small archive photographs from being
   enlarged into visibly soft full-width frames.
@@ -345,6 +395,7 @@ created by merging this update into `develop`.
 ## [1.2.6] — 2026-09-16
 
 ### Fixed
+
 - Project-detail heroes now detect portrait photographs and show the complete
   composition instead of cropping faces and figures into a landscape viewport.
 - Project galleries now preserve each photograph’s natural aspect ratio rather
@@ -353,6 +404,7 @@ created by merging this update into `develop`.
 ## [1.2.5] — 2026-09-16
 
 ### Fixed
+
 - Added image-specific focal positions to all five homepage collection cards so
   temple architecture, portrait groups, mural scenes, landmark sculptures, and
   experiential installations remain properly framed on desktop and mobile.
@@ -361,30 +413,34 @@ created by merging this update into `develop`.
 ## [1.2.4] — 2026-09-16
 
 ### Fixed
+
 - Moved the desktop project status row below the fixed navigation so its labels
   no longer overlap the logo, studio descriptor, collection count, or menu.
 
 ### Removed
+
 - Removed the non-functional “SOUND OFF” control from the staging navigation.
 
 ## [1.2.3] — 2026-09-16
 
-  Removed with it: `loader.css`, the `.loader`, `.loader-mark`, `.loader-copy`
-  and `.loader-line` rules in `styles.css` and `responsive.css`, the
-  `loaderOut`, `markIn` and `loading` keyframes, the reduced-motion override
-  that hid the panel, and the counter driver in `motion.js` — which had to go
-  with the markup, since `$('.loader-copy b')` would otherwise be null and
-  throw on every homepage load.
+Removed with it: `loader.css`, the `.loader`, `.loader-mark`, `.loader-copy`
+and `.loader-line` rules in `styles.css` and `responsive.css`, the
+`loaderOut`, `markIn` and `loading` keyframes, the reduced-motion override
+that hid the panel, and the counter driver in `motion.js` — which had to go
+with the markup, since `$('.loader-copy b')` would otherwise be null and
+throw on every homepage load.
 
 ## [1.2.2] — 2026-09-16
 
 ### Removed
+
 - Removed the oversized “FORM × FAITH × MEMORY” kinetic strip from the staging
   homepage, including its scroll animation and responsive styling.
 
 ## [1.2.1] — 2026-09-16
 
 ### Changed
+
 - Collection and project routes now use the same editorial motion design system
   as the staging homepage, including responsive mobile compositions, cinematic
   image grids, project narratives, and next-project navigation.
@@ -394,6 +450,7 @@ created by merging this update into `develop`.
 ## [1.2.0] — 2026-09-15
 
 ### Added
+
 - A dedicated touch-responsive staging layout that preserves the horizontal
   "Works of Presence" scroll sequence while stacking the process and archive
   content cleanly on phones, including browsers that request a wide viewport.
@@ -410,6 +467,7 @@ created by merging this update into `develop`.
   navigation while the loading screen keeps only the Kannada leading mark.
 
 ### Changed
+
 - Removed the rotating circular hero ornament so it no longer obscures the
   sculpture on desktop or mobile.
 - Landmarks and Murals open with different photographs, chosen for resolution
@@ -514,6 +572,7 @@ created by merging this update into `develop`.
   rather than from the project titles. No image now says "Placeholder".
 
 ### Changed
+
 - Motion homepage project cards now link to their real collection routes; the
   generic hard-coded project page has been removed so every selected-work click
   resolves through the project metadata and displays its associated media.
@@ -599,6 +658,7 @@ created by merging this update into `develop`.
   emits as hashed variants.
 
 ### Removed
+
 - The 29 placeholder SVGs, now unreferenced.
 - `story-01.svg` and `story-02.svg`, the last two generated illustrations.
 - `logo-mark.png`, the header's Kannada mark, now unreferenced.
@@ -611,6 +671,7 @@ than hand-maintained as markup. **No visible change** — the rendered page is
 identical to the hand-written one.
 
 ### Added
+
 - Astro build. `src/pages` holds the two pages, `src/layouts/Base.astro` owns
   the document head, and `dist/` is the deployed output.
 - `src/data/projects.json` — all 29 projects as data. Adding a project means
@@ -626,6 +687,7 @@ identical to the hand-written one.
   work — a hero reference left behind when the file moved.
 
 ### Changed
+
 - `scripts/check.py` and `scripts/stamp.sh` operate on the build output rather
   than the repository root, since the output is what ships.
 - Workflows install Node, run `npm ci` and build before checking; the Pages
@@ -634,6 +696,7 @@ identical to the hand-written one.
   output contains only the site, so there is nothing to exclude.
 
 ### Verified
+
 Old and new rendered side by side in a browser and compared on twenty-one
 properties: title, section ids, navigation labels, all 29 card titles and
 scales, statistics, expertise, materials, section titles, contact links,
@@ -644,6 +707,7 @@ landmarks screenshots are pixel-identical.
 ## [1.0.2] — 2026-09-07
 
 ### Changed
+
 - Staging now serves the site under development at its root. `stamp.sh` swaps
   `index.html` and `preview.html` when the environment is `staging`, so
   `https://kalaayana.shrenikyd.workers.dev/` is the site being worked on, with
@@ -660,6 +724,7 @@ Holds the launch. The site is not ready to be public yet, so production goes
 back to the holding page while the full site is verified on staging.
 
 ### Changed
+
 - `index.html` is the **Coming Soon** holding page again, indexable with its
   canonical tag, so `kalaayanastudios.com` shows it to visitors.
 - The full site returns to `preview.html`, marked `noindex, nofollow` with no
@@ -669,6 +734,7 @@ back to the holding page while the full site is verified on staging.
   `coming-soon.html`.
 
 ### Note
+
 `1.0.0` remains tagged and is a valid, deployable release. Relaunching is the
 same file swap in reverse, and will be `1.1.0`.
 
@@ -677,6 +743,7 @@ same file swap in reverse, and will be `1.1.0`.
 Launch. The full site replaces the holding page at `kalaayanastudios.com`.
 
 ### Changed
+
 - `index.html` is now the complete site — hero, our story, expertise,
   monumental landmarks, temple architecture, portraits and life sculptures,
   murals and contact — with its canonical tag restored and `noindex` removed
@@ -691,6 +758,7 @@ Launch. The full site replaces the holding page at `kalaayanastudios.com`.
 ## [0.1.1] — 2026-09-07
 
 ### Fixed
+
 - The release job could not tag a version. `git tag -a` needs a committer
   identity and the runner has none, so the job failed at its first git command
   and `v0.1.0` was never created. The deploy itself had already succeeded.
@@ -700,6 +768,7 @@ Launch. The full site replaces the holding page at `kalaayanastudios.com`.
   Now matched literally with `index()`, which has no escaping to get wrong.
 
 ### Added
+
 - `wrangler.jsonc` and `.assetsignore` for the Cloudflare staging environment,
   and `scripts/stamp.sh` resolves the commit and ref from the checkout when
   they are not passed, so a Cloudflare build can stamp itself.
@@ -710,6 +779,7 @@ The site is live at `kalaayanastudios.com` as a holding page, with the complete
 site staged behind it.
 
 ### Added
+
 - Full site built from the studio profile deck: hero, our story, expertise,
   monumental landmarks, temple architecture, portraits and life sculptures,
   murals and contact. Staged at `preview.html` pending launch.
@@ -729,6 +799,7 @@ site staged behind it.
   can never be masked by a stale browser cache.
 
 ### Changed
+
 - Site palette set to **Bone on Charcoal** — `#0A0908` on every surface,
   `#22333B` cards, `#5E503F` rules, `#C6AC8F` accent, `#EAE0D5` text — with
   headings in Cinzel and body in Jost.

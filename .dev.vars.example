@@ -1,0 +1,3 @@
+# Local development only. Copy to .dev.vars (git-ignored).
+GITHUB_TOKEN=
+DEV_EMAIL=you@example.com

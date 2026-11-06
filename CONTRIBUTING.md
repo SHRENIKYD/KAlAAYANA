@@ -8,11 +8,11 @@ feature/*  ──PR──▶  develop  ──PR──▶  main
                  staging (private)   kalaayanastudios.com
 ```
 
-| Branch | Purpose | Direct pushes |
-| --- | --- | --- |
-| `main` | Production. Deploys to `kalaayanastudios.com` on merge. | Never — PR only |
-| `develop` | Integration. Everything lands here first and is reviewed on staging. | Never — PR only |
-| `feature/*` | One change each. Branch from `develop`, merge back to `develop`. | Yes, it is yours |
+| Branch      | Purpose                                                              | Direct pushes    |
+| ----------- | -------------------------------------------------------------------- | ---------------- |
+| `main`      | Production. Deploys to `kalaayanastudios.com` on merge.              | Never — PR only  |
+| `develop`   | Integration. Everything lands here first and is reviewed on staging. | Never — PR only  |
+| `feature/*` | One change each. Branch from `develop`, merge back to `develop`.     | Yes, it is yours |
 
 Branch names: `feature/<short-description>`, `fix/<short-description>`,
 `chore/<short-description>`.
@@ -37,18 +37,23 @@ Nothing reaches `kalaayanastudios.com` without passing through staging first.
 Staging is a Cloudflare Worker built from this repo and protected by Cloudflare
 Access, so only allowed accounts can open it. Its settings:
 
-| Setting | Value |
-| --- | --- |
-| Production branch | `develop` |
-| Build command | `npm run build:staging` |
-| Deploy command | `npx wrangler deploy` |
+| Setting                            | Value                               |
+| ---------------------------------- | ----------------------------------- |
+| Production branch                  | `develop`                           |
+| Build command                      | `npm run build:staging`             |
+| Deploy command                     | `npx wrangler deploy`               |
 | Builds for non-production branches | on — gives every branch its own URL |
-| Protect with Cloudflare Access | on |
+| Protect with Cloudflare Access     | on                                  |
 
 `wrangler.jsonc` serves the repo root as static assets; `.assetsignore` keeps
 scripts, workflows and docs out of what is served. The build command is what
 makes staging carry a real version — without it staging would serve `?v=dev`
 forever and cache stale assets.
+
+Cloudflare's **preview** (non-production branch) builds use a separate, legacy
+build command — `bash scripts/stamp.sh staging` — that the dashboard no longer
+shows. `scripts/stamp.sh` therefore runs `npm run build` itself when `dist/`
+is missing, so previews build; production never takes that path.
 
 The build command is a single npm script on purpose. It expands to
 `astro build && bash scripts/stamp.sh staging`, and both halves are required:
@@ -72,9 +77,24 @@ Its root serves the site under development — the build swaps `index.html` and
 there at `/coming-soon.html`. Cloudflare Access sits in front, so only
 permitted accounts and email addresses can open it.
 
-Production is unaffected by that swap: `kalaayanastudios.com` serves the
-holding page at its root until a release deliberately changes which file is
-`index.html`.
+Production is unaffected by that swap until launch. `kalaayanastudios.com`
+serves the holding page at its root, and every other page is `noindex`, while
+the `LIVE` file is absent from the repo root.
+
+**Launching the site.** Create an empty `LIVE` file at the repo root on
+`develop`, in the same PR that removes `FREEZE`, and merge `develop` into
+`main`. From then on every build — staging, production and rollback — serves
+the full site at `/`, moves the holding page to `/coming-soon/` (noindex),
+marks every page indexable, claims `https://kalaayanastudios.com/` as the
+canonical origin and lists every route in `sitemap.xml`. `scripts/check.py`
+enforces each of those in both states, so a build cannot half-launch.
+
+## Content admin
+
+Staging carries a content admin at `/admin/` for sections, projects and
+photographs. Each save is one commit and one pull request into `develop`,
+validated by the same `scripts/check.py` as any other change. Production
+never includes it. Setup and use are in [docs/ADMIN-SETUP.md](docs/ADMIN-SETUP.md).
 
 ## Building locally
 

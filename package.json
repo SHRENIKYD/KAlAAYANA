@@ -9,13 +9,15 @@
     "test:version": "node --test scripts/version.test.mjs",
     "version:next": "node scripts/bump-version.mjs",
     "dev": "astro dev",
-    "build": "astro build && python scripts/legacy_urls.py",
+    "build": "astro build && python scripts/legacy_urls.py && python scripts/sitemap.py && python scripts/csp.py",
     "build:staging": "npm run build && bash scripts/stamp.sh staging",
     "preview": "astro preview",
     "check": "python3 scripts/check.py",
     "format": "prettier --write \"**/*.{astro,ts,js,css,html,json,jsonc,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{astro,ts,js,css,html,json,jsonc,yml,yaml}\"",
-    "test:diagnostics": "node --test scripts/diagnostics.test.mjs"
+    "test:diagnostics": "node --test scripts/diagnostics.test.mjs",
+    "test:admin": "node --test scripts/admin.test.mjs",
+    "admin:demo": "npm run build && node scripts/admin-demo.mjs"
   },
   "devDependencies": {
     "astro": "^7.3.1",

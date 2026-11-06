@@ -38,27 +38,174 @@ except FileNotFoundError:
 if version and not re.fullmatch(r'(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.\d{1,2}', version):
     bad('VERSION must use MAJOR.MINOR.PATCH with patch 00 through 99: %r' % version)
 
-# 3. The public entry point must declare its canonical origin and be indexable.
+# 3. Indexing follows the LIVE marker. Before launch only the holding page is
+#    indexable. After it, the holding page (served at /coming-soon/ once stamped)
+#    is the only noindex route, the full site claims the canonical origin, and
+#    every other page is indexable. Legacy .html aliases always stay noindex.
+#    Checked by exclusion, so a route added later is covered automatically.
+live = os.path.exists('LIVE')
+def page_text(page): return open(os.path.join(OUT, page), encoding='utf-8').read()
+def is_alias(page):
+    return page.endswith('.html') and not page.endswith('index.html') and \
+        os.path.exists(os.path.join(OUT, page[:-5], 'index.html'))
+# Files copied verbatim from public/ (design mockups) are not site routes and
+# must never enter search, live or not.
+def is_static(page): return os.path.exists(os.path.join('public', page))
+
 if 'index.html' in html:
-    home = open(os.path.join(OUT, 'index.html'), encoding='utf-8').read()
+    home = page_text('index.html')
     if 'rel="canonical"' not in home:
         bad('index.html has no canonical link')
-    if not staging and 'noindex' in home:
+    if not staging and not live and 'noindex' in home:
         bad('index.html is marked noindex — it is the public page')
+    if live and 'noindex' not in home:
+        bad('index.html (holding page) must be noindex once LIVE exists')
 
-# 4. Staged pages must stay out of search. Every page except the public entry
-#    point is staged, so this is checked by exclusion — a new route added later
-#    is covered without anyone remembering to list it here.
+if live and 'preview/index.html' in html:
+    public = page_text('preview/index.html')
+    if 'noindex' in public:
+        bad('preview/index.html is marked noindex but is the public site once LIVE exists')
+    if 'rel="canonical" href="https://kalaayanastudios.com/"' not in public:
+        bad('preview/index.html must claim the canonical origin once LIVE exists')
+
 for page in sorted(html):
-    if page == 'index.html' and not staging:
+    text = page_text(page)
+    if is_alias(page) or is_static(page):
+        if 'noindex' not in text:
+            bad('%s is not a site route and must be noindex' % page)
         continue
-    if 'noindex' not in open(os.path.join(OUT, page), encoding='utf-8').read():
-        bad('%s is not marked noindex but is not the public page' % page)
+    if live:
+        if page != 'index.html' and 'noindex' in text:
+            bad('%s is marked noindex but the site is live' % page)
+    else:
+        if page == 'index.html' and not staging:
+            continue
+        if 'noindex' not in text:
+            bad('%s is not marked noindex but is not the public page' % page)
+
+# 4. The sitemap must exist and list exactly the indexable routes.
+sitemap_path = os.path.join(OUT, 'sitemap.xml')
+if not os.path.exists(sitemap_path):
+    bad('sitemap.xml is missing from the build')
+else:
+    listed = set(re.findall(r'<loc>https://kalaayanastudios\.com(/[^<]*)</loc>', open(sitemap_path, encoding='utf-8').read()))
+    expected = set()
+    for page in html:
+        if not page.endswith('index.html') or 'noindex' in page_text(page):
+            continue
+        route = '/' + page[:-len('index.html')]
+        if live and route == '/preview/':
+            route = '/'
+        expected.add(route)
+    for route in sorted(expected - listed):
+        bad('sitemap.xml does not list indexable route %s' % route)
+    for route in sorted(listed - expected):
+        bad('sitemap.xml lists %s, which is not an indexable route' % route)
+
+# 4b. Every page carries its Content Security Policy.
+for page in html:
+    if '<meta http-equiv="Content-Security-Policy"' not in page_text(page):
+        bad('%s has no Content-Security-Policy meta' % page)
+if os.path.exists(os.path.join(OUT, '_headers')) and '__SCRIPT_HASHES__' in open(os.path.join(OUT, '_headers'), encoding='utf-8').read():
+    bad('_headers still carries the script hash placeholder')
 
 # 5. Content data must be well formed — a malformed project must fail the build,
 #    not reach a visitor. Presentation is not consulted; this checks data alone.
 REQUIRED = ('slug', 'group', 'title', 'scale', 'description')
-GROUPS = {'landmarks', 'temples', 'portraits', 'murals', 'installations'}
+try:
+    GROUPS = set(json.load(open('src/data/site.json', encoding='utf-8'))['sections'])
+except Exception as e:
+    GROUPS = set()
+    bad('site.json sections are unreadable: %s' % e)
+for key, section in (json.load(open('src/data/site.json', encoding='utf-8')).get('sections', {}) if GROUPS else {}).items():
+    for field in ('eyebrow', 'title', 'lede', 'banner', 'bannerAlt', 'href'):
+        if not str(section.get(field, '')).strip():
+            bad('section %s is missing %s' % (key, field))
+    if section.get('banner') and not os.path.exists(os.path.join('src/images/sections', section['banner'])):
+        bad('section %s banner is missing: %s' % (key, section.get('banner')))
+
+# 5a. Admin users: valid emails, known roles, at least one superadmin.
+try:
+    users = json.load(open('admin/users.json', encoding='utf-8')).get('users', [])
+except Exception as e:
+    users = None
+    bad('admin/users.json is unreadable: %s' % e)
+if users is not None:
+    if not any(u.get('role') == 'superadmin' for u in users):
+        bad('admin/users.json needs at least one superadmin')
+    for u in users:
+        if not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', str(u.get('email', ''))):
+            bad('admin/users.json has an invalid email: %r' % u.get('email'))
+        if u.get('role') not in ('superadmin', 'admin'):
+            bad('admin/users.json has an unknown role for %s: %r' % (u.get('email'), u.get('role')))
+
+# 5a2. The admin log is append-only. Compared with the base branch when CI
+#      provides one: every existing line stays, in order, and no photograph
+#      under logs/photos/ disappears. The branch rules forbid force pushes, so
+#      together nothing written to the log can be taken back.
+import subprocess
+base_ref = os.environ.get('BASE_REF')
+def base_file(path):
+    if not base_ref:
+        return None
+    r = subprocess.run(['git', 'show', 'origin/%s:%s' % (base_ref, path)], capture_output=True)
+    return r.stdout.decode('utf-8', 'replace') if r.returncode == 0 else None
+for path in ('logs/admin-log.jsonl', 'CONTENT-LOG.md'):
+    before = base_file(path)
+    now = open(path, encoding='utf-8').read() if os.path.exists(path) else None
+    if before is not None:
+        if now is None:
+            bad('%s was deleted — the admin log is append-only' % path)
+        elif not now.startswith(before.rstrip('\n') + ('\n' if before.rstrip('\n') else '')):
+            bad('%s changed or lost existing lines — the admin log is append-only' % path)
+if os.path.exists('logs/admin-log.jsonl'):
+    for n, line in enumerate(open('logs/admin-log.jsonl', encoding='utf-8'), 1):
+        if not line.strip():
+            continue
+        try:
+            e = json.loads(line)
+            assert e['category'] in ('content', 'admin', 'session', 'error') and e['at'] and e['email']
+        except Exception:
+            bad('logs/admin-log.jsonl line %d is not a valid entry' % n)
+if base_ref:
+    r = subprocess.run(['git', 'ls-tree', '--name-only', 'origin/%s' % base_ref, 'logs/photos/'], capture_output=True)
+    if r.returncode == 0:
+        for photo in r.stdout.decode().split():
+            if not os.path.exists(photo):
+                bad('%s was removed — sign-in photographs are never deleted' % photo)
+
+# 5b. Homepage features are data too: every entry needs its text and a real image.
+try:
+    works = json.load(open('src/data/site.json', encoding='utf-8')).get('home', {}).get('works', [])
+except Exception:
+    works = []
+if not works:
+    bad('site.json home.works is empty — the homepage would show no work')
+for i, w in enumerate(works):
+    where = 'home.works[%d]' % i
+    for field in ('href', 'eyebrow', 'title', 'link'):
+        if not str(w.get(field, '')).strip():
+            bad('%s is missing %s' % (where, field))
+    if w.get('section') is not None:
+        if w['section'] not in GROUPS:
+            bad('%s names a work that does not exist: %s' % (where, w['section']))
+        elif w.get('href') != '/%s/' % w['section']:
+            bad('%s must link to /%s/' % (where, w['section']))
+    image = w.get('image') or {}
+    if image.get('from') not in ('projects', 'sections'):
+        bad('%s image.from must be projects or sections' % where)
+    elif not os.path.exists(os.path.join('src/images', image['from'], str(image.get('file', '')))):
+        bad('%s image is missing: %s/%s' % (where, image['from'], image.get('file')))
+    if not str(image.get('alt', '')).strip():
+        bad('%s image needs alt text' % where)
+    if image.get('zoom') is not None and not (isinstance(image['zoom'], (int, float)) and 1 <= image['zoom'] <= 3):
+        bad('%s image zoom must be a number between 1 and 3' % where)
+    if image.get('fit') is not None and image['fit'] not in ('cover', 'contain'):
+        bad('%s image fit must be cover or contain' % where)
+    if image.get('background') is not None and not re.fullmatch(r'#[0-9a-fA-F]{6}', str(image['background'])):
+        bad('%s image background must be a hex colour' % where)
+    if image.get('focus') is not None and not re.fullmatch(r'\d{1,3}% \d{1,3}%', str(image['focus'])):
+        bad('%s image focus must look like "50%% 40%%"' % where)
 try:
     projects = json.load(open('src/data/projects.json', encoding='utf-8'))
 except Exception as e:

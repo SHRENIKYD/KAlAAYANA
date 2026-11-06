@@ -5,19 +5,20 @@
  * own body. Presentation depends on this; it depends on no page.
  */
 import site from '../data/site.json';
+import { LIVE } from '../lib/live';
 import Seo from '../components/Seo.astro';
 import PolicyLinks from '../components/PolicyLinks.astro';
 
 interface Props {
   title: string;
   description?: string;
-  /** Public pages are indexable and claim the canonical origin. Staged pages are not. */
+  /** Pages are indexable once the site is live; before that only the holding page is. */
   indexable?: boolean;
   fonts: string;
   bodyClass?: string;
 }
 
-const { title, description = site.description, indexable = false, fonts, bodyClass } = Astro.props;
+const { title, description = site.description, indexable = LIVE, fonts, bodyClass } = Astro.props;
 ---
 
 <!doctype html>

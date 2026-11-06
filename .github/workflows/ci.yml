@@ -39,6 +39,8 @@ jobs:
         run: npm audit --audit-level=high
       - name: Test privacy-safe diagnostics
         run: npm run test:diagnostics
+      - name: Test the content admin Worker
+        run: npm run test:admin
       - name: Build
         run: npm run build
       - name: Verify version rollover rules
@@ -58,3 +60,4 @@ jobs:
           ./scripts/stamp.sh ci "${{ github.sha }}" "${{ github.ref_name }}"
           test -f dist/version.json
           grep -q 'name="version"' dist/index.html
+          python3 scripts/csp.py --verify

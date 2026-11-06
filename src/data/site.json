@@ -154,5 +154,86 @@
     "phones": ["+918886870796", "+918310660720"],
     "instagram": "kalaayana_studios",
     "address": ["No. 46, 47, BM Kaval,", "Kengeri, Bangalore South,", "Karnataka — 560060"]
+  },
+  "home": {
+    "works": [
+      {
+        "section": "temples",
+        "href": "/temples/",
+        "eyebrow": "Sacred spaces",
+        "title": "Temple Architecture",
+        "link": "Discover collection",
+        "image": {
+          "from": "sections",
+          "file": "temples.jpg",
+          "alt": "Intricately sculpted Kalaayana temple façade",
+          "focus": "50% 48%"
+        }
+      },
+      {
+        "section": "portraits",
+        "href": "/portraits/",
+        "eyebrow": "Portraiture",
+        "title": "Portrait",
+        "link": "Discover collection",
+        "image": {
+          "from": "sections",
+          "file": "portraits.jpg",
+          "alt": "Kalaayana sculpted portrait",
+          "focus": "50% 48%"
+        }
+      },
+      {
+        "section": "murals",
+        "href": "/murals/",
+        "eyebrow": "Narrative relief",
+        "title": "Murals",
+        "link": "Discover collection",
+        "image": {
+          "from": "projects",
+          "file": "sri-adi-shankaracharya-2.jpg",
+          "alt": "Finished Sri Adi Shankaracharya mural with four disciples beneath a tree in an ornate bronze frame",
+          "focus": "50% 50%"
+        }
+      },
+      {
+        "section": "landmarks",
+        "href": "/landmarks/",
+        "eyebrow": "Landmarks",
+        "title": "Monumental",
+        "link": "Discover collection",
+        "image": {
+          "from": "projects",
+          "file": "hanuman-hangluru-1.jpg",
+          "alt": "The monumental standing Hanuman sculpture at Hangluru holding a mace",
+          "focus": "50% 0%"
+        }
+      },
+      {
+        "href": "/collectables/",
+        "eyebrow": "Collectables",
+        "title": "Collectables",
+        "link": "View collectables",
+        "image": {
+          "from": "projects",
+          "file": "collectables-hanuman-front.jpg",
+          "alt": "Hanuman collectable sculpture",
+          "focus": "50% 48%"
+        }
+      },
+      {
+        "section": "installations",
+        "href": "/installations/",
+        "eyebrow": "Experiential",
+        "title": "Other Installations",
+        "link": "Discover collection",
+        "image": {
+          "from": "sections",
+          "file": "installations.jpg",
+          "alt": "Oversized sculptural installation by Kalaayana",
+          "focus": "50% 72%"
+        }
+      }
+    ]
   }
 }

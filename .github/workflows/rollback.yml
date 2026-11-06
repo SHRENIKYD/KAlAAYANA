@@ -62,7 +62,9 @@ jobs:
         run: npm run build
 
       - name: Stamp the build
-        run: ./scripts/stamp.sh production "$GITHUB_SHA" "$ROLLBACK_TAG"
+        run: |
+          ./scripts/stamp.sh production "$GITHUB_SHA" "$ROLLBACK_TAG"
+          test ! -e dist/admin || { echo "::error::content admin must not ship to production"; exit 1; }
 
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
