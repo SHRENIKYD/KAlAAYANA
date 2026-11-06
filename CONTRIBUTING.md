@@ -137,8 +137,15 @@ Actions → **Rollback production** → Run workflow → enter a tag such as
 
 ## Production freeze
 
-The existing FREEZE file contains **2026-11-07**. Do not merge into main or run
-production/rollback workflows during the freeze. Staging work continues on develop.
+The FREEZE file contains **2026-11-08T22:00:00+05:30** — 22:00 IST on Sunday
+8 November, which is 16:30 UTC. Do not merge into main or run production/rollback
+workflows during the freeze. Staging work continues on develop.
+
+`FREEZE` accepts either a bare date, which means midnight UTC on it, or an ISO
+timestamp carrying a UTC offset. The timestamp form is the clearer one, because a
+launch is set in the team's own clock: `2026-11-08T22:00:00+05:30` is unambiguous
+where `2026-11-08` is not. A timestamp without an offset is rejected rather than
+assumed, so the gate cannot drift with the runner's timezone.
 
 The guards on develop block main-targeting PR checks and guard deployment and
 rollback workflows. However, the live main branch still lacks these guards.
@@ -150,9 +157,22 @@ A repository-level approval control on the github-pages environment or equivalen
 protection must be verified before launch. Changing GitHub settings, deleting
 FREEZE or merging guards into main is not authorised merely by preparing a release.
 
-Current workflow logic uses UTC and unlocks at 05:30 IST on 7 November, rather
-than blocking through the whole day. Confirm the intended end time and obtain
-explicit release approval. See RELEASE_READINESS.md for the unresolved blockers.
+The end time is settled: the studio set it at 22:00 IST on Sunday 8 November, and
+`FREEZE` now carries that instant rather than a bare date. The earlier note that
+the gate unlocked at 05:30 IST on 7 November no longer applies.
+
+Two gates read this file and they are deliberately different. `scripts/check.py`
+compares the instant, so a release PR into main can merge once the freeze lifts.
+`scripts/deploy_guard.py` blocks while the file **exists at all**, whatever it
+says, so nothing deploys until the file is deleted. Lifting the freeze is
+therefore two acts, not one: the clock passing, then a reviewed removal.
+
+The release order that follows from that: remove FREEZE on develop first, then
+merge develop into main, which is what deploys. Merging first leaves main updated
+and nothing published.
+
+See RELEASE_READINESS.md for the unresolved blockers, which the clock does not
+clear.
 
 ## Releasing
 
