@@ -530,13 +530,30 @@
   );
 
   /* ---------- users (superadmin) ---------- */
-  async function changeUser(body, note, button) {
-    note.textContent = '';
-    const label = button ? button.textContent : '';
-    if (button) {
-      button.disabled = true;
-      button.textContent = 'Saving…';
-    }
+  // The table changes the moment you act; the server's answer then confirms
+  // it, or the previous list comes back with the reason.
+  async function changeUser(body) {
+    const before = state.users;
+    const email = String(body.email || '')
+      .trim()
+      .toLowerCase();
+    if (body.action === 'remove') state.users = before.filter((u) => u.email !== email);
+    else if (body.action === 'role')
+      state.users = before.map((u) => (u.email === email ? { ...u, role: body.role } : u));
+    else if (body.action === 'invite')
+      state.users = [
+        ...before,
+        { email, role: body.role, invitedBy: state.email, invitedAt: new Date().toISOString() },
+      ];
+    state.usersBusy =
+      body.action === 'remove'
+        ? `Removing ${email}…`
+        : body.action === 'invite'
+          ? `Inviting ${email}…`
+          : `Saving ${email}…`;
+    state.usersError = '';
+    state.usersPending = '';
+    renderUsers();
     try {
       const r = await api('/users', { method: 'POST', body: JSON.stringify(body) });
       if (Array.isArray(r.users)) state.users = r.users;
@@ -547,14 +564,12 @@
       ]
         .filter(Boolean)
         .join(' ');
-      renderUsers();
     } catch (e) {
-      note.textContent = e.message;
-      if (button) {
-        button.disabled = false;
-        button.textContent = label;
-      }
+      state.users = before;
+      state.usersError = e.message;
     }
+    state.usersBusy = '';
+    if (state.view === 'users') renderUsers();
   }
   async function showUsers() {
     state.view = 'users';
@@ -567,7 +582,8 @@
     if (state.view === 'users') renderUsers();
   }
   function renderUsers() {
-    const note = el('p', { class: 'signin-error', role: 'alert' });
+    const note = el('p', { class: 'signin-error', role: 'alert' }, state.usersError || '');
+    const busy = Boolean(state.usersBusy);
     const email = el('input', {
       type: 'email',
       id: 'invite-email',
@@ -580,7 +596,11 @@
       el('option', { value: 'admin' }, 'Admin — add and update projects'),
       el('option', { value: 'superadmin' }, 'Superadmin — everything, including users and the log'),
     );
-    const inviteBtn = el('button', { class: 'btn', type: 'submit' }, 'Invite');
+    const inviteBtn = el(
+      'button',
+      { class: 'btn', type: 'submit', disabled: busy ? '' : null },
+      'Invite',
+    );
     const form = el(
       'form',
       { class: 'invite' },
@@ -602,11 +622,7 @@
     );
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      changeUser(
-        { action: 'invite', email: email.value.trim(), role: role.value },
-        note,
-        inviteBtn,
-      );
+      changeUser({ action: 'invite', email: email.value.trim(), role: role.value });
     });
     const main = $('#main');
     main.replaceChildren(
@@ -623,6 +639,7 @@
             { class: 'muted' },
             'Who can sign in to the admin, and what they may do. Admins add and update projects; superadmins can do everything, see the log and manage users.',
           ),
+          busy ? el('p', { class: 'pending-note' }, state.usersBusy) : null,
           state.usersPending ? el('p', { class: 'pending-note' }, state.usersPending) : null,
         ),
       ),
@@ -654,8 +671,9 @@
                 return o;
               }),
             );
+            sel.disabled = busy;
             sel.addEventListener('change', () =>
-              changeUser({ action: 'role', email: u.email, role: sel.value }, note),
+              changeUser({ action: 'role', email: u.email, role: sel.value }),
             );
             return el(
               'tr',
@@ -684,11 +702,12 @@
                       {
                         class: 'btn btn-danger btn-sm',
                         type: 'button',
+                        disabled: busy ? '' : null,
                         onclick: () =>
                           confirmBox(
                             `Remove ${u.email}?`,
                             'They can no longer sign in to the admin.',
-                            () => changeUser({ action: 'remove', email: u.email }, note),
+                            () => changeUser({ action: 'remove', email: u.email }),
                           ),
                       },
                       'Remove',
