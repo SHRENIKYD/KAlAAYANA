@@ -24,7 +24,8 @@ async function identify(request, env) {
     .split(',')
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
-  if (!allowed.includes(email)) throw new Error(`${email} is not an admin`);
+  if (!allowed.includes(email))
+    throw Object.assign(new Error(`${email} is not an admin`), { email });
   return email;
 }
 
@@ -48,7 +49,7 @@ async function handleApi(request, env) {
   try {
     email = await identify(request, env);
   } catch (e) {
-    return json({ error: e.message }, 403);
+    return json({ error: e.message, email: e.email }, 403);
   }
   const gh = client(env.GITHUB_TOKEN, env.GITHUB_REPO);
   const base = env.GITHUB_BASE || 'develop';
@@ -65,6 +66,7 @@ async function handleApi(request, env) {
       base,
       projects,
       sections: site.sections,
+      home: site.home,
       projectFiles: [...projectFiles],
       bannerFiles: [...bannerFiles],
     });
@@ -112,9 +114,14 @@ async function handleApi(request, env) {
     const bannerShas = Object.fromEntries(
       await Promise.all(Object.entries(banners).map(async ([f, b]) => [f, await blobSha(b)])),
     );
-    const deletions = orphans(before, payload.projects, projectFiles);
+    const deletions = orphans(
+      before,
+      payload.projects,
+      projectFiles,
+      payload.home.works.filter((w) => w.image.from === 'projects').map((w) => w.image.file),
+    );
 
-    const nextSite = { ...site, sections: payload.sections };
+    const nextSite = { ...site, sections: payload.sections, home: payload.home };
     const entries = treeEntries({
       projectsJson: JSON.stringify(payload.projects, null, 2) + '\n',
       siteJson: JSON.stringify(nextSite, null, 2) + '\n',

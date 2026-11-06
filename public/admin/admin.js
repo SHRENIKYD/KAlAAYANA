@@ -32,6 +32,7 @@
     JSON.stringify({
       p: state.projects,
       s: state.sections,
+      h: state.home,
       u: Object.keys(state.uploads),
       b: Object.keys(state.banners),
     });
@@ -51,7 +52,10 @@
     const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
     if (!res.ok)
       throw Object.assign(new Error(data.error || `HTTP ${res.status}`), {
+        status: res.status,
         problems: data.problems,
+        demo: data.demo,
+        email: data.email,
       });
     return data;
   }
@@ -79,6 +83,16 @@
   function renderSections() {
     const nav = $('#sections');
     nav.replaceChildren(
+      el(
+        'button',
+        {
+          type: 'button',
+          'aria-current': String(state.view === 'home'),
+          onclick: editHome,
+        },
+        el('span', {}, 'Homepage'),
+        el('b', {}, String((state.home?.works || []).length)),
+      ),
       ...Object.entries(state.sections).map(([key, s]) =>
         el(
           'button',
@@ -466,6 +480,325 @@
     renderSections();
   }
 
+  /* ---------- focus point ----------
+     Click the photograph where the subject is. The crops on the right show how
+     the site will frame it at the given aspect ratios. */
+  function focusPicker({ src, get, set, crops }) {
+    const img = el('img', { src, alt: '' });
+    const dot = el('div', { class: 'focus-dot' });
+    const stage = el('div', { class: 'focus-stage' }, img, dot);
+    const value = el('span', { class: 'focus-value' });
+    const cropImgs = crops.map(([label, ratio]) => {
+      const c = el('img', { src, alt: '' });
+      c.style.aspectRatio = ratio;
+      return [c, el('div', { class: 'focus-crop' }, c, el('span', {}, label))];
+    });
+    const paint = () => {
+      const f = get() || '50% 50%';
+      const [x, y] = f.split(' ');
+      dot.style.left = x;
+      dot.style.top = y;
+      value.textContent = `Focus ${f}`;
+      for (const [c] of cropImgs) c.style.objectPosition = f;
+    };
+    stage.addEventListener('click', (e) => {
+      const r = img.getBoundingClientRect();
+      const x = Math.round(Math.min(100, Math.max(0, ((e.clientX - r.left) / r.width) * 100)));
+      const y = Math.round(Math.min(100, Math.max(0, ((e.clientY - r.top) / r.height) * 100)));
+      set(`${x}% ${y}%`);
+      paint();
+      markDirty();
+    });
+    paint();
+    return el(
+      'div',
+      { class: 'f' },
+      el('label', {}, 'Framing'),
+      el(
+        'div',
+        { class: 'focus' },
+        stage,
+        el('div', { class: 'focus-crops' }, ...cropImgs.map(([, box]) => box)),
+        value,
+        el('small', {}, 'Click the photograph where the subject is. The crops follow.'),
+      ),
+    );
+  }
+
+  /* ---------- homepage works ---------- */
+  function imageChoices() {
+    const choices = [];
+    for (const p of state.projects)
+      for (const img of p.images)
+        choices.push({
+          from: 'projects',
+          file: img.file,
+          label: `${p.title} — ${img.file}`,
+          alt: img.alt,
+        });
+    for (const [key, sec] of Object.entries(state.sections))
+      if (sec.banner)
+        choices.push({
+          from: 'sections',
+          file: sec.banner,
+          label: `${sec.title} banner — ${sec.banner}`,
+          alt: sec.bannerAlt,
+        });
+    return choices;
+  }
+
+  function editHome() {
+    state.view = 'home';
+    state.current = null;
+    const works = (state.home.works ||= []);
+    const main = $('#main');
+    const list = el('div', { class: 'images' });
+
+    const render = () => {
+      list.replaceChildren(
+        ...works.map((w, i) =>
+          el(
+            'div',
+            { class: `image work${w.image.file in state.uploads ? ' new' : ''}` },
+            el('img', { src: imageUrl(w.image.from, w.image.file), alt: '' }),
+            el(
+              'div',
+              { class: 'form work-form' },
+              el(
+                'p',
+                { class: 'image-name' },
+                `${String(i + 1).padStart(2, '0')} · ${w.image.from}/${w.image.file}`,
+              ),
+              el(
+                'div',
+                { class: 'row' },
+                field('Eyebrow', {
+                  value: w.eyebrow,
+                  required: true,
+                  placeholder: 'Sacred spaces',
+                  oninput: (v) => {
+                    w.eyebrow = v;
+                    markDirty();
+                  },
+                }),
+                field('Title', {
+                  value: w.title,
+                  required: true,
+                  oninput: (v) => {
+                    w.title = v;
+                    markDirty();
+                  },
+                }),
+              ),
+              el(
+                'div',
+                { class: 'row' },
+                (() => {
+                  const sel = el('select', {});
+                  const options = [
+                    ...Object.entries(state.sections).map(([k, sec]) => [`/${k}/`, sec.title]),
+                    ['/collectables/', 'Collectables'],
+                  ];
+                  if (!options.some(([h]) => h === w.href)) options.push([w.href, w.href]);
+                  for (const [h, label] of options) {
+                    const o = el('option', { value: h }, label);
+                    if (h === w.href) o.selected = true;
+                    sel.append(o);
+                  }
+                  sel.addEventListener('change', () => {
+                    w.href = sel.value;
+                    markDirty();
+                  });
+                  return el('div', { class: 'f' }, el('label', {}, 'Links to'), sel);
+                })(),
+                field('Link text', {
+                  value: w.link,
+                  required: true,
+                  placeholder: 'Discover collection',
+                  oninput: (v) => {
+                    w.link = v;
+                    markDirty();
+                  },
+                }),
+              ),
+              (() => {
+                const sel = el('select', {});
+                for (const c of imageChoices()) {
+                  const o = el('option', { value: `${c.from}/${c.file}` }, c.label);
+                  if (c.from === w.image.from && c.file === w.image.file) o.selected = true;
+                  sel.append(o);
+                }
+                if (!sel.value || sel.value !== `${w.image.from}/${w.image.file}`) {
+                  const o = el(
+                    'option',
+                    { value: `${w.image.from}/${w.image.file}` },
+                    `${w.image.from}/${w.image.file}`,
+                  );
+                  o.selected = true;
+                  sel.append(o);
+                }
+                sel.addEventListener('change', () => {
+                  const [from, file] = sel.value.split('/');
+                  const choice = imageChoices().find((c) => c.from === from && c.file === file);
+                  w.image = { from, file, alt: choice?.alt || w.image.alt };
+                  render();
+                  markDirty();
+                });
+                return el(
+                  'div',
+                  { class: 'f' },
+                  el('label', {}, 'Photograph'),
+                  sel,
+                  el(
+                    'small',
+                    {},
+                    'Any project photograph or section banner, or drop a new one below.',
+                  ),
+                );
+              })(),
+              field('Alt text', {
+                value: w.image.alt,
+                required: true,
+                oninput: (v) => {
+                  w.image.alt = v;
+                  markDirty();
+                },
+              }),
+              focusPicker({
+                src: imageUrl(w.image.from, w.image.file),
+                get: () => w.image.focus || '50% 48%',
+                set: (v) => {
+                  w.image.focus = v;
+                },
+                crops: [
+                  ['Desktop', '2 / 1'],
+                  ['Phone', '4 / 3'],
+                ],
+              }),
+              dropZone(
+                'Drop a new photograph for this feature',
+                async (files) => {
+                  if (!files[0]) return;
+                  const ext = files[0].type === 'image/png' ? 'png' : 'jpg';
+                  const name = nextImageName(
+                    `home-${slugify(w.title || 'feature') || 'feature'}`,
+                    ext,
+                  );
+                  await stageUpload(files[0], name, state.uploads);
+                  w.image = { from: 'projects', file: name, alt: w.image.alt };
+                  render();
+                  markDirty();
+                },
+                false,
+              ),
+            ),
+            el(
+              'div',
+              { class: 'image-tools' },
+              el(
+                'button',
+                {
+                  class: 'btn btn-ghost btn-sm',
+                  type: 'button',
+                  disabled: i === 0 ? '' : null,
+                  onclick: () => {
+                    [works[i - 1], works[i]] = [works[i], works[i - 1]];
+                    render();
+                    markDirty();
+                  },
+                },
+                '↑',
+              ),
+              el(
+                'button',
+                {
+                  class: 'btn btn-ghost btn-sm',
+                  type: 'button',
+                  disabled: i === works.length - 1 ? '' : null,
+                  onclick: () => {
+                    [works[i + 1], works[i]] = [works[i], works[i + 1]];
+                    render();
+                    markDirty();
+                  },
+                },
+                '↓',
+              ),
+              el(
+                'button',
+                {
+                  class: 'btn btn-danger btn-sm',
+                  type: 'button',
+                  onclick: () => {
+                    if (
+                      w.image.from === 'projects' &&
+                      w.image.file in state.uploads &&
+                      !state.projects.some((p) => p.images.some((x) => x.file === w.image.file))
+                    )
+                      delete state.uploads[w.image.file];
+                    works.splice(i, 1);
+                    render();
+                    markDirty();
+                  },
+                },
+                'Remove',
+              ),
+            ),
+          ),
+        ),
+      );
+    };
+
+    main.replaceChildren(
+      el(
+        'div',
+        { class: 'head' },
+        el(
+          'div',
+          {},
+          el('p', { class: 'eyebrow' }, 'Homepage'),
+          el('h1', {}, 'Works'),
+          el(
+            'p',
+            { class: 'muted' },
+            'The features under WORKS on the homepage, in this order. Each links to a section or to Collectables.',
+          ),
+        ),
+        el(
+          'div',
+          { class: 'actions' },
+          el(
+            'button',
+            {
+              class: 'btn',
+              type: 'button',
+              onclick: () => {
+                const first = imageChoices()[0];
+                works.push({
+                  href: Object.keys(state.sections).length
+                    ? `/${Object.keys(state.sections)[0]}/`
+                    : '/collectables/',
+                  eyebrow: '',
+                  title: '',
+                  link: 'Discover collection',
+                  image: first
+                    ? { from: first.from, file: first.file, alt: first.alt }
+                    : { from: 'projects', file: '', alt: '' },
+                });
+                render();
+                markDirty();
+                list.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              },
+            },
+            '+ New feature',
+          ),
+        ),
+      ),
+      list,
+    );
+    render();
+    renderSections();
+  }
+
   /* ---------- section editor ---------- */
   function editSection(key, isNew = false) {
     const s =
@@ -502,18 +835,17 @@
                     markDirty();
                   },
                 }),
-                field(
-                  'Focus point',
-                  {
-                    value: s.bannerFocus,
-                    placeholder: '50% 16%',
-                    oninput: (v) => {
-                      s.bannerFocus = v;
-                      markDirty();
-                    },
+                focusPicker({
+                  src: imageUrl('sections', s.banner),
+                  get: () => s.bannerFocus,
+                  set: (v) => {
+                    s.bannerFocus = v;
                   },
-                  'Horizontal and vertical position kept in view when the banner is cropped.',
-                ),
+                  crops: [
+                    ['Section banner', '16 / 6'],
+                    ['Phone', '4 / 5'],
+                  ],
+                }),
               ),
             )
           : el('p', { class: 'muted' }, 'No banner yet.'),
@@ -669,6 +1001,122 @@
     dlg.showModal();
   }
 
+  /* ---------- demo preview build ---------- */
+  async function buildPreview() {
+    const body = $('#result-body');
+    body.replaceChildren(
+      el('h2', {}, 'Building preview'),
+      el('p', {}, 'Running the real site build with your saved changes…'),
+    );
+    $('#result-close').hidden = true;
+    try {
+      const r = await api('/preview', { method: 'POST' });
+      body.replaceChildren(
+        el('h2', {}, 'Preview ready'),
+        el(
+          'p',
+          {},
+          el(
+            'a',
+            { href: r.url, target: '_blank', rel: 'noopener noreferrer' },
+            'Open the preview site ↗',
+          ),
+        ),
+        el(
+          'p',
+          { class: 'muted' },
+          `Built in ${r.seconds}s from the saved changes. Close this to keep editing.`,
+        ),
+      );
+      const bar = $('#preview-link');
+      if (bar) {
+        bar.href = r.url;
+        bar.hidden = false;
+      }
+    } catch (e) {
+      body.replaceChildren(el('h2', {}, 'Preview failed'), el('pre', {}, e.message));
+    } finally {
+      $('#result-close').hidden = false;
+    }
+  }
+
+  /* ---------- sign-in ----------
+     On staging, Cloudflare Access shows its own sign-in page before this one
+     loads; the Worker then checks the signed-in email against the editor
+     list. This screen covers the two cases the page itself can see: a
+     signed-in account that is not an editor, and the local demo's sign-in. */
+  function showSignIn(err) {
+    document.body.classList.add('signin');
+    const main = $('#main');
+    const box = el('div', { class: 'signin-card' });
+    if (err.demo) {
+      const input = el('input', {
+        type: 'email',
+        id: 'signin-email',
+        autocomplete: 'email',
+        placeholder: 'you@kalaayanastudios.com',
+        required: '',
+      });
+      const note = el('p', { class: 'signin-error', role: 'alert' });
+      const form = el(
+        'form',
+        { class: 'signin-form' },
+        el('div', { class: 'f' }, el('label', { for: 'signin-email' }, 'Studio email'), input),
+        el('button', { class: 'btn', type: 'submit' }, 'Sign in'),
+        note,
+      );
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        note.textContent = '';
+        try {
+          await api('/login', {
+            method: 'POST',
+            body: JSON.stringify({ email: input.value.trim() }),
+          });
+          document.body.classList.remove('signin');
+          await load();
+        } catch (x) {
+          note.textContent = x.message;
+        }
+      });
+      box.append(
+        el('p', { class: 'eyebrow' }, 'Content admin'),
+        el('h1', {}, 'Sign in'),
+        el(
+          'p',
+          { class: 'muted' },
+          'Only authorised studio accounts can edit the site. Anyone else is turned away here.',
+        ),
+        form,
+        el(
+          'p',
+          { class: 'muted signin-small' },
+          'Local demo: on staging this page is Cloudflare Access, which sends a one-time code to the email.',
+        ),
+      );
+    } else {
+      box.append(
+        el('p', { class: 'eyebrow' }, 'Content admin'),
+        el('h1', {}, err.status === 403 ? 'Not authorised' : 'Sign in'),
+        el(
+          'p',
+          { class: 'muted' },
+          err.email
+            ? `${err.email} is signed in but is not on the editor list. Ask the studio to add it, or sign in with another account.`
+            : 'Only authorised studio accounts can edit the site. Sign in with your studio email to continue.',
+        ),
+        el(
+          'div',
+          { class: 'signin-form' },
+          el('a', { class: 'btn', href: '/cdn-cgi/access/logout' }, 'Sign in with another account'),
+          el('a', { class: 'btn btn-ghost', href: '/' }, 'Back to the site'),
+        ),
+      );
+    }
+    main.replaceChildren(box);
+    $('#who').textContent = err.email || '';
+  }
+
   /* ---------- dialogs ---------- */
   function alertBox(title, text) {
     $('#result-body').replaceChildren(el('h2', {}, title), el('p', {}, text));
@@ -709,6 +1157,7 @@
         body: JSON.stringify({
           projects: state.projects,
           sections: state.sections,
+          home: state.home,
           uploads: state.uploads,
           banners: state.banners,
           message: $('#message').value,
@@ -735,13 +1184,24 @@
                 '.',
               ),
           result.demo
-            ? null
+            ? el(
+                'p',
+                {},
+                'To see exactly how the site looks with these changes, build a preview — it takes about a minute.',
+              )
             : el(
                 'p',
                 {},
                 result.autoMerge
                   ? 'The checks are running. When they pass it merges itself and staging rebuilds — allow three or four minutes.'
                   : 'Auto-merge is not enabled on the repository, so merge it on GitHub once the checks pass. Staging rebuilds after the merge.',
+              ),
+          result.demo
+            ? el('button', { class: 'btn', type: 'button', onclick: buildPreview }, 'Preview site')
+            : el(
+                'p',
+                {},
+                'Preview: Cloudflare builds this pull request\u2019s branch and posts the preview link as a comment on it within a few minutes. That is the site exactly as it will look.',
               ),
         ].filter(Boolean),
       );
@@ -778,6 +1238,7 @@
       base: data.base,
       projects: data.projects,
       sections: data.sections,
+      home: data.home || { works: [] },
       projectFiles: new Set(data.projectFiles),
       bannerFiles: new Set(data.bannerFiles),
       uploads: {},
@@ -808,6 +1269,7 @@
     if (state.dirty) e.preventDefault();
   });
   load().catch((e) => {
-    $('#loading').textContent = `Could not load content: ${e.message}`;
+    if (e.status === 401 || e.status === 403) showSignIn(e);
+    else $('#loading').textContent = `Could not load content: ${e.message}`;
   });
 })();

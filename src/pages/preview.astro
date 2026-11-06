@@ -8,7 +8,7 @@ import site from '../data/site.json';
 import { LIVE } from '../lib/live';
 import Seo from '../components/Seo.astro';
 import { Image } from 'astro:assets';
-import { photo, photoWidths } from '../lib/photos';
+import { photo, photoWidths, homeImage } from '../lib/photos';
 import PolicyLinks from '../components/PolicyLinks.astro';
 import ArtistCarousel from '../components/ArtistCarousel.astro';
 import ClientMarquee from '../components/ClientMarquee.astro';
@@ -177,105 +177,28 @@ const story = site.story.map((paragraph) =>
           <h2 class="collections-label" id="works-title">
             WORKS
           </h2>
-          <a class="collection-feature" href="/temples/">
-            <img
-              src="/motion/assets/temples.jpg"
-              alt="Intricately sculpted Kalaayana temple façade"
-              loading="lazy"
-              width="1200"
-              height="900"
-            />
-            <div class="collection-feature-copy">
-              <span>01 / SACRED SPACES</span>
-              <h3>Temple Architecture</h3>
-              <span class="collection-link">
-                Discover collection <span aria-hidden="true">↗</span>
-              </span>
-            </div>
-          </a>
-          <a class="collection-feature" href="/portraits/">
-            <img
-              src="/motion/assets/portraits.jpg"
-              alt="Kalaayana sculpted portrait"
-              loading="lazy"
-              width="1200"
-              height="900"
-            />
-            <div class="collection-feature-copy">
-              <span>02 / PORTRAITURE</span>
-              <h3>Potrtait</h3>
-              <span class="collection-link">
-                Discover collection <span aria-hidden="true">↗</span>
-              </span>
-            </div>
-          </a>
-          <a class="collection-feature" href="/murals/">
-            <Image
-              src={photo('sri-adi-shankaracharya-2.jpg')}
-              alt="Finished Sri Adi Shankaracharya mural with four disciples beneath a tree in an ornate bronze frame"
-              widths={photoWidths(photo('sri-adi-shankaracharya-2.jpg'))}
-              sizes="(max-width: 760px) 90vw, (min-width: 1024px) 45vw, 90vw"
-              quality={95}
-              loading="lazy"
-            />
-            <div class="collection-feature-copy">
-              <span>03 / NARRATIVE RELIEF</span>
-              <h3>Murals</h3>
-              <span class="collection-link">
-                Discover collection <span aria-hidden="true">↗</span>
-              </span>
-            </div>
-          </a>
-          <a class="collection-feature" href="/landmarks/">
-            <Image
-              src={photo('hanuman-hangluru-1.jpg')}
-              alt="The monumental standing Hanuman sculpture at Hangluru holding a mace"
-              widths={photoWidths(photo('hanuman-hangluru-1.jpg'))}
-              sizes="(max-width: 760px) 90vw, (min-width: 1024px) 45vw, 90vw"
-              quality={95}
-              loading="lazy"
-            />
-            <div class="collection-feature-copy">
-              <span>04 / LANDMARKS</span>
-              <h3>Monumental</h3>
-              <span class="collection-link">
-                Discover collection <span aria-hidden="true">↗</span>
-              </span>
-            </div>
-          </a>
-          <a class="collection-feature" href="/collectables/">
-            <Image
-              src={photo('collectables-hanuman-front.jpg')}
-              alt="Hanuman collectable sculpture"
-              widths={photoWidths(photo('collectables-hanuman-front.jpg'))}
-              sizes="(max-width: 760px) 90vw, (min-width: 1024px) 45vw, 90vw"
-              quality={95}
-              loading="lazy"
-            />
-            <div class="collection-feature-copy">
-              <span>05 / COLLECTABLES</span>
-              <h3>Collectables</h3>
-              <span class="collection-link">
-                View collectables <span aria-hidden="true">&#8599;</span>
-              </span>
-            </div>
-          </a>
-          <a class="collection-feature" href="/installations/">
-            <img
-              src="/motion/assets/installations.jpg"
-              alt="Oversized sculptural installation by Kalaayana"
-              loading="lazy"
-              width="1200"
-              height="900"
-            />
-            <div class="collection-feature-copy">
-              <span>06 / EXPERIENTIAL</span>
-              <h3>Other Installations</h3>
-              <span class="collection-link">
-                Discover collection <span aria-hidden="true">↗</span>
-              </span>
-            </div>
-          </a>
+          {site.home.works.map((work, index) => (
+            <a class="collection-feature" href={work.href}>
+              <Image
+                src={homeImage(work.image)}
+                alt={work.image.alt}
+                widths={photoWidths(homeImage(work.image))}
+                sizes="(max-width: 760px) 90vw, (min-width: 1024px) 45vw, 90vw"
+                quality={95}
+                loading="lazy"
+                style={`object-position: ${work.image.focus || '50% 48%'}`}
+              />
+              <div class="collection-feature-copy">
+                <span>
+                  {String(index + 1).padStart(2, '0')} / {work.eyebrow.toUpperCase()}
+                </span>
+                <h3>{work.title}</h3>
+                <span class="collection-link">
+                  {work.link} <span aria-hidden="true">↗</span>
+                </span>
+              </div>
+            </a>
+          ))}
         </div>
       </section>
       <section class="statement" id="story">

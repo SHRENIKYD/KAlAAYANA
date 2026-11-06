@@ -34,3 +34,10 @@ export function photoWidths(source: ImageMetadata): number[] {
     ...new Set([640, 960, 1600, 2200, 2880, 3840, limit].filter((width) => width <= limit)),
   ].sort((a, b) => a - b);
 }
+
+/** A homepage feature image: a project photograph or a section banner. */
+export function homeImage(image: { from: string; file: string }): ImageMetadata {
+  if (image.from === 'sections') return banner(image.file);
+  if (image.from === 'projects') return photo(image.file);
+  throw new Error(`Unknown image source ${image.from} — check site.json home.works`);
+}

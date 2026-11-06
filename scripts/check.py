@@ -123,6 +123,28 @@ for key, section in (json.load(open('src/data/site.json', encoding='utf-8')).get
             bad('section %s is missing %s' % (key, field))
     if section.get('banner') and not os.path.exists(os.path.join('src/images/sections', section['banner'])):
         bad('section %s banner is missing: %s' % (key, section.get('banner')))
+
+# 5b. Homepage features are data too: every entry needs its text and a real image.
+try:
+    works = json.load(open('src/data/site.json', encoding='utf-8')).get('home', {}).get('works', [])
+except Exception:
+    works = []
+if not works:
+    bad('site.json home.works is empty — the homepage would show no work')
+for i, w in enumerate(works):
+    where = 'home.works[%d]' % i
+    for field in ('href', 'eyebrow', 'title', 'link'):
+        if not str(w.get(field, '')).strip():
+            bad('%s is missing %s' % (where, field))
+    image = w.get('image') or {}
+    if image.get('from') not in ('projects', 'sections'):
+        bad('%s image.from must be projects or sections' % where)
+    elif not os.path.exists(os.path.join('src/images', image['from'], str(image.get('file', '')))):
+        bad('%s image is missing: %s/%s' % (where, image['from'], image.get('file')))
+    if not str(image.get('alt', '')).strip():
+        bad('%s image needs alt text' % where)
+    if image.get('focus') is not None and not re.fullmatch(r'\d{1,3}% \d{1,3}%', str(image['focus'])):
+        bad('%s image focus must look like "50%% 40%%"' % where)
 try:
     projects = json.load(open('src/data/projects.json', encoding='utf-8'))
 except Exception as e:

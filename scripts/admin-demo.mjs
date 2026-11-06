@@ -7,10 +7,28 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { validate, orphans, imageType, MAX_IMAGE_BYTES } from '../worker/validate.js';
+import { spawn } from 'node:child_process';
 
 const port = Number(process.argv[2] || 8788);
 const dist = path.resolve('dist');
 const out = path.resolve('.admin-demo');
+const previewRoot = path.join(out, 'preview');
+let previewReady = false;
+// Who may sign in to the demo. Mirrors ADMIN_EMAILS on the Worker.
+const DEMO_ADMINS = (process.env.DEMO_ADMINS || 'demo@localhost,studio@kalaayanastudios.com')
+  .split(',')
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+const signedIn = (req) => {
+  const m = /(?:^|;\s*)demo-user=([^;]+)/.exec(req.headers.cookie || '');
+  const email = m ? decodeURIComponent(m[1]).toLowerCase() : '';
+  return DEMO_ADMINS.includes(email) ? email : null;
+};
+const walk = (d) =>
+  fs.readdirSync(d).flatMap((f) => {
+    const p = path.join(d, f);
+    return fs.statSync(p).isDirectory() ? walk(p) : p.endsWith('.html') ? [p] : [];
+  });
 const types = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css',
@@ -49,13 +67,37 @@ function decode(map) {
 http
   .createServer(async (req, res) => {
     const url = new URL(req.url, 'http://x');
+    if (req.method === 'POST' && url.pathname === '/admin/api/login') {
+      let body = '';
+      for await (const chunk of req) body += chunk;
+      let email = '';
+      try {
+        email = String(JSON.parse(body).email || '')
+          .trim()
+          .toLowerCase();
+      } catch {}
+      if (!DEMO_ADMINS.includes(email))
+        return json(
+          res,
+          { error: `${email || 'That address'} is not on the editor list.`, demo: true },
+          403,
+        );
+      res.setHeader(
+        'set-cookie',
+        `demo-user=${encodeURIComponent(email)}; Path=/admin; HttpOnly; SameSite=Lax`,
+      );
+      return json(res, { ok: true, email });
+    }
+    if (url.pathname.startsWith('/admin/api/') && !signedIn(req))
+      return json(res, { error: 'Sign in to edit the site.', demo: true }, 401);
     if (url.pathname === '/admin/api/content') {
       const site = readJson('src/data/site.json');
       return json(res, {
-        email: 'demo@localhost',
+        email: signedIn(req),
         base: 'local working tree (demo)',
         projects: readJson('src/data/projects.json'),
         sections: site.sections,
+        home: site.home,
         projectFiles: [...listDir('src/images/projects')],
         bannerFiles: [...listDir('src/images/sections')],
       });
@@ -89,7 +131,11 @@ http
       }
       const problems = validate({ ...payload, uploads, banners }, projectFiles, bannerFiles);
       if (problems.length) return json(res, { error: 'Not saved', problems }, 422);
-      const site = { ...readJson('src/data/site.json'), sections: payload.sections };
+      const site = {
+        ...readJson('src/data/site.json'),
+        sections: payload.sections,
+        home: payload.home,
+      };
       fs.rmSync(out, { recursive: true, force: true });
       fs.mkdirSync(path.join(out, 'images/projects'), { recursive: true });
       fs.mkdirSync(path.join(out, 'images/sections'), { recursive: true });
@@ -102,7 +148,12 @@ http
         fs.writeFileSync(path.join(out, 'images/projects', f), b);
       for (const [f, b] of Object.entries(banners))
         fs.writeFileSync(path.join(out, 'images/sections', f), b);
-      const deletions = orphans(readJson('src/data/projects.json'), payload.projects, projectFiles);
+      const deletions = orphans(
+        readJson('src/data/projects.json'),
+        payload.projects,
+        projectFiles,
+        payload.home.works.filter((w) => w.image.from === 'projects').map((w) => w.image.file),
+      );
       fs.writeFileSync(
         path.join(out, 'DELETIONS.txt'),
         deletions.join('\n') + (deletions.length ? '\n' : ''),
@@ -116,6 +167,103 @@ http
         added: Object.keys(uploads).length,
         removed: deletions.length,
       });
+    }
+    if (req.method === 'POST' && url.pathname === '/admin/api/preview') {
+      // Build the real site from a copy of the project with the saved changes
+      // applied, so the preview is exactly what a deploy would be.
+      if (!fs.existsSync(path.join(out, 'projects.json')))
+        return json(res, { error: 'Save first, then preview.' }, 400);
+      const started = Date.now();
+      try {
+        const site = path.join(previewRoot, 'site');
+        fs.rmSync(previewRoot, { recursive: true, force: true });
+        fs.mkdirSync(site, { recursive: true });
+        for (const item of [
+          'src',
+          'public',
+          'scripts',
+          'astro.config.mjs',
+          'package.json',
+          'tsconfig.json',
+          'VERSION',
+        ])
+          if (fs.existsSync(item)) fs.cpSync(item, path.join(site, item), { recursive: true });
+        fs.symlinkSync(path.resolve('node_modules'), path.join(site, 'node_modules'), 'junction');
+        fs.copyFileSync(path.join(out, 'projects.json'), path.join(site, 'src/data/projects.json'));
+        fs.copyFileSync(path.join(out, 'site.json'), path.join(site, 'src/data/site.json'));
+        for (const kind of ['projects', 'sections'])
+          for (const f of fs.readdirSync(path.join(out, 'images', kind)))
+            fs.copyFileSync(
+              path.join(out, 'images', kind, f),
+              path.join(site, 'src/images', kind, f),
+            );
+        for (const f of fs
+          .readFileSync(path.join(out, 'DELETIONS.txt'), 'utf8')
+          .split('\n')
+          .filter(Boolean))
+          fs.rmSync(path.join(site, 'src/images/projects', f), { force: true });
+        // LIVE so the preview shows the launched site at /, like production after release.
+        fs.writeFileSync(path.join(site, 'LIVE'), '');
+        await new Promise((resolve, reject) => {
+          const child = spawn(
+            process.execPath,
+            [path.resolve('node_modules/astro/bin/astro.mjs'), 'build'],
+            { cwd: site, stdio: ['ignore', 'pipe', 'pipe'] },
+          );
+          let log = '';
+          child.stdout.on('data', (d) => (log += d));
+          child.stderr.on('data', (d) => (log += d));
+          child.on('close', (code) =>
+            code === 0 ? resolve() : reject(new Error('astro build failed\n' + log.slice(-2000))),
+          );
+        });
+        const built = path.join(site, 'dist');
+        if (fs.existsSync(path.join(built, 'preview/index.html'))) {
+          fs.copyFileSync(path.join(built, 'preview/index.html'), path.join(built, 'index.html'));
+          for (const page of walk(built)) {
+            const html = fs.readFileSync(page, 'utf8');
+            fs.writeFileSync(page, html.replace(/href="\/preview\//g, 'href="/'));
+          }
+        }
+        previewReady = true;
+        console.log(
+          `preview built in ${Math.round((Date.now() - started) / 1000)}s → http://localhost:${port}/admin/preview/`,
+        );
+        return json(res, {
+          url: `/admin/preview/`,
+          seconds: Math.round((Date.now() - started) / 1000),
+        });
+      } catch (e) {
+        return json(res, { error: e.message }, 500);
+      }
+    }
+    if (url.pathname.startsWith('/admin/preview/')) {
+      if (!previewReady) {
+        res.writeHead(404);
+        return res.end('No preview built yet');
+      }
+      const built = path.join(previewRoot, 'site/dist');
+      let file = path.join(built, decodeURIComponent(url.pathname.slice('/admin/preview'.length)));
+      if (fs.existsSync(file) && fs.statSync(file).isDirectory())
+        file = path.join(file, 'index.html');
+      if (!fs.existsSync(file) && fs.existsSync(file + '.html')) file += '.html';
+      if (!file.startsWith(built) || !fs.existsSync(file)) {
+        res.writeHead(404);
+        return res.end('not found');
+      }
+      let body = fs.readFileSync(file);
+      if (file.endsWith('.html'))
+        body = Buffer.from(
+          body
+            .toString('utf8')
+            .replace(/(href|src|srcset|content)="\//g, '$1="/admin/preview/')
+            .replace(/url\(\//g, 'url(/admin/preview/')
+            .replace(/, \//g, ', /admin/preview/'),
+        );
+      res.writeHead(200, {
+        'content-type': types[path.extname(file)] || 'application/octet-stream',
+      });
+      return res.end(body);
     }
     let file = path.join(dist, decodeURIComponent(url.pathname));
     if (fs.existsSync(file) && fs.statSync(file).isDirectory())

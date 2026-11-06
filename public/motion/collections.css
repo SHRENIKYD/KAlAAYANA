@@ -63,15 +63,6 @@
 .collection-feature + .collection-feature {
   margin-top: 40px;
 }
-.collection-feature[href='/murals/'] > img {
-  object-position: 50% 50%;
-}
-.collection-feature[href='/landmarks/'] > img {
-  object-position: 50% 0%;
-}
-.collection-feature[href='/installations/'] > img {
-  object-position: 50% 72%;
-}
 .collection-index a:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 6px;

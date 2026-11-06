@@ -23,10 +23,21 @@ const project = (over = {}) => ({
   ...over,
 });
 const files = new Set(['hanuman-1.jpg', 'old-1.jpg']);
+const home = {
+  works: [
+    {
+      href: '/landmarks/',
+      eyebrow: 'L',
+      title: 'Landmarks',
+      link: 'Discover',
+      image: { from: 'projects', file: 'hanuman-1.jpg', alt: 'a' },
+    },
+  ],
+};
 const banners = new Set(['landmarks.jpg']);
 
 test('a well-formed payload passes', () => {
-  assert.deepEqual(validate({ projects: [project()], sections }, files, banners), []);
+  assert.deepEqual(validate({ projects: [project()], sections, home }, files, banners), []);
 });
 
 test('mirrors check.py: required fields, groups, alt text, slugs', () => {
@@ -53,6 +64,7 @@ test('uploads must be referenced and references must be uploaded or present', ()
     {
       projects: [project({ images: [{ file: 'new-1.jpg', alt: 'a' }] })],
       sections,
+      home,
       uploads: { 'new-1.jpg': 'AA==' },
     },
     files,
@@ -60,7 +72,7 @@ test('uploads must be referenced and references must be uploaded or present', ()
   );
   assert.deepEqual(ok, []);
   const stray = validate(
-    { projects: [project()], sections, uploads: { 'stray.jpg': 'AA==' } },
+    { projects: [project()], sections, home, uploads: { 'stray.jpg': 'AA==' } },
     files,
     banners,
   );
@@ -88,6 +100,45 @@ test('new sections need a banner and a matching href', () => {
   );
   assert.ok(bad.some((m) => m.includes('href must be /gardens/')));
   assert.ok(bad.some((m) => m.includes('gardens.jpg is not uploaded')));
+});
+
+test('homepage works are validated and keep their photographs alive', () => {
+  const bad = validate(
+    {
+      projects: [project()],
+      sections,
+      home: {
+        works: [
+          {
+            href: 'landmarks',
+            eyebrow: '',
+            title: 'T',
+            link: 'Go',
+            image: { from: 'projects', file: 'nope.jpg', alt: '' },
+          },
+        ],
+      },
+    },
+    files,
+    banners,
+  );
+  assert.ok(bad.some((m) => m.includes('homepage work 1 is missing eyebrow')));
+  assert.ok(bad.some((m) => m.includes('link must look like')));
+  assert.ok(bad.some((m) => m.includes('nope.jpg is not uploaded')));
+  assert.ok(bad.some((m) => m.includes('image needs alt text')));
+  assert.deepEqual(
+    validate({ projects: [project()], sections, home: { works: [] } }, files, banners),
+    ['the homepage needs at least one work'],
+  );
+  const before = [
+    project({
+      images: [
+        { file: 'hanuman-1.jpg', alt: 'a' },
+        { file: 'old-1.jpg', alt: 'b' },
+      ],
+    }),
+  ];
+  assert.deepEqual(orphans(before, [project()], files, ['old-1.jpg']), []);
 });
 
 test('only photographs removed by this save are deleted; never-referenced files are left alone', () => {

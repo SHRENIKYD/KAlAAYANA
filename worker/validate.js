@@ -1,6 +1,7 @@
 // Mirrors scripts/check.py so a save that would fail CI is refused here first.
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.(?:jpg|png)$/;
+const FOCUS = /^\d{1,3}% \d{1,3}%$/;
 export const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 
 export function imageType(bytes) {
@@ -37,14 +38,42 @@ export function validate(payload, existingProjectFiles, existingBannerFiles) {
       if (!String(s?.[f] ?? '').trim()) bad.push(`section ${key} is missing ${f}`);
     }
     if (s?.href !== `/${key}/`) bad.push(`section ${key} href must be /${key}/`);
+    if (s?.bannerFocus != null && !FOCUS.test(String(s.bannerFocus)))
+      bad.push(`section ${key} banner focus must look like 50% 40%`);
     if (s?.banner && !FILE.test(s.banner))
       bad.push(`section ${key} banner ${s.banner} must be a lowercase .jpg or .png name`);
     if (s?.banner && !existingBannerFiles.has(s.banner) && !(s.banner in banners))
       bad.push(`section ${key} banner ${s.banner} is not uploaded`);
   }
 
+  const works = payload.home?.works;
+  if (!Array.isArray(works) || works.length === 0) bad.push('the homepage needs at least one work');
+  const homeRefs = new Set();
+  (Array.isArray(works) ? works : []).forEach((w, i) => {
+    const where = `homepage work ${i + 1}`;
+    for (const f of ['href', 'eyebrow', 'title', 'link']) {
+      if (!String(w?.[f] ?? '').trim()) bad.push(`${where} is missing ${f}`);
+    }
+    if (w?.href && !/^\/[a-z0-9-]+\/$/.test(w.href) && !/^#[a-z0-9-]+$/.test(w.href))
+      bad.push(`${where} link must look like /section/`);
+    const img = w?.image || {};
+    if (!['projects', 'sections'].includes(img.from))
+      bad.push(`${where} image source must be projects or sections`);
+    else if (!FILE.test(img.file || '')) bad.push(`${where} has an invalid image file name`);
+    else {
+      const pool = img.from === 'projects' ? existingProjectFiles : existingBannerFiles;
+      const staged = img.from === 'projects' ? uploads : banners;
+      if (!pool.has(img.file) && !(img.file in staged))
+        bad.push(`${where} image ${img.file} is not uploaded`);
+      if (img.from === 'projects') homeRefs.add(img.file);
+    }
+    if (!String(img.alt ?? '').trim()) bad.push(`${where} image needs alt text`);
+    if (img.focus != null && !FOCUS.test(String(img.focus)))
+      bad.push(`${where} image focus must look like 50% 40%`);
+  });
+
   const seen = new Set();
-  const referenced = new Set();
+  const referenced = new Set(homeRefs);
   projects.forEach((p, i) => {
     const where = p?.slug || `#${i}`;
     for (const f of ['slug', 'group', 'title', 'scale', 'description']) {
@@ -85,8 +114,8 @@ export function validate(payload, existingProjectFiles, existingBannerFiles) {
  * present in the repository. Files that were never referenced are left alone,
  * because pages may use them by hand.
  */
-export function orphans(before, after, existingProjectFiles) {
+export function orphans(before, after, existingProjectFiles, keep = []) {
   const was = new Set(before.flatMap((p) => p.images.map((i) => i.file)));
-  const still = new Set(after.flatMap((p) => p.images.map((i) => i.file)));
+  const still = new Set([...keep, ...after.flatMap((p) => p.images.map((i) => i.file))]);
   return [...was].filter((f) => !still.has(f) && existingProjectFiles.has(f)).sort();
 }
