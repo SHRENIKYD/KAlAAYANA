@@ -8,10 +8,20 @@ import {
   roleOf,
   restrictForAdmin,
   applyUserChange,
+  photoRequiredFor,
   PERMANENT_SUPERADMIN,
 } from '../worker/validate.js';
 import { makeEntry, parseLog, isAppendOnly, decodePhoto } from '../worker/logbook.js';
-import { treeEntries, commitAndOpenPr, acceptPr, rejectPr, client } from '../worker/github.js';
+import {
+  treeEntries,
+  commitAndOpenPr,
+  acceptPr,
+  rejectPr,
+  client,
+  branchAlias,
+  commitToBranch,
+  rejectBranch,
+} from '../worker/github.js';
 import { syncAccessPolicy } from '../worker/policy.js';
 import { fetchInsights } from '../worker/insights.js';
 
@@ -582,4 +592,65 @@ test('insights fill every day of the window and name empty referrers', async () 
     }),
     /bad token/,
   );
+});
+
+test('only the studio account decides who may sign in without a photograph', () => {
+  const users = [
+    { email: 'a@example.com', role: 'admin' },
+    { email: PERMANENT_SUPERADMIN, role: 'superadmin' },
+  ];
+  assert.equal(photoRequiredFor(users, 'a@example.com'), true);
+  assert.throws(
+    () =>
+      applyUserChange(
+        users,
+        { action: 'photo', email: 'a@example.com', photo: 'optional' },
+        'a@example.com',
+      ),
+    /Only contact@/,
+  );
+  const next = applyUserChange(
+    users,
+    { action: 'photo', email: 'a@example.com', photo: 'optional' },
+    PERMANENT_SUPERADMIN,
+  );
+  assert.equal(photoRequiredFor(next, 'a@example.com'), false);
+  assert.equal(photoRequiredFor(next, PERMANENT_SUPERADMIN), true);
+  assert.throws(
+    () =>
+      applyUserChange(
+        users,
+        { action: 'photo', email: PERMANENT_SUPERADMIN, photo: 'optional' },
+        PERMANENT_SUPERADMIN,
+      ),
+    /always photographed/,
+  );
+});
+
+test('a proposal is a branch, not a pull request, until it is accepted', async () => {
+  assert.equal(branchAlias('content/20261106T085139Z'), 'content-20261106t085139z');
+  const calls = [];
+  const gh = client('t', 'o/r', async (url, init) => {
+    calls.push(`${init.method} ${url.replace('https://api.github.com/repos/o/r', '')}`);
+    const body = (p) => new Response(JSON.stringify(p), { status: 200 });
+    if (url.endsWith('/git/ref/heads/develop')) return body({ object: { sha: 'base' } });
+    if (url.includes('/git/commits/base')) return body({ tree: { sha: 'tree0' } });
+    if (url.endsWith('/git/trees')) return body({ sha: 'tree1' });
+    if (url.endsWith('/git/commits')) return body({ sha: 'c1' });
+    if (url.endsWith('/git/refs')) return body({});
+    if (url.includes('/git/refs/heads/content/x')) return body({});
+    return new Response('{}', { status: 404 });
+  });
+  const r = await commitToBranch(gh, {
+    base: 'develop',
+    branch: 'content/x',
+    message: 'm',
+    author: { name: 'a', email: 'a@example.com' },
+    entries: [],
+  });
+  assert.deepEqual(r, { branch: 'content/x', commit: 'c1' });
+  assert.ok(!calls.some((c) => c.includes('/pulls')));
+  await rejectBranch(gh, 'content/x');
+  assert.ok(calls.includes('DELETE /git/refs/heads/content/x'));
+  await assert.rejects(rejectBranch(gh, 'develop'), /Not a content branch/);
 });

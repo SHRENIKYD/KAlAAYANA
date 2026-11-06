@@ -896,6 +896,57 @@ body.signin .tabs {
   outline: none;
   border-color: var(--cream);
 }
+/* Drop-downs: the admin's own look for the control and, where the browser
+   allows it, for the open list; elsewhere the list at least stays light. */
+select {
+  color-scheme: light;
+  accent-color: var(--black);
+}
+.log-table select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--panel)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%231a1816' stroke-width='1.5'/%3E%3C/svg%3E")
+    no-repeat right 10px center;
+  color: var(--black);
+  border: 1px solid var(--line);
+  padding: 7px 30px 7px 12px;
+  font: 300 0.9rem/1.4 var(--sans);
+  cursor: pointer;
+}
+.log-table select:focus-visible {
+  outline: 2px solid var(--black);
+  outline-offset: 2px;
+}
+@supports (appearance: base-select) {
+  select,
+  select::picker(select) {
+    appearance: base-select;
+  }
+  select::picker(select) {
+    background: var(--panel);
+    color: var(--black);
+    border: 1px solid var(--line);
+    border-radius: 0;
+    padding: 4px 0;
+    box-shadow: 0 10px 30px #1a181622;
+    font: 300 0.9rem/1.4 var(--sans);
+  }
+  select option {
+    padding: 9px 14px;
+  }
+  select option:hover,
+  select option:focus-visible {
+    background: var(--bg);
+  }
+  select option:checked {
+    background: var(--black);
+    color: #f5f1ea;
+  }
+  select::picker-icon {
+    display: none;
+  }
+}
 .f small {
   color: var(--muted);
   font-size: 0.78rem;

@@ -56,7 +56,16 @@ is a holding page. `1.0.0` marks the launch of the full site.
   the previous period, a per-day chart with a crosshair tooltip, pages,
   sources, countries and devices, and a table view, from Cloudflare Web
   Analytics once its beacon token and site tag are set.
-- Every public page shows a soft shimmer where a photograph is still loading.
+- Every public page shows a soft shimmer where a photograph is still loading,
+  and each page type (home, works, project, collectables, policy) shows its
+  own shape over the viewport until it has loaded, never for more than 1.8 s.
+- Admin: a proposed edit goes to a branch and is built for preview; a pull
+  request exists only once the editor accepts it, and a rejected proposal
+  leaves nothing behind. The studio account alone decides, per editor,
+  whether a photograph is required at sign-in; it always is for the studio
+  account, and an account that requires one cannot sign in without a camera.
+  The mark in the admin header stays in the admin. Drop-downs wear the
+  admin's look.
 - Admin: a refresh keeps the tab and open work; sign-out returns to the admin
   sign-in; the sign-in photograph is required and never black; missing fields
   are listed and focused before a preview; the users table updates at once;

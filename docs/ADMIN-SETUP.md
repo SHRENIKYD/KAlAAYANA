@@ -93,7 +93,21 @@ cookies. Three things switch it on:
 
 Until all three are in place the tab explains what is missing.
 
+## How a change is published
+
+Preview & publish commits the edit to a `content/<time>` branch. No pull
+request exists yet. Cloudflare builds that branch and the admin opens the
+preview at the branch's own address once `version.json` there reports the
+proposed commit. Accept opens the pull request into `develop`, records who
+accepted and when, and merges it (auto-merge while checks run). Reject
+deletes the branch; nothing else was created. Both decisions are logged.
+
 ## Roles and invitations
+
+A photograph is required at sign-in by default, and always for
+`contact@kalaayanastudios.com`. Only that account sees the **Photo at
+sign-in** column in the Users tab and can set another editor to _Optional_;
+an editor who requires one cannot sign in from a device without a camera.
 
 Who may sign in, and as what, is `admin/users.json` in the repository, so
 every invitation is a versioned, logged change. Two roles:

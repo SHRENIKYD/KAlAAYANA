@@ -15,6 +15,8 @@ import {
   roleOf,
   restrictForAdmin,
   applyUserChange,
+  photoRequiredFor,
+  PERMANENT_SUPERADMIN,
 } from '../worker/validate.js';
 import { makeEntry, parseLog, decodePhoto } from '../worker/logbook.js';
 import { spawn } from 'node:child_process';
@@ -182,6 +184,8 @@ http
         email: me,
         sessionEnds: session(req).ends,
         role,
+        photoRequired: photoRequiredFor(users(), me),
+        canSetPhoto: me === PERMANENT_SUPERADMIN,
         users: superadmin ? users() : undefined,
         log:
           superadmin && fs.existsSync('logs/admin-log.jsonl')
@@ -373,7 +377,7 @@ http
           email: me,
           name: nameOf(req),
           action: `users: ${body.action}`,
-          details: `${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}`,
+          details: `${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}${body.photo ? ` · photograph ${body.photo}` : ''}`,
         }),
       ]);
       return json(res, { users: next });
