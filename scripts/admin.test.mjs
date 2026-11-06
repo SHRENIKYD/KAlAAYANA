@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validate, orphans, imageType } from '../worker/validate.js';
+import {
+  validate,
+  orphans,
+  imageType,
+  parseUsers,
+  roleOf,
+  restrictForAdmin,
+  applyUserChange,
+} from '../worker/validate.js';
 import { treeEntries, commitAndOpenPr, acceptPr, rejectPr, client } from '../worker/github.js';
 
 const sections = {
@@ -316,5 +324,82 @@ test('one commit on a fresh branch, then a pull request that waits for acceptanc
   assert.deepEqual(
     calls.map((c) => c[0]),
     ['GET', 'GET', 'POST', 'POST', 'POST', 'POST'],
+  );
+});
+
+test('roles come from admin/users.json; admins may only add or update projects', () => {
+  const users = parseUsers(
+    JSON.stringify({
+      users: [
+        { email: 'Boss@X.com', role: 'superadmin' },
+        { email: 'ed@x.com', role: 'admin' },
+        { email: 'bad', role: 'admin' },
+        { email: 'odd@x.com', role: 'owner' },
+      ],
+    }),
+  );
+  assert.deepEqual(
+    users.map((u) => u.email + ':' + u.role),
+    ['boss@x.com:superadmin', 'ed@x.com:admin'],
+  );
+  assert.equal(roleOf(users, 'BOSS@x.com'), 'superadmin');
+  assert.equal(roleOf(users, 'nobody@x.com'), null);
+  const base = { sections, home, projects: [project()] };
+  assert.deepEqual(
+    restrictForAdmin(base, { sections, home, projects: [project(), project({ slug: 'new-one' })] }),
+    [],
+  );
+  assert.deepEqual(
+    restrictForAdmin(base, { sections, home, projects: [project({ title: 'Edited' })] }),
+    [],
+  );
+  const bad = restrictForAdmin(base, {
+    sections: {},
+    home: { works: [] },
+    projects: [],
+    banners: { 'x.jpg': 'AA==' },
+  });
+  assert.ok(bad.some((m) => m.includes('change works')));
+  assert.ok(bad.some((m) => m.includes('change the homepage')));
+  assert.ok(bad.some((m) => m.includes('delete a project (hanuman)')));
+  assert.ok(bad.some((m) => m.includes('work banner')));
+});
+
+test('inviting, changing and removing users keeps at least one superadmin', () => {
+  const users = [{ email: 'boss@x.com', role: 'superadmin', invitedBy: null, invitedAt: null }];
+  const invited = applyUserChange(
+    users,
+    { action: 'invite', email: 'New@x.com', role: 'admin' },
+    'boss@x.com',
+  );
+  assert.equal(invited[1].email, 'new@x.com');
+  assert.equal(invited[1].invitedBy, 'boss@x.com');
+  assert.throws(
+    () =>
+      applyUserChange(
+        invited,
+        { action: 'invite', email: 'new@x.com', role: 'admin' },
+        'boss@x.com',
+      ),
+    /already has access/,
+  );
+  assert.throws(
+    () =>
+      applyUserChange(invited, { action: 'invite', email: 'nope', role: 'admin' }, 'boss@x.com'),
+    /valid email/,
+  );
+  const promoted = applyUserChange(
+    invited,
+    { action: 'role', email: 'new@x.com', role: 'superadmin' },
+    'boss@x.com',
+  );
+  assert.equal(promoted[1].role, 'superadmin');
+  assert.throws(
+    () => applyUserChange(users, { action: 'remove', email: 'boss@x.com' }, 'boss@x.com'),
+    /at least one superadmin/,
+  );
+  assert.equal(
+    applyUserChange(promoted, { action: 'remove', email: 'boss@x.com' }, 'new@x.com').length,
+    1,
   );
 });

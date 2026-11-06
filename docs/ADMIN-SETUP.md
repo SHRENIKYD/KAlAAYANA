@@ -22,8 +22,9 @@ Zero Trust → Access → Applications → the staging application → Overview.
 - **Team domain**: `<team>.cloudflareaccess.com` (Zero Trust → Settings → Custom pages shows the team name).
 - **Application Audience (AUD) tag**: the long hex string on the application's overview.
 
-Put both in `wrangler.jsonc` under `vars` (`ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`)
-and list the editors' emails in `ADMIN_EMAILS`, comma-separated. These are not
+Put both in `wrangler.jsonc` under `vars` (`ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`).
+Editors and their roles are in `admin/users.json` (see Roles below);
+`ADMIN_EMAILS` is only a fallback while that file is missing. These are not
 secrets; the Access policy itself must also allow those emails.
 
 ### 2. Create the GitHub token
@@ -47,6 +48,32 @@ GitHub → repository Settings → General → Pull Requests → tick
 **Allow auto-merge**. When an editor accepts a preview while CI is still
 running, the pull request then merges on its own as soon as CI passes.
 Without it, acceptance while CI is running asks you to merge on GitHub.
+
+## Roles and invitations
+
+Who may sign in, and as what, is `admin/users.json` in the repository, so
+every invitation is a versioned, logged change. Two roles:
+
+|                                                      | Superadmin | Admin |
+| ---------------------------------------------------- | ---------- | ----- |
+| Add and update projects and photographs              | yes        | yes   |
+| Delete projects                                      | yes        | no    |
+| Homepage works; create, edit, delete works           | yes        | no    |
+| Preview and accept their own changes                 | yes        | yes   |
+| **Log** tab: the content log and every accept/reject | yes        | no    |
+| **Users** tab: invite, change role, remove           | yes        | no    |
+
+The Worker enforces the role on every request; an admin who sends a change
+to the homepage gets it refused, not just hidden. The file must always hold
+at least one superadmin; the admin will not let you remove the last one.
+
+**Inviting someone** (Users tab): enter the email and the role. On staging
+they then open the staging address, Cloudflare Access emails them a
+one-time code, and the Worker lets them in with that role. Their email
+must also be allowed by the Access policy: either list it there too, or
+set the policy to allow a group or domain the Worker then narrows. If
+`admin/users.json` is missing, `ADMIN_EMAILS` in `wrangler.jsonc` acts as
+the superadmin list so the first superadmin can invite the rest.
 
 ## Using it
 

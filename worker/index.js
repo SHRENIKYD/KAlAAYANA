@@ -4,7 +4,16 @@
 // GitHub and opens a pull request into the base branch.
 import { client, treeEntries, commitAndOpenPr, acceptPr, rejectPr } from './github.js';
 import { verifyAccessJwt } from './access.js';
-import { validate, orphans, imageType, MAX_IMAGE_BYTES } from './validate.js';
+import {
+  validate,
+  orphans,
+  imageType,
+  MAX_IMAGE_BYTES,
+  parseUsers,
+  roleOf,
+  restrictForAdmin,
+  applyUserChange,
+} from './validate.js';
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), {
@@ -16,17 +25,27 @@ async function identify(request, env) {
   const url = new URL(request.url);
   if (env.DEV_EMAIL && (url.hostname === 'localhost' || url.hostname === '127.0.0.1'))
     return env.DEV_EMAIL;
-  const email = await verifyAccessJwt(request.headers.get('cf-access-jwt-assertion'), {
+  return verifyAccessJwt(request.headers.get('cf-access-jwt-assertion'), {
     teamDomain: env.ACCESS_TEAM_DOMAIN,
     aud: env.ACCESS_AUD,
   });
-  const allowed = (env.ADMIN_EMAILS || '')
+}
+
+// Who may edit, and as what, lives in admin/users.json on the base branch.
+// ADMIN_EMAILS (comma-separated) is a fallback that grants superadmin while
+// the file is missing, so the first superadmin can be invited through the UI.
+async function usersOf(gh, base, env) {
+  try {
+    const users = parseUsers(await gh.file('admin/users.json', base).then((r) => r.text()));
+    if (users.length) return users;
+  } catch {
+    /* fall through */
+  }
+  return (env.ADMIN_EMAILS || '')
     .split(',')
     .map((e) => e.trim().toLowerCase())
-    .filter(Boolean);
-  if (!allowed.includes(email))
-    throw Object.assign(new Error(`${email} is not an admin`), { email });
-  return email;
+    .filter(Boolean)
+    .map((email) => ({ email, role: 'superadmin', invitedBy: null, invitedAt: null }));
 }
 
 function decodeUploads(map) {
@@ -53,6 +72,10 @@ async function handleApi(request, env) {
   }
   const gh = client(env.GITHUB_TOKEN, env.GITHUB_REPO);
   const base = env.GITHUB_BASE || 'develop';
+  const users = await usersOf(gh, base, env);
+  const role = roleOf(users, email);
+  if (!role) return json({ error: `${email} is not an admin`, email }, 403);
+  const superadmin = role === 'superadmin';
 
   if (request.method === 'GET' && route === '/content') {
     const [projects, site, projectFiles, bannerFiles] = await Promise.all([
@@ -61,8 +84,32 @@ async function handleApi(request, env) {
       gh.listDir('src/images/projects', base),
       gh.listDir('src/images/sections', base),
     ]);
+    let log = null;
+    let decisions = null;
+    if (superadmin) {
+      log = await gh
+        .file('CONTENT-LOG.md', base)
+        .then((r) => r.text())
+        .catch(() => '');
+      const prs = await gh.call('GET', '/pulls?state=all&sort=created&direction=desc&per_page=30');
+      decisions = prs
+        .filter((pr) => pr.head?.ref?.startsWith('content/'))
+        .map((pr) => ({
+          number: pr.number,
+          title: pr.title,
+          url: pr.html_url,
+          by: pr.user?.login,
+          at: pr.created_at,
+          state: pr.merged_at ? 'published' : pr.state === 'closed' ? 'rejected' : 'proposed',
+          decidedAt: pr.merged_at || pr.closed_at || null,
+        }));
+    }
     return json({
       email,
+      role,
+      users: superadmin ? users : undefined,
+      log,
+      decisions,
       base,
       projects,
       sections: site.sections,
@@ -116,6 +163,13 @@ async function handleApi(request, env) {
       return json({ error: e.message }, 400);
     }
     const problems = validate({ ...payload, uploads, banners }, projectFiles, bannerFiles);
+    if (!superadmin)
+      problems.push(
+        ...restrictForAdmin(
+          { sections: site.sections, home: site.home, projects: before },
+          payload,
+        ),
+      );
     if (problems.length) return json({ error: 'Not saved', problems }, 422);
 
     const blobSha = async (b64) =>
@@ -204,6 +258,54 @@ async function handleApi(request, env) {
       return json({ error: e.message }, 502);
     }
   }
+  if (request.method === 'POST' && route === '/users') {
+    if (!superadmin) return json({ error: 'Only a superadmin can manage users' }, 403);
+    let body = {};
+    try {
+      body = await request.json();
+    } catch {
+      return json({ error: 'Body must be JSON' }, 400);
+    }
+    let next;
+    try {
+      next = applyUserChange(users, body, email);
+    } catch (e) {
+      return json({ error: e.message }, 422);
+    }
+    const head = await gh.call('GET', `/git/ref/heads/${base}`);
+    const baseCommit = await gh.call('GET', `/git/commits/${head.object.sha}`);
+    const tree = await gh.call('POST', '/git/trees', {
+      base_tree: baseCommit.tree.sha,
+      tree: [
+        {
+          path: 'admin/users.json',
+          mode: '100644',
+          type: 'blob',
+          content: JSON.stringify({ users: next }, null, 2) + '\n',
+        },
+      ],
+    });
+    const author = { name: email.split('@')[0], email };
+    const commit = await gh.call('POST', '/git/commits', {
+      message: `admin: ${body.action} ${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}\n\nBy ${email} from the content admin.`,
+      tree: tree.sha,
+      parents: [head.object.sha],
+      author,
+      committer: author,
+    });
+    try {
+      await gh.call('PATCH', `/git/refs/heads/${base}`, { sha: commit.sha });
+    } catch (e) {
+      return json(
+        {
+          error: `${base} does not accept direct commits; change admin/users.json through a pull request. (${e.message})`,
+        },
+        502,
+      );
+    }
+    return json({ users: next, commit: commit.sha });
+  }
+
   const decide = route.match(/^\/(accept|reject)\/(\d+)$/);
   if (request.method === 'POST' && decide) {
     let body = {};

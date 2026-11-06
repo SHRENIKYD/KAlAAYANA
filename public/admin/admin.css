@@ -108,6 +108,118 @@ body.tab-home .shell {
 body.signin #preview-btn {
   display: none;
 }
+body.role-admin .superadmin-only {
+  display: none;
+}
+body.tab-log .side,
+body.tab-users .side {
+  display: none;
+}
+body.tab-log .shell,
+body.tab-users .shell {
+  grid-template-columns: 1fr;
+}
+.log-block {
+  margin-bottom: 36px;
+}
+.log-block h2 {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+}
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  background: var(--panel);
+}
+.log-table th,
+.log-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.log-table th {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 400;
+}
+.log-table select {
+  border: 1px solid var(--line);
+  padding: 4px 8px;
+  background: var(--panel);
+  color: var(--black);
+}
+.pill {
+  display: inline-block;
+  padding: 2px 10px;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+}
+.pill-published {
+  color: #2f6b3a;
+  border-color: #2f6b3a;
+}
+.pill-rejected {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+.log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+.log-list li {
+  display: grid;
+  grid-template-columns: 160px 240px minmax(0, 1fr);
+  gap: 16px;
+  padding: 10px 12px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.88rem;
+}
+.log-list time {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.log-list b {
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+.invite-heading {
+  font-size: 1.5rem;
+  margin: 36px 0 12px;
+}
+.invite {
+  display: grid;
+  gap: 16px;
+  max-width: 720px;
+  justify-items: start;
+}
+.invite .row {
+  width: 100%;
+}
+.invite select {
+  width: 100%;
+  background: transparent;
+  color: var(--black);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 12px 0;
+  font: 300 1rem/1.5 var(--sans);
+}
+@media (max-width: 820px) {
+  .log-list li {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
 body.signin .tabs {
   display: none;
 }
@@ -570,6 +682,22 @@ body.signin .tabs {
 .image.work.open .work-head {
   margin-bottom: 12px;
   border-bottom: 1px solid var(--line);
+}
+
+/* ---------- zoom ---------- */
+.zoom-bar {
+  display: grid;
+  grid-template-columns: auto minmax(120px, 260px) auto;
+  gap: 12px;
+  align-items: center;
+}
+.zoom-bar small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.zoom-bar input[type='range'] {
+  accent-color: var(--black);
 }
 
 /* ---------- fit: show whole photograph on a matching background ---------- */

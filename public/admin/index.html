@@ -25,8 +25,14 @@
     </header>
 
     <nav class="tabs" aria-label="Admin areas">
-      <button type="button" class="tab" id="tab-home" data-tab="home">Homepage</button>
+      <button type="button" class="tab superadmin-only" id="tab-home" data-tab="home">
+        Homepage
+      </button>
       <button type="button" class="tab" id="tab-projects" data-tab="projects">Projects</button>
+      <button type="button" class="tab superadmin-only" id="tab-log" data-tab="log">Log</button>
+      <button type="button" class="tab superadmin-only" id="tab-users" data-tab="users">
+        Users
+      </button>
     </nav>
 
     <div class="shell">
@@ -34,7 +40,9 @@
         <h2 class="side-heading">Works</h2>
         <nav class="side-list" id="sections" aria-label="Works"></nav>
         <button class="btn" id="new-project" type="button">+ New project</button>
-        <button class="btn btn-ghost" id="new-section" type="button">+ New work</button>
+        <button class="btn btn-ghost superadmin-only" id="new-section" type="button">
+          + New work
+        </button>
         <div class="side-foot">
           <p class="muted" id="base-note"></p>
         </div>

@@ -57,8 +57,12 @@
   font-size: 0.78rem;
   line-height: 1.5;
 }
+.collection-feature > img {
+  transform: scale(var(--zoom, 1));
+  transform-origin: var(--focus, 50% 48%);
+}
 .collection-feature:hover > img {
-  transform: scale(1.025);
+  transform: scale(calc(var(--zoom, 1) * 1.025));
 }
 .collection-feature + .collection-feature {
   margin-top: 40px;
@@ -127,6 +131,6 @@
     transition: none;
   }
   .collection-feature:hover > img {
-    transform: none;
+    transform: scale(var(--zoom, 1));
   }
 }

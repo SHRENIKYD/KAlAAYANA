@@ -6,7 +6,16 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
-import { validate, orphans, imageType, MAX_IMAGE_BYTES } from '../worker/validate.js';
+import {
+  validate,
+  orphans,
+  imageType,
+  MAX_IMAGE_BYTES,
+  parseUsers,
+  roleOf,
+  restrictForAdmin,
+  applyUserChange,
+} from '../worker/validate.js';
 import { spawn } from 'node:child_process';
 
 const port = Number(process.argv[2] || 8788);
@@ -14,15 +23,14 @@ const dist = path.resolve('dist');
 const out = path.resolve('.admin-demo');
 const previewRoot = path.join(out, 'preview');
 let previewReady = false;
-// Who may sign in to the demo. Mirrors ADMIN_EMAILS on the Worker.
-const DEMO_ADMINS = (process.env.DEMO_ADMINS || 'demo@localhost,studio@kalaayanastudios.com')
-  .split(',')
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean);
+// Who may sign in, and as what: admin/users.json, the same file the Worker reads.
+const usersFile = 'admin/users.json';
+const users = () =>
+  fs.existsSync(usersFile) ? parseUsers(fs.readFileSync(usersFile, 'utf8')) : [];
 const signedIn = (req) => {
   const m = /(?:^|;\s*)demo-user=([^;]+)/.exec(req.headers.cookie || '');
   const email = m ? decodeURIComponent(m[1]).toLowerCase() : '';
-  return DEMO_ADMINS.includes(email) ? email : null;
+  return roleOf(users(), email) ? email : null;
 };
 const walk = (d) =>
   fs.readdirSync(d).flatMap((f) => {
@@ -114,7 +122,7 @@ http
           .trim()
           .toLowerCase();
       } catch {}
-      if (!DEMO_ADMINS.includes(email))
+      if (!roleOf(users(), email))
         return json(
           res,
           { error: `${email || 'That address'} is not on the editor list.`, demo: true },
@@ -130,8 +138,18 @@ http
       return json(res, { error: 'Sign in to edit the site.', demo: true }, 401);
     if (url.pathname === '/admin/api/content') {
       const site = readJson('src/data/site.json');
+      const me = signedIn(req);
+      const role = roleOf(users(), me);
+      const superadmin = role === 'superadmin';
       return json(res, {
-        email: signedIn(req),
+        email: me,
+        role,
+        users: superadmin ? users() : undefined,
+        log:
+          superadmin && fs.existsSync('CONTENT-LOG.md')
+            ? fs.readFileSync('CONTENT-LOG.md', 'utf8')
+            : null,
+        decisions: superadmin ? [] : null,
         demo: true,
         base: 'local working tree (demo)',
         projects: readJson('src/data/projects.json'),
@@ -173,6 +191,19 @@ http
         return json(res, { error: e.message }, 400);
       }
       const problems = validate({ ...payload, uploads, banners }, projectFiles, bannerFiles);
+      if (roleOf(users(), signedIn(req)) !== 'superadmin') {
+        const baseSite = readJson('src/data/site.json');
+        problems.push(
+          ...restrictForAdmin(
+            {
+              sections: baseSite.sections,
+              home: baseSite.home,
+              projects: readJson('src/data/projects.json'),
+            },
+            payload,
+          ),
+        );
+      }
       if (problems.length)
         return json(res, { error: isPreview ? 'Cannot preview yet' : 'Not saved', problems }, 422);
       const target = isPreview ? path.join(previewRoot, 'input') : out;
@@ -278,6 +309,36 @@ http
         return json(res, { error: e.message }, 500);
       }
     }
+    if (req.method === 'POST' && url.pathname === '/admin/api/users') {
+      const me = signedIn(req);
+      if (roleOf(users(), me) !== 'superadmin')
+        return json(res, { error: 'Only a superadmin can manage users' }, 403);
+      let raw = '';
+      for await (const chunk of req) raw += chunk;
+      let body;
+      try {
+        body = JSON.parse(raw);
+      } catch {
+        return json(res, { error: 'Body must be JSON' }, 400);
+      }
+      let next;
+      try {
+        next = applyUserChange(users(), body, me);
+      } catch (e) {
+        return json(res, { error: e.message }, 422);
+      }
+      fs.writeFileSync(usersFile, JSON.stringify({ users: next }, null, 2) + '\n');
+      const logPath = 'CONTENT-LOG.md';
+      const head = fs.existsSync(logPath)
+        ? fs.readFileSync(logPath, 'utf8').replace(/\n*$/, '\n')
+        : '# Content log\n\nOne line per change made through the content admin.\n\n';
+      fs.writeFileSync(
+        logPath,
+        head +
+          `- ${new Date().toISOString()} · ${me} · users: ${body.action} ${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}\n`,
+      );
+      return json(res, { users: next });
+    }
     if (url.pathname.startsWith('/admin/preview/')) {
       if (!previewReady) {
         res.writeHead(404);
@@ -319,6 +380,6 @@ http
   })
   .listen(port, '127.0.0.1', () =>
     console.log(
-      `content admin demo: http://localhost:${port}/admin/  (saves go to .admin-demo/, nothing is committed)`,
+      `content admin demo: http://localhost:${port}/admin/  (accepted saves write to src/ and CONTENT-LOG.md; commit and push to publish)`,
     ),
   );

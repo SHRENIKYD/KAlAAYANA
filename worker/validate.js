@@ -78,6 +78,8 @@ export function validate(payload, existingProjectFiles, existingBannerFiles) {
       if (img.from === 'projects') homeRefs.add(img.file);
     }
     if (!String(img.alt ?? '').trim()) bad.push(`${where} image needs alt text`);
+    if (img.zoom != null && !(Number(img.zoom) >= 1 && Number(img.zoom) <= 3))
+      bad.push(`${where} zoom must be between 1 and 3`);
     if (img.fit != null && !['cover', 'contain'].includes(img.fit))
       bad.push(`${where} fit must be cover or contain`);
     if (img.background != null && !/^#[0-9a-f]{6}$/i.test(String(img.background)))
@@ -139,4 +141,62 @@ export function orphans(before, after, existingProjectFiles, keep = []) {
   const was = new Set(before.flatMap((p) => p.images.map((i) => i.file)));
   const still = new Set([...keep, ...after.flatMap((p) => p.images.map((i) => i.file))]);
   return [...was].filter((f) => !still.has(f) && existingProjectFiles.has(f)).sort();
+}
+
+export const ROLES = ['superadmin', 'admin'];
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Reads admin/users.json; returns [] when it is missing or malformed. */
+export function parseUsers(text) {
+  try {
+    const list = JSON.parse(text).users;
+    return Array.isArray(list)
+      ? list
+          .filter((u) => u && EMAIL.test(String(u.email || '')) && ROLES.includes(u.role))
+          .map((u) => ({ ...u, email: String(u.email).toLowerCase() }))
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+export function roleOf(users, email) {
+  return users.find((u) => u.email === String(email || '').toLowerCase())?.role || null;
+}
+
+/** What an admin (not superadmin) may change: projects added or updated, nothing else. */
+export function restrictForAdmin(base, payload) {
+  const bad = [];
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  if (!same(base.sections, payload.sections)) bad.push('Only a superadmin can change works');
+  if (!same(base.home, payload.home)) bad.push('Only a superadmin can change the homepage');
+  const after = new Set((payload.projects || []).map((p) => p.slug));
+  for (const p of base.projects || [])
+    if (!after.has(p.slug)) bad.push(`Only a superadmin can delete a project (${p.slug})`);
+  if (Object.keys(payload.banners || {}).length || Object.keys(payload.bannerCopies || {}).length)
+    bad.push('Only a superadmin can change a work banner');
+  return bad;
+}
+
+/** Applies one users change; returns the new list or throws with a readable message. */
+export function applyUserChange(users, { action, email, role }, by) {
+  const target = String(email || '').toLowerCase();
+  if (!EMAIL.test(target)) throw new Error('Enter a valid email address');
+  const list = users.map((u) => ({ ...u }));
+  const i = list.findIndex((u) => u.email === target);
+  if (action === 'invite') {
+    if (!ROLES.includes(role)) throw new Error('Choose a role');
+    if (i >= 0) throw new Error(`${target} already has access`);
+    list.push({ email: target, role, invitedBy: by, invitedAt: new Date().toISOString() });
+  } else if (action === 'role') {
+    if (!ROLES.includes(role)) throw new Error('Choose a role');
+    if (i < 0) throw new Error(`${target} has no access to change`);
+    list[i].role = role;
+  } else if (action === 'remove') {
+    if (i < 0) throw new Error(`${target} has no access to remove`);
+    list.splice(i, 1);
+  } else throw new Error('Unknown action');
+  if (!list.some((u) => u.role === 'superadmin'))
+    throw new Error('There must always be at least one superadmin');
+  return list;
 }

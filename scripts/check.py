@@ -124,6 +124,21 @@ for key, section in (json.load(open('src/data/site.json', encoding='utf-8')).get
     if section.get('banner') and not os.path.exists(os.path.join('src/images/sections', section['banner'])):
         bad('section %s banner is missing: %s' % (key, section.get('banner')))
 
+# 5a. Admin users: valid emails, known roles, at least one superadmin.
+try:
+    users = json.load(open('admin/users.json', encoding='utf-8')).get('users', [])
+except Exception as e:
+    users = None
+    bad('admin/users.json is unreadable: %s' % e)
+if users is not None:
+    if not any(u.get('role') == 'superadmin' for u in users):
+        bad('admin/users.json needs at least one superadmin')
+    for u in users:
+        if not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', str(u.get('email', ''))):
+            bad('admin/users.json has an invalid email: %r' % u.get('email'))
+        if u.get('role') not in ('superadmin', 'admin'):
+            bad('admin/users.json has an unknown role for %s: %r' % (u.get('email'), u.get('role')))
+
 # 5b. Homepage features are data too: every entry needs its text and a real image.
 try:
     works = json.load(open('src/data/site.json', encoding='utf-8')).get('home', {}).get('works', [])
@@ -148,6 +163,8 @@ for i, w in enumerate(works):
         bad('%s image is missing: %s/%s' % (where, image['from'], image.get('file')))
     if not str(image.get('alt', '')).strip():
         bad('%s image needs alt text' % where)
+    if image.get('zoom') is not None and not (isinstance(image['zoom'], (int, float)) and 1 <= image['zoom'] <= 3):
+        bad('%s image zoom must be a number between 1 and 3' % where)
     if image.get('fit') is not None and image['fit'] not in ('cover', 'contain'):
         bad('%s image fit must be cover or contain' % where)
     if image.get('background') is not None and not re.fullmatch(r'#[0-9a-fA-F]{6}', str(image['background'])):

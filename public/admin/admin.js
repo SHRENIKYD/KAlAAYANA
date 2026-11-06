@@ -93,13 +93,16 @@
   }
 
   /* ---------- tabs ---------- */
+  const TABS = ['home', 'projects', 'log', 'users'];
   function showTab(tab) {
     state.tab = tab;
-    document.body.classList.toggle('tab-home', tab === 'home');
-    document.body.classList.toggle('tab-projects', tab === 'projects');
-    $('#tab-home').setAttribute('aria-current', tab === 'home' ? 'page' : 'false');
-    $('#tab-projects').setAttribute('aria-current', tab === 'projects' ? 'page' : 'false');
+    for (const t of TABS) {
+      document.body.classList.toggle(`tab-${t}`, tab === t);
+      $(`#tab-${t}`).setAttribute('aria-current', tab === t ? 'page' : 'false');
+    }
     if (tab === 'home') editHome();
+    else if (tab === 'log') showLog();
+    else if (tab === 'users') showUsers();
     else
       openSection(
         state.current && state.sections[state.current]
@@ -108,7 +111,255 @@
       );
   }
 
-  /* ---------- sections sidebar ---------- */
+  /* ---------- log (superadmin) ---------- */
+  async function refreshAdminData() {
+    const data = await api('/content');
+    state.users = data.users || [];
+    state.log = data.log || '';
+    state.decisions = data.decisions || [];
+  }
+  async function showLog() {
+    state.view = 'log';
+    await refreshAdminData();
+    const lines = (state.log || '')
+      .split('\n')
+      .filter((l) => l.startsWith('- '))
+      .map((l) => l.slice(2))
+      .reverse();
+    const main = $('#main');
+    main.replaceChildren(
+      el(
+        'div',
+        { class: 'head' },
+        el(
+          'div',
+          {},
+          el('p', { class: 'eyebrow' }, 'Superadmin'),
+          el('h1', {}, 'Log'),
+          el(
+            'p',
+            { class: 'muted' },
+            'Every change made through the admin: who, when, what. Newest first.',
+          ),
+        ),
+      ),
+      state.decisions?.length
+        ? el(
+            'div',
+            { class: 'log-block' },
+            el('h2', {}, 'Proposed changes on staging'),
+            el(
+              'table',
+              { class: 'log-table' },
+              el(
+                'thead',
+                {},
+                el(
+                  'tr',
+                  {},
+                  el('th', {}, '#'),
+                  el('th', {}, 'Change'),
+                  el('th', {}, 'Proposed'),
+                  el('th', {}, 'State'),
+                  el('th', {}, 'Decided'),
+                ),
+              ),
+              el(
+                'tbody',
+                {},
+                ...state.decisions.map((d) =>
+                  el(
+                    'tr',
+                    {},
+                    el(
+                      'td',
+                      {},
+                      el(
+                        'a',
+                        { href: d.url, target: '_blank', rel: 'noopener noreferrer' },
+                        `#${d.number}`,
+                      ),
+                    ),
+                    el('td', {}, d.title),
+                    el('td', {}, d.at?.replace('T', ' ').slice(0, 16) || ''),
+                    el('td', {}, el('span', { class: `pill pill-${d.state}` }, d.state)),
+                    el('td', {}, d.decidedAt?.replace('T', ' ').slice(0, 16) || '—'),
+                  ),
+                ),
+              ),
+            ),
+          )
+        : null,
+      el(
+        'div',
+        { class: 'log-block' },
+        el('h2', {}, 'Content log'),
+        lines.length
+          ? el(
+              'ol',
+              { class: 'log-list' },
+              ...lines.map((l) => {
+                const [at, who, ...rest] = l.split(' · ');
+                return el(
+                  'li',
+                  {},
+                  el('time', {}, at.replace('T', ' ').slice(0, 19)),
+                  el('b', {}, who),
+                  el('span', {}, rest.join(' · ')),
+                );
+              }),
+            )
+          : el('p', { class: 'muted' }, 'Nothing logged yet.'),
+      ),
+    );
+    renderSections();
+  }
+
+  /* ---------- users (superadmin) ---------- */
+  async function changeUser(body, note) {
+    note.textContent = '';
+    try {
+      await api('/users', { method: 'POST', body: JSON.stringify(body) });
+      await showUsers();
+    } catch (e) {
+      note.textContent = e.message;
+    }
+  }
+  async function showUsers() {
+    state.view = 'users';
+    await refreshAdminData();
+    const note = el('p', { class: 'signin-error', role: 'alert' });
+    const email = el('input', {
+      type: 'email',
+      id: 'invite-email',
+      placeholder: 'name@example.com',
+      autocomplete: 'off',
+    });
+    const role = el(
+      'select',
+      { id: 'invite-role' },
+      el('option', { value: 'admin' }, 'Admin — add and update projects'),
+      el('option', { value: 'superadmin' }, 'Superadmin — everything, including users and the log'),
+    );
+    const form = el(
+      'form',
+      { class: 'invite' },
+      el(
+        'div',
+        { class: 'row' },
+        el('div', { class: 'f' }, el('label', { for: 'invite-email' }, 'Email'), email),
+        el('div', { class: 'f' }, el('label', { for: 'invite-role' }, 'Role'), role),
+      ),
+      el('button', { class: 'btn', type: 'submit' }, 'Invite'),
+      el(
+        'small',
+        { class: 'muted' },
+        state.demo
+          ? 'Locally: the person signs in with this email on the sign-in page.'
+          : 'They sign in at the staging address with this email; Cloudflare Access emails them a one-time code. Their email must also be allowed by the Access policy.',
+      ),
+      note,
+    );
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      changeUser({ action: 'invite', email: email.value.trim(), role: role.value }, note);
+    });
+    const main = $('#main');
+    main.replaceChildren(
+      el(
+        'div',
+        { class: 'head' },
+        el(
+          'div',
+          {},
+          el('p', { class: 'eyebrow' }, 'Superadmin'),
+          el('h1', {}, 'Users'),
+          el(
+            'p',
+            { class: 'muted' },
+            'Who can sign in to the admin, and what they may do. Admins add and update projects; superadmins can do everything, see the log and manage users.',
+          ),
+        ),
+      ),
+      el(
+        'table',
+        { class: 'log-table' },
+        el(
+          'thead',
+          {},
+          el(
+            'tr',
+            {},
+            el('th', {}, 'Email'),
+            el('th', {}, 'Role'),
+            el('th', {}, 'Invited'),
+            el('th', {}, ''),
+          ),
+        ),
+        el(
+          'tbody',
+          {},
+          ...state.users.map((u) => {
+            const sel = el(
+              'select',
+              {},
+              ...['admin', 'superadmin'].map((r) => {
+                const o = el('option', { value: r }, r);
+                if (r === u.role) o.selected = true;
+                return o;
+              }),
+            );
+            sel.addEventListener('change', () =>
+              changeUser({ action: 'role', email: u.email, role: sel.value }, note),
+            );
+            return el(
+              'tr',
+              {},
+              el(
+                'td',
+                {},
+                u.email,
+                u.email === state.email ? el('small', { class: 'muted' }, ' (you)') : null,
+              ),
+              el('td', {}, sel),
+              el(
+                'td',
+                {},
+                u.invitedAt
+                  ? `${u.invitedAt.replace('T', ' ').slice(0, 16)}${u.invitedBy ? ` by ${u.invitedBy}` : ''}`
+                  : '—',
+              ),
+              el(
+                'td',
+                {},
+                u.email === state.email
+                  ? null
+                  : el(
+                      'button',
+                      {
+                        class: 'btn btn-danger btn-sm',
+                        type: 'button',
+                        onclick: () =>
+                          confirmBox(
+                            `Remove ${u.email}?`,
+                            'They can no longer sign in to the admin.',
+                            () => changeUser({ action: 'remove', email: u.email }, note),
+                          ),
+                      },
+                      'Remove',
+                    ),
+              ),
+            );
+          }),
+        ),
+      ),
+      el('h2', { class: 'invite-heading' }, 'Invite someone'),
+      form,
+    );
+    renderSections();
+  }
+
+  /* ---------- sections sidebar ---------- */ /* ---------- sections sidebar ---------- */
   function renderSections() {
     const nav = $('#sections');
     nav.replaceChildren(
@@ -149,11 +400,13 @@
         el(
           'div',
           { class: 'actions' },
-          el(
-            'button',
-            { class: 'btn btn-ghost', type: 'button', onclick: () => editSection(key) },
-            'Edit work',
-          ),
+          state.role === 'superadmin'
+            ? el(
+                'button',
+                { class: 'btn btn-ghost', type: 'button', onclick: () => editSection(key) },
+                'Edit work',
+              )
+            : null,
           el(
             'button',
             { class: 'btn', type: 'button', onclick: () => newProject(key) },
@@ -399,7 +652,7 @@
             },
             '← Back',
           ),
-          isNew
+          isNew || state.role !== 'superadmin'
             ? null
             : el(
                 'button',
@@ -651,7 +904,7 @@
      The photograph is shown whole, with the crop the site will use drawn over
      it. Drag the frame to the part that should show. One frame per layout
      (desktop, phone); the position is saved as the image's focus point. */
-  function focusPicker({ src, get, set, crops }) {
+  function focusPicker({ src, get, set, crops, getZoom, setZoom }) {
     const img = el('img', { src, alt: '', draggable: 'false' });
     const frame = el(
       'div',
@@ -681,7 +934,8 @@
       const W = img.clientWidth;
       const H = img.clientHeight;
       const r = ratioOf(crops[active][1]);
-      const fw = Math.min(W, H * r);
+      const z = getZoom ? Number(getZoom()) || 1 : 1;
+      const fw = Math.min(W, H * r) / z;
       const fh = fw / r;
       const f = parse();
       return { W, H, fw, fh, left: ((W - fw) * f.x) / 100, top: ((H - fh) * f.y) / 100 };
@@ -778,9 +1032,41 @@
     const reset = el('button', { class: 'btn btn-ghost btn-sm', type: 'button' }, 'Centre');
     reset.addEventListener('click', () => {
       set('50% 50%');
+      if (setZoom) {
+        setZoom(1);
+        zoom.value = '1';
+        zoomOut.textContent = '1.0×';
+      }
       paint();
       markDirty();
     });
+    // Zoom: the photograph is scaled up inside the frame, so the frame covers
+    // less of it and can move left and right as well as up and down.
+    const zoom = el('input', {
+      type: 'range',
+      min: '1',
+      max: '2.5',
+      step: '0.05',
+      value: String(getZoom ? getZoom() || 1 : 1),
+      'aria-label': 'Zoom',
+    });
+    const zoomOut = el('span', { class: 'focus-value' }, `${Number(zoom.value).toFixed(1)}×`);
+    zoom.addEventListener('input', () => {
+      if (setZoom) setZoom(Number(zoom.value));
+      zoomOut.textContent = `${Number(zoom.value).toFixed(1)}×`;
+      paint();
+    });
+    zoom.addEventListener('change', () => markDirty());
+    const zoomBar = setZoom
+      ? el(
+          'label',
+          { class: 'zoom-bar' },
+          el('span', { class: 'fit-label' }, 'Zoom'),
+          zoom,
+          zoomOut,
+          el('small', {}, 'Zoom in to move the frame left and right too.'),
+        )
+      : null;
 
     img.addEventListener('load', paint);
     if (img.complete) queueMicrotask(paint);
@@ -793,6 +1079,7 @@
         'div',
         { class: 'focus' },
         el('div', { class: 'frame-bar' }, tabs, reset, value),
+        zoomBar,
         stage,
         el(
           'small',
@@ -987,6 +1274,11 @@
                     get: () => w.image.focus || '50% 48%',
                     set: (v) => {
                       w.image.focus = v;
+                    },
+                    getZoom: () => w.image.zoom || 1,
+                    setZoom: (z) => {
+                      if (z > 1) w.image.zoom = Math.round(z * 100) / 100;
+                      else delete w.image.zoom;
                     },
                     crops: [
                       ['Desktop', '2 / 1'],
@@ -1805,6 +2097,10 @@
       email: data.email,
       base: data.base,
       demo: Boolean(data.demo),
+      role: data.role || 'admin',
+      users: data.users || [],
+      log: data.log || '',
+      decisions: data.decisions || [],
       projects: data.projects,
       sections: data.sections,
       home: data.home || { works: [] },
@@ -1817,7 +2113,11 @@
       dirty: false,
     });
     state.original = snapshot();
-    $('#who').textContent = data.email;
+    $('#who').textContent = `${data.email} · ${data.role || 'admin'}`;
+    document.body.classList.toggle('role-admin', data.role !== 'superadmin');
+    document.body.classList.toggle('role-superadmin', data.role === 'superadmin');
+    if (data.role !== 'superadmin' && ['home', 'log', 'users'].includes(state.tab))
+      state.tab = 'projects';
     $('#base-note').textContent =
       `Editing the ${data.base} branch. Saves open a pull request; staging updates once it merges.`;
     $('#message').value = '';
@@ -1828,6 +2128,8 @@
   $('#new-section').addEventListener('click', newWork);
   $('#preview-btn').addEventListener('click', previewCurrent);
   $('#tab-home').addEventListener('click', () => showTab('home'));
+  $('#tab-log').addEventListener('click', () => showTab('log'));
+  $('#tab-users').addEventListener('click', () => showTab('users'));
   $('#tab-projects').addEventListener('click', () => showTab('projects'));
   $('#new-project').addEventListener('click', newProjectAnywhere);
   $('#save').addEventListener('click', publish);
