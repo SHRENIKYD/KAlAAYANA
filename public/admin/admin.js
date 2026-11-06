@@ -2288,8 +2288,8 @@
             'div',
             { class: 'signin-form' },
             el(
-              'a',
-              { class: 'btn', href: '/cdn-cgi/access/logout' },
+              'button',
+              { class: 'btn', type: 'button', onclick: () => accessSignOut() },
               err.status === 403 ? 'Sign in with another account' : 'Sign in',
             ),
           ),
@@ -2322,8 +2322,19 @@
       }
       showSignIn({ demo: true, status: 401, expired: reason === 'expired' });
     } else {
-      window.location.assign('/cdn-cgi/access/logout');
+      await accessSignOut();
     }
+  }
+  // Access's logout drops the browser on the site root. Clear the session
+  // without following its redirect, then go to the admin, where Access asks
+  // for a fresh sign-in and returns here afterwards.
+  async function accessSignOut() {
+    try {
+      await fetch('/cdn-cgi/access/logout', { credentials: 'include', redirect: 'manual' });
+    } catch {
+      /* the cookie is cleared by the response even when the redirect is opaque */
+    }
+    window.location.replace('/admin/');
   }
   function startSessionClock(ends) {
     stopSessionClock();
