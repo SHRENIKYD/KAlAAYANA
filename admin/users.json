@@ -11,6 +11,12 @@
       "role": "superadmin",
       "invitedBy": null,
       "invitedAt": "2026-11-06T06:00:00Z"
+    },
+    {
+      "email": "svinaykr27@gmail.com",
+      "role": "admin",
+      "invitedBy": "contact@kalaayanastudios.com",
+      "invitedAt": "2026-11-06T13:23:46.963Z"
     }
   ]
 }
