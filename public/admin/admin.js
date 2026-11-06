@@ -1903,7 +1903,7 @@
       el('img', { src: '/assets/img/logo.svg', alt: 'Kalaayana Studios' }),
     );
     const box = el('div', { class: 'signin-card' }, brand);
-    const expired = err.status === 401 || err.expired;
+    const expired = Boolean(err.expired);
     if (err.demo) {
       const input = el('input', {
         type: 'email',
