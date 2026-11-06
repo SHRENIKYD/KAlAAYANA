@@ -535,6 +535,7 @@ test('insights fill every day of the window and name empty referrers', async () 
           viewer: {
             accounts: [
               {
+                previous: [{ count: 5, sum: { visits: 2 } }],
                 byDay: [{ count: 10, sum: { visits: 4 }, dimensions: { date: '2026-11-05' } }],
                 pages: [{ count: 7, sum: { visits: 3 }, dimensions: { requestPath: '/murals/' } }],
                 referrers: [{ count: 7, sum: { visits: 3 }, dimensions: { refererHost: '' } }],
@@ -567,6 +568,7 @@ test('insights fill every day of the window and name empty referrers', async () 
     ],
   );
   assert.deepEqual(r.totals, { views: 10, visits: 4 });
+  assert.deepEqual(r.previous, { views: 5, visits: 2 });
   assert.equal(r.referrers[0].label, 'Direct / none');
   assert.equal(r.pages[0].label, '/murals/');
   await assert.rejects(

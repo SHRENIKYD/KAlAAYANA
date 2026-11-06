@@ -169,12 +169,14 @@
   }
 
   /* ---------- insights (everyone) ---------- */
+  let insightsResizeBound = false;
   async function showInsights(days) {
     state.view = 'insights';
     state.insightDays = days || state.insightDays || 7;
     renderInsights();
     const want = state.insightDays;
     if (state.insights?.days === want && Date.now() - (state.insightsAt || 0) < 120000) return;
+    if (state.insights) renderInsights();
     try {
       const data = await api(`/insights?days=${want}`);
       if (state.insightDays !== want) return;
@@ -188,11 +190,393 @@
       state.insightsUnconfigured = Boolean(e.status === 503);
     }
     if (state.view === 'insights') renderInsights();
+    if (!insightsResizeBound) {
+      insightsResizeBound = true;
+      let t;
+      window.addEventListener('resize', () => {
+        clearTimeout(t);
+        t = setTimeout(() => {
+          if (state.view === 'insights' && state.insights) renderInsights();
+        }, 150);
+      });
+    }
+  }
+  /* The dashboard. Two series share one axis (both are counts): visits in
+     gold, page views in blue, validated for colour-vision separation on this
+     surface. A period change keeps the previous render dimmed until the new
+     figures arrive; the skeleton shows only on the first load. */
+  const INS = {
+    visits: { label: 'Visits', color: '#a8781a' },
+    views: { label: 'Page views', color: '#2a6fa8' },
+  };
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = (tag, attrs = {}, ...children) => {
+    const node = document.createElementNS(svgNS, tag);
+    for (const [k, v] of Object.entries(attrs)) if (v != null) node.setAttribute(k, v);
+    for (const c of children.flat()) if (c != null) node.append(c);
+    return node;
+  };
+  const fmt = (x) => {
+    const v = Number(x || 0);
+    if (v >= 1e6) return `${(v / 1e6).toFixed(v >= 1e7 ? 0 : 1)}M`;
+    if (v >= 1e4) return `${(v / 1e3).toFixed(v >= 1e5 ? 0 : 1)}K`;
+    return v.toLocaleString('en-IN');
+  };
+  const niceCeil = (v) => {
+    if (v <= 0) return 1;
+    const p = 10 ** Math.floor(Math.log10(v));
+    for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= v) return m * p;
+    return 10 * p;
+  };
+  const delta = (cur, prev) => {
+    if (!prev) return null;
+    return (cur - prev) / prev;
+  };
+  function sparkline(raw, color) {
+    const buckets = Math.min(12, raw.length);
+    const size = raw.length / buckets;
+    const values = Array.from({ length: buckets }, (_, b) =>
+      raw.slice(Math.round(b * size), Math.round((b + 1) * size)).reduce((n, v) => n + v, 0),
+    );
+    const w = 96;
+    const h = 28;
+    const max = Math.max(1, ...values);
+    const step = values.length > 1 ? w / (values.length - 1) : w;
+    const pts = values.map(
+      (v, i) => `${(i * step).toFixed(1)},${(h - 2 - (v / max) * (h - 4)).toFixed(1)}`,
+    );
+    return svg(
+      'svg',
+      { class: 'spark', viewBox: `0 0 ${w} ${h}`, 'aria-hidden': 'true' },
+      svg('polyline', {
+        points: pts.join(' '),
+        fill: 'none',
+        stroke: color,
+        'stroke-width': '1.5',
+        'stroke-linejoin': 'round',
+        'stroke-linecap': 'round',
+      }),
+      svg('circle', {
+        cx: pts[pts.length - 1].split(',')[0],
+        cy: pts[pts.length - 1].split(',')[1],
+        r: '3',
+        fill: color,
+        stroke: '#fff',
+        'stroke-width': '2',
+      }),
+    );
+  }
+  function statTile({ label, value, deltaValue, periodLabel, spark, color, upIsGood = true }) {
+    let d = null;
+    if (deltaValue != null && Number.isFinite(deltaValue)) {
+      const up = deltaValue >= 0;
+      const good = up === upIsGood;
+      d = el(
+        'span',
+        { class: `delta ${deltaValue === 0 ? '' : good ? 'good' : 'bad'}` },
+        el('i', { 'aria-hidden': 'true' }, deltaValue === 0 ? '·' : up ? '▲' : '▼'),
+        ` ${Math.abs(Math.round(deltaValue * 100))}% vs previous ${periodLabel}`,
+      );
+    } else if (deltaValue === null)
+      d = el('span', { class: 'delta' }, `No previous ${periodLabel} to compare`);
+    return el(
+      'div',
+      { class: 'tile' },
+      el('small', {}, label),
+      el('div', { class: 'tile-row' }, el('b', {}, value), spark ? sparkline(spark, color) : null),
+      d,
+    );
+  }
+  function lineChart(d, width) {
+    const W = Math.max(320, width);
+    const H = 260;
+    const pad = { t: 18, r: 96, b: 30, l: 44 };
+    const iw = W - pad.l - pad.r;
+    const ih = H - pad.t - pad.b;
+    const n = d.byDay.length;
+    const max = niceCeil(Math.max(1, ...d.byDay.map((x) => Math.max(x.visits, x.views))));
+    const x = (i) => pad.l + (n > 1 ? (i / (n - 1)) * iw : iw / 2);
+    const y = (v) => pad.t + ih - (v / max) * ih;
+    const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => max * f);
+    const g = svg('svg', {
+      class: 'line-chart',
+      viewBox: `0 0 ${W} ${H}`,
+      width: W,
+      height: H,
+      role: 'img',
+      'aria-label': `Visits and page views per day for the last ${d.days} days`,
+    });
+    for (const t of ticks) {
+      g.append(svg('line', { x1: pad.l, x2: W - pad.r, y1: y(t), y2: y(t), class: 'grid' }));
+      g.append(
+        svg('text', { x: pad.l - 8, y: y(t) + 4, class: 'tick', 'text-anchor': 'end' }, fmt(t)),
+      );
+    }
+    const every = n > 45 ? 15 : n > 14 ? 7 : 1;
+    d.byDay.forEach((p, i) => {
+      if (i === n - 1 || (i % every === 0 && n - 1 - i > every / 2))
+        g.append(
+          svg(
+            'text',
+            {
+              x: x(i),
+              y: H - 8,
+              class: 'tick',
+              'text-anchor': i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle',
+            },
+            p.date.slice(5).replace('-', '/'),
+          ),
+        );
+    });
+    for (const key of ['views', 'visits']) {
+      const pts = d.byDay.map((p, i) => [x(i), y(p[key])]);
+      const path = pts
+        .map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`)
+        .join(' ');
+      g.append(
+        svg('path', {
+          d: `${path} L${pts[n - 1][0].toFixed(1)},${y(0)} L${pts[0][0].toFixed(1)},${y(0)} Z`,
+          fill: INS[key].color,
+          'fill-opacity': '0.08',
+        }),
+      );
+      g.append(
+        svg('path', {
+          d: path,
+          fill: 'none',
+          stroke: INS[key].color,
+          'stroke-width': '2',
+          'stroke-linejoin': 'round',
+          'stroke-linecap': 'round',
+        }),
+      );
+      const last = pts[n - 1];
+      g.append(
+        svg('circle', {
+          cx: last[0],
+          cy: last[1],
+          r: '4',
+          fill: INS[key].color,
+          stroke: '#fff',
+          'stroke-width': '2',
+        }),
+      );
+      g.append(
+        svg(
+          'text',
+          { x: last[0] + 10, y: last[1] + 4, class: 'end-label' },
+          `${fmt(d.byDay[n - 1][key])} ${key === 'views' ? 'views' : 'visits'}`,
+        ),
+      );
+    }
+    // crosshair layer
+    const cross = svg('line', {
+      class: 'crosshair',
+      y1: pad.t,
+      y2: pad.t + ih,
+      x1: 0,
+      x2: 0,
+      visibility: 'hidden',
+    });
+    const dots = ['visits', 'views'].map((key) =>
+      svg('circle', {
+        r: '5',
+        fill: INS[key].color,
+        stroke: '#fff',
+        'stroke-width': '2',
+        visibility: 'hidden',
+      }),
+    );
+    g.append(cross, ...dots);
+    const hit = svg('rect', {
+      x: pad.l,
+      y: pad.t,
+      width: iw,
+      height: ih,
+      fill: 'transparent',
+      tabindex: '0',
+      'aria-label': 'Hover or use arrow keys to read values',
+    });
+    g.append(hit);
+    const wrap = el('div', { class: 'chart-wrap' });
+    const tip = el('div', { class: 'chart-tip', hidden: '' });
+    wrap.append(g, tip);
+    let current = -1;
+    const show = (i) => {
+      if (i < 0 || i >= n) return;
+      current = i;
+      const p = d.byDay[i];
+      cross.setAttribute('x1', x(i));
+      cross.setAttribute('x2', x(i));
+      cross.setAttribute('visibility', 'visible');
+      ['visits', 'views'].forEach((key, k) => {
+        dots[k].setAttribute('cx', x(i));
+        dots[k].setAttribute('cy', y(p[key]));
+        dots[k].setAttribute('visibility', 'visible');
+      });
+      tip.replaceChildren(
+        el('b', {}, p.date),
+        ...['visits', 'views'].map((key) =>
+          el(
+            'div',
+            { class: 'tip-row' },
+            el('i', { style: `background:${INS[key].color}` }),
+            el('strong', {}, fmt(p[key])),
+            el('span', {}, INS[key].label),
+          ),
+        ),
+      );
+      tip.hidden = false;
+      const left = (x(i) / W) * wrap.clientWidth;
+      tip.style.left = `${Math.min(Math.max(left, 90), wrap.clientWidth - 90)}px`;
+    };
+    const hide = () => {
+      cross.setAttribute('visibility', 'hidden');
+      dots.forEach((c) => c.setAttribute('visibility', 'hidden'));
+      tip.hidden = true;
+      current = -1;
+    };
+    hit.addEventListener('pointermove', (e) => {
+      const r = g.getBoundingClientRect();
+      const px = ((e.clientX - r.left) / r.width) * W;
+      show(Math.round(((px - pad.l) / iw) * (n - 1)));
+    });
+    hit.addEventListener('pointerleave', hide);
+    hit.addEventListener('focus', () => show(n - 1));
+    hit.addEventListener('blur', hide);
+    hit.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(Math.max(0, (current < 0 ? n - 1 : current) - 1));
+      else if (e.key === 'ArrowRight') show(Math.min(n - 1, (current < 0 ? 0 : current) + 1));
+      else return;
+      e.preventDefault();
+    });
+    return wrap;
+  }
+  function barList(title, list, total, color) {
+    const max = Math.max(1, ...list.map((r) => r.visits));
+    return el(
+      'section',
+      { class: 'ins-card' },
+      el('h2', {}, title),
+      list.length
+        ? el(
+            'ol',
+            { class: 'bars' },
+            ...list.map((r) =>
+              el(
+                'li',
+                { title: `${r.label}: ${fmt(r.visits)} visits, ${fmt(r.views)} page views` },
+                el('span', { class: 'bar-label' }, r.label || '—'),
+                el(
+                  'span',
+                  { class: 'bar-track' },
+                  el('i', {
+                    style: `width:${Math.max(2, (r.visits / max) * 100)}%;background:${color}`,
+                  }),
+                ),
+                el('span', { class: 'bar-value' }, fmt(r.visits)),
+                el(
+                  'span',
+                  { class: 'bar-share' },
+                  total ? `${Math.round((r.visits / total) * 100)}%` : '',
+                ),
+              ),
+            ),
+          )
+        : el('p', { class: 'muted' }, 'Nothing in this period.'),
+    );
+  }
+  function segmented(title, list, total) {
+    const shades = ['#a8781a', '#2a6fa8', '#6b6256', '#b9ab8f'];
+    const parts = list.slice(0, 4);
+    return el(
+      'section',
+      { class: 'ins-card' },
+      el('h2', {}, title),
+      parts.length
+        ? el(
+            'div',
+            {},
+            el(
+              'div',
+              {
+                class: 'segments',
+                role: 'img',
+                'aria-label': parts
+                  .map((p) => `${p.label} ${Math.round((p.visits / total) * 100)}%`)
+                  .join(', '),
+              },
+              ...parts.map((p, i) => {
+                const share = total ? p.visits / total : 0;
+                return el(
+                  'span',
+                  {
+                    style: `flex:${Math.max(share, 0.001)};background:${shades[i]}`,
+                    title: `${p.label}: ${fmt(p.visits)} visits (${Math.round(share * 100)}%)`,
+                  },
+                  share >= 0.12 ? `${Math.round(share * 100)}%` : '',
+                );
+              }),
+            ),
+            el(
+              'ul',
+              { class: 'legend' },
+              ...parts.map((p, i) =>
+                el('li', {}, el('i', { style: `background:${shades[i]}` }), p.label),
+              ),
+            ),
+          )
+        : el('p', { class: 'muted' }, 'Nothing in this period.'),
+    );
+  }
+  function insightTables(d) {
+    const t = (title, head, rows) =>
+      el(
+        'section',
+        { class: 'ins-card' },
+        el('h2', {}, title),
+        el(
+          'table',
+          { class: 'log-table ins-table' },
+          el('thead', {}, el('tr', {}, ...head.map((h) => el('th', {}, h)))),
+          el('tbody', {}, ...rows.map((r) => el('tr', {}, ...r.map((c) => el('td', {}, c))))),
+        ),
+      );
+    return el(
+      'div',
+      { class: 'ins-grid' },
+      t(
+        'Per day',
+        ['Date', 'Visits', 'Page views'],
+        d.byDay.map((x) => [x.date, fmt(x.visits), fmt(x.views)]),
+      ),
+      t(
+        'Pages',
+        ['Page', 'Visits', 'Page views'],
+        d.pages.map((x) => [x.label, fmt(x.visits), fmt(x.views)]),
+      ),
+      t(
+        'Sources',
+        ['Site', 'Visits'],
+        d.referrers.map((x) => [x.label, fmt(x.visits)]),
+      ),
+      t(
+        'Countries',
+        ['Country', 'Visits'],
+        d.countries.map((x) => [x.label, fmt(x.visits)]),
+      ),
+      t(
+        'Devices',
+        ['Device', 'Visits'],
+        d.devices.map((x) => [x.label, fmt(x.visits)]),
+      ),
+    );
   }
   function renderInsights() {
-    const d = state.insights && state.insights.days === state.insightDays ? state.insights : null;
+    const d = state.insights;
+    const stale = d && d.days !== state.insightDays;
     const loading = !d && !state.insightsError;
-    const n = (x) => Number(x || 0).toLocaleString('en-IN');
+    const periodLabel = `${state.insightDays} days`;
     const range = el(
       'div',
       { class: 'range', role: 'group', 'aria-label': 'Period' },
@@ -204,37 +588,31 @@
             'aria-pressed': String(state.insightDays === k),
             onclick: () => showInsights(k),
           },
-          k === 7 ? '7 days' : k === 30 ? '30 days' : '90 days',
+          `${k} days`,
         ),
       ),
     );
-    const tile = (value, label) =>
-      el('div', { class: 'tile' }, el('b', {}, value), el('small', {}, label));
-    const table = (title, list, col) =>
-      el(
-        'div',
-        {},
-        el('h2', {}, title),
-        list.length
-          ? el(
-              'table',
-              { class: 'log-table' },
-              el('thead', {}, el('tr', {}, el('th', {}, col), el('th', {}, 'Visits'))),
-              el(
-                'tbody',
-                {},
-                ...list.map((r) =>
-                  el(
-                    'tr',
-                    {},
-                    el('td', { title: r.label }, r.label || '—'),
-                    el('td', {}, n(r.visits)),
-                  ),
-                ),
-              ),
-            )
-          : el('p', { class: 'muted' }, 'Nothing yet.'),
-      );
+    const view = el(
+      'div',
+      { class: 'range', role: 'group', 'aria-label': 'View' },
+      ...[
+        ['chart', 'Charts'],
+        ['table', 'Table'],
+      ].map(([k, label]) =>
+        el(
+          'button',
+          {
+            type: 'button',
+            'aria-pressed': String((state.insightsView || 'chart') === k),
+            onclick: () => {
+              state.insightsView = k;
+              renderInsights();
+            },
+          },
+          label,
+        ),
+      ),
+    );
     let body;
     if (loading) {
       body = el(
@@ -243,16 +621,16 @@
         el(
           'div',
           { class: 'tiles' },
-          ...[0, 1, 2].map(() =>
+          ...[0, 1, 2, 3].map(() =>
             el(
               'div',
               { class: 'tile' },
+              el('span', { class: 'skel skel-line', style: 'width:40%' }),
               el('span', { class: 'skel skel-title' }),
-              el('span', { class: 'skel skel-line', style: 'width:60%' }),
             ),
           ),
         ),
-        el('span', { class: 'skel', style: 'display:block;height:180px' }),
+        el('span', { class: 'skel', style: 'display:block;height:260px' }),
       );
     } else if (!d) {
       body = el(
@@ -275,47 +653,71 @@
           : null,
       );
     } else {
-      const max = Math.max(1, ...d.byDay.map((x) => x.visits));
-      const chart = el(
+      const perVisit = d.totals.visits ? d.totals.views / d.totals.visits : 0;
+      const tiles = el(
         'div',
-        { class: 'chart', role: 'img', 'aria-label': `Visits per day, last ${d.days} days` },
-        ...d.byDay.map((x) =>
+        { class: 'tiles' },
+        statTile({
+          label: 'Visits',
+          value: fmt(d.totals.visits),
+          deltaValue: delta(d.totals.visits, d.previous?.visits),
+          periodLabel,
+          spark: d.byDay.map((x) => x.visits),
+          color: INS.visits.color,
+        }),
+        statTile({
+          label: 'Page views',
+          value: fmt(d.totals.views),
+          deltaValue: delta(d.totals.views, d.previous?.views),
+          periodLabel,
+          spark: d.byDay.map((x) => x.views),
+          color: INS.views.color,
+        }),
+        statTile({ label: 'Pages per visit', value: perVisit.toFixed(1) }),
+        statTile({ label: 'Visits a day', value: fmt(Math.round(d.totals.visits / d.days)) }),
+      );
+      const legend = el(
+        'ul',
+        { class: 'legend' },
+        ...['visits', 'views'].map((k) =>
           el(
-            'div',
-            { class: 'bar-day' },
-            el('i', { style: `height:${Math.max(1, Math.round((x.visits / max) * 100))}%` }),
-            el('span', {}, `${x.date.slice(5)} · ${n(x.visits)} visits · ${n(x.views)} views`),
+            'li',
+            {},
+            el('i', { class: 'key-line', style: `background:${INS[k].color}` }),
+            INS[k].label,
           ),
         ),
       );
-      const perDay = d.days ? Math.round(d.totals.visits / d.days) : 0;
-      body = el(
+      const chartCard = el(
+        'section',
+        { class: 'ins-card ins-main' },
+        el('div', { class: 'card-head' }, el('h2', {}, 'Per day'), legend),
+        el('div', { class: 'chart-slot' }),
+      );
+      const grid = el(
         'div',
-        {},
-        el(
-          'div',
-          { class: 'tiles' },
-          tile(n(d.totals.visits), 'Visits'),
-          tile(n(d.totals.views), 'Page views'),
-          tile(n(perDay), 'Visits a day'),
-          tile(d.pages[0] ? d.pages[0].label : '—', 'Most read page'),
-        ),
-        chart,
-        el(
-          'div',
-          { class: 'chart-axis' },
-          el('span', {}, d.byDay[0]?.date || ''),
-          el('span', {}, d.byDay[d.byDay.length - 1]?.date || ''),
-        ),
-        el(
-          'div',
-          { class: 'insight-grid' },
-          table('Pages', d.pages, 'Page'),
-          table('Came from', d.referrers, 'Site'),
-          table('Countries', d.countries, 'Country'),
-          table('Devices', d.devices, 'Device'),
+        { class: 'ins-grid' },
+        barList('Pages', d.pages, d.totals.visits, INS.visits.color),
+        barList('Sources', d.referrers, d.totals.visits, INS.views.color),
+        barList('Countries', d.countries, d.totals.visits, INS.visits.color),
+        segmented(
+          'Devices',
+          d.devices,
+          d.devices.reduce((n, x) => n + x.visits, 0),
         ),
       );
+      body = el(
+        'div',
+        { class: stale ? 'refetching' : '' },
+        tiles,
+        (state.insightsView || 'chart') === 'table'
+          ? insightTables(d)
+          : el('div', {}, chartCard, grid),
+      );
+      requestAnimationFrame(() => {
+        const slot = $('.chart-slot');
+        if (slot) slot.replaceChildren(lineChart(d, slot.clientWidth));
+      });
     }
     $('#main').replaceChildren(
       el(
@@ -329,10 +731,12 @@
           el(
             'p',
             { class: 'muted' },
-            'Who is reading the site, measured without cookies by Cloudflare Web Analytics. Bots are left out.',
+            d
+              ? `${d.from.slice(0, 10)} to ${d.to.slice(0, 10)} · measured without cookies by Cloudflare Web Analytics · bots left out`
+              : 'Who is reading the site, measured without cookies by Cloudflare Web Analytics. Bots are left out.',
           ),
         ),
-        el('div', { class: 'actions' }, range),
+        el('div', { class: 'actions' }, range, view),
       ),
       body,
     );

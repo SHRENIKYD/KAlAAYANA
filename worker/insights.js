@@ -5,9 +5,13 @@
 const GRAPHQL = 'https://api.cloudflare.com/client/v4/graphql';
 
 const QUERY = `
-query Insights($account: string!, $site: string!, $from: Time!, $to: Time!) {
+query Insights($account: string!, $site: string!, $from: Time!, $to: Time!, $prevFrom: Time!) {
   viewer {
     accounts(filter: { accountTag: $account }) {
+      previous: rumPageloadEventsAdaptiveGroups(
+        filter: { siteTag: $site, bot: 0, datetime_geq: $prevFrom, datetime_lt: $from }
+        limit: 1
+      ) { count sum { visits } }
       byDay: rumPageloadEventsAdaptiveGroups(
         filter: { siteTag: $site, bot: 0, datetime_geq: $from, datetime_leq: $to }
         limit: 100
@@ -68,6 +72,7 @@ export async function fetchInsights({
         site: siteTag,
         from: from.toISOString(),
         to: to.toISOString(),
+        prevFrom: new Date(from.getTime() - span * 24 * 3600 * 1000).toISOString(),
       },
     }),
   });
@@ -96,6 +101,10 @@ export async function fetchInsights({
     totals: {
       views: series.reduce((n, d) => n + d.views, 0),
       visits: series.reduce((n, d) => n + d.visits, 0),
+    },
+    previous: {
+      views: acc.previous?.[0]?.count || 0,
+      visits: acc.previous?.[0]?.sum?.visits || 0,
     },
     byDay: series,
     pages: rows(acc.pages, 'requestPath'),
