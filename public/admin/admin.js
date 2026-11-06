@@ -68,10 +68,16 @@
     return img;
   };
 
-  // Who is using the account this session. Kept for the hour in this tab.
+  // Who is using the account this session. Kept in this browser for the
+  // sign-in's hour, so every admin tab shares it; a different account or an
+  // ended session asks again.
+  const WHO_KEY = 'admin-who';
   const sessionName = () => {
     try {
-      return sessionStorage.getItem('admin-name') || '';
+      const w = JSON.parse(localStorage.getItem(WHO_KEY) || 'null');
+      if (!w || !w.name || !(w.ends > Date.now())) return '';
+      if (state.email && w.email !== state.email) return '';
+      return w.name;
     } catch {
       return '';
     }
@@ -1280,7 +1286,14 @@
         try {
           await api('/session', { method: 'POST', body: JSON.stringify({ name: who, photo }) });
           try {
-            sessionStorage.setItem('admin-name', who);
+            localStorage.setItem(
+              WHO_KEY,
+              JSON.stringify({
+                name: who,
+                email: state.email,
+                ends: state.sessionEnds || Date.now() + 3600000,
+              }),
+            );
           } catch {
             /* no storage: the name is still on this request's log line */
           }
@@ -3446,7 +3459,7 @@
   async function signOut(reason) {
     stopSessionClock();
     try {
-      sessionStorage.removeItem('admin-name');
+      localStorage.removeItem(WHO_KEY);
     } catch {
       /* nothing stored */
     }
@@ -3819,6 +3832,7 @@
     state.adminFetchedAt = Date.now();
     readPlace();
     $('#who').textContent = `${data.email} · ${data.role || 'admin'}`;
+    state.sessionEnds = Number(data.sessionEnds) || 0;
     if (data.sessionEnds) startSessionClock(Number(data.sessionEnds));
     document.body.classList.toggle('role-admin', data.role !== 'superadmin');
     document.body.classList.toggle('role-superadmin', data.role === 'superadmin');
