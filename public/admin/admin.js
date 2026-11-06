@@ -151,7 +151,7 @@
           el(
             'button',
             { class: 'btn btn-ghost', type: 'button', onclick: () => editSection(key) },
-            'Edit section',
+            'Edit work',
           ),
           el(
             'button',
@@ -262,14 +262,14 @@
     let slugLocked = !isNew;
     let slugField;
     const main = $('#main');
-    const imagesBox = el('div', { class: 'images' });
+    const imagesBox = el('div', { class: 'images photos' });
 
     const renderImages = () => {
       imagesBox.replaceChildren(
         ...p.images.map((img, i) =>
           el(
             'div',
-            { class: `image${img.file in state.uploads ? ' new' : ''}` },
+            { class: `image photo${img.file in state.uploads ? ' new' : ''}` },
             el('img', { src: imageUrl('projects', img.file), alt: '' }),
             el(
               'div',
@@ -1011,7 +1011,7 @@
         el(
           'div',
           {},
-          el('p', { class: 'eyebrow' }, isNew ? 'New section' : 'Edit section'),
+          el('p', { class: 'eyebrow' }, isNew ? 'New section' : 'Edit work'),
           el('h1', {}, s.title || key),
         ),
         el(

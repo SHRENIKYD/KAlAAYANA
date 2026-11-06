@@ -198,11 +198,13 @@ body.signin .tabs {
 }
 
 .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 24px;
+  columns: 240px;
+  column-gap: 24px;
 }
 .card {
+  display: block;
+  break-inside: avoid;
+  margin-bottom: 24px;
   background: var(--panel);
   border: 1px solid var(--line);
   cursor: pointer;
@@ -216,8 +218,7 @@ body.signin .tabs {
 .card-thumb {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
+  height: auto;
   background: #e6e0d6;
 }
 .card-body {
@@ -482,6 +483,38 @@ body.signin .tabs {
   }
 }
 
+/* ---------- project photographs: Pinterest-style columns ---------- */
+.images.photos {
+  display: block;
+  columns: 260px;
+  column-gap: 16px;
+}
+.image.photo {
+  display: block;
+  break-inside: avoid;
+  margin-bottom: 16px;
+  padding: 0 0 12px;
+}
+.image.photo > img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: auto;
+  object-fit: unset;
+  margin-bottom: 10px;
+}
+.image.photo > div {
+  padding: 0 12px;
+}
+.image.photo .image-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 12px 0;
+}
+.images > .image.photo:first-child {
+  box-shadow: inset 0 3px 0 var(--gold);
+}
+
 /* ---------- project cover ---------- */
 .cover-badge {
   display: inline-flex;
@@ -493,9 +526,6 @@ body.signin .tabs {
   text-transform: uppercase;
   color: var(--gold);
   border: 1px solid var(--gold);
-}
-.images > .image:first-child:not(.work) {
-  box-shadow: inset 3px 0 0 var(--gold);
 }
 
 /* ---------- homepage work rows ---------- */
