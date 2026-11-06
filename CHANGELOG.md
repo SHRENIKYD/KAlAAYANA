@@ -10,7 +10,7 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
-## [1.2.18] - Unreleased
+## [1.2.18] - 2026-11-06
 
 ### Added
 
