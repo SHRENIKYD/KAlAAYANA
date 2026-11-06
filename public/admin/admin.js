@@ -136,7 +136,7 @@
   /* ---------- tabs ----------
      The tab, and the open work on the Projects tab, live in the address
      (#projects/murals), so a refresh or the back button lands where you were. */
-  const TABS = ['home', 'projects', 'log', 'users'];
+  const TABS = ['home', 'projects', 'insights', 'log', 'users'];
   function readPlace() {
     const [tab, key] = location.hash.replace(/^#/, '').split('/');
     if (TABS.includes(tab)) state.tab = tab;
@@ -158,6 +158,7 @@
     if (tab === 'home') editHome();
     else if (tab === 'log') showLog();
     else if (tab === 'users') showUsers();
+    else if (tab === 'insights') showInsights();
     else
       openSection(
         state.current && state.sections[state.current]
@@ -165,6 +166,177 @@
           : Object.keys(state.sections)[0],
       );
     writePlace();
+  }
+
+  /* ---------- insights (everyone) ---------- */
+  async function showInsights(days) {
+    state.view = 'insights';
+    state.insightDays = days || state.insightDays || 7;
+    renderInsights();
+    const want = state.insightDays;
+    if (state.insights?.days === want && Date.now() - (state.insightsAt || 0) < 120000) return;
+    try {
+      const data = await api(`/insights?days=${want}`);
+      if (state.insightDays !== want) return;
+      state.insights = data;
+      state.insightsError = '';
+      state.insightsUnconfigured = false;
+      state.insightsAt = Date.now();
+    } catch (e) {
+      state.insights = null;
+      state.insightsError = e.message;
+      state.insightsUnconfigured = Boolean(e.status === 503);
+    }
+    if (state.view === 'insights') renderInsights();
+  }
+  function renderInsights() {
+    const d = state.insights && state.insights.days === state.insightDays ? state.insights : null;
+    const loading = !d && !state.insightsError;
+    const n = (x) => Number(x || 0).toLocaleString('en-IN');
+    const range = el(
+      'div',
+      { class: 'range', role: 'group', 'aria-label': 'Period' },
+      ...[7, 30, 90].map((k) =>
+        el(
+          'button',
+          {
+            type: 'button',
+            'aria-pressed': String(state.insightDays === k),
+            onclick: () => showInsights(k),
+          },
+          k === 7 ? '7 days' : k === 30 ? '30 days' : '90 days',
+        ),
+      ),
+    );
+    const tile = (value, label) =>
+      el('div', { class: 'tile' }, el('b', {}, value), el('small', {}, label));
+    const table = (title, list, col) =>
+      el(
+        'div',
+        {},
+        el('h2', {}, title),
+        list.length
+          ? el(
+              'table',
+              { class: 'log-table' },
+              el('thead', {}, el('tr', {}, el('th', {}, col), el('th', {}, 'Visits'))),
+              el(
+                'tbody',
+                {},
+                ...list.map((r) =>
+                  el(
+                    'tr',
+                    {},
+                    el('td', { title: r.label }, r.label || '—'),
+                    el('td', {}, n(r.visits)),
+                  ),
+                ),
+              ),
+            )
+          : el('p', { class: 'muted' }, 'Nothing yet.'),
+      );
+    let body;
+    if (loading) {
+      body = el(
+        'div',
+        { 'aria-hidden': 'true' },
+        el(
+          'div',
+          { class: 'tiles' },
+          ...[0, 1, 2].map(() =>
+            el(
+              'div',
+              { class: 'tile' },
+              el('span', { class: 'skel skel-title' }),
+              el('span', { class: 'skel skel-line', style: 'width:60%' }),
+            ),
+          ),
+        ),
+        el('span', { class: 'skel', style: 'display:block;height:180px' }),
+      );
+    } else if (!d) {
+      body = el(
+        'div',
+        { class: 'insight-note' },
+        el(
+          'p',
+          {},
+          state.insightsUnconfigured
+            ? 'Insights are not switched on yet.'
+            : 'Insights could not be loaded.',
+        ),
+        el('p', { class: 'muted' }, state.insightsError),
+        state.insightsUnconfigured
+          ? el(
+              'p',
+              { class: 'muted' },
+              'A superadmin sets this up once: a Cloudflare Web Analytics site for the domain, its token in the site data, its site tag and an analytics-reading API token on the Worker. The steps are in docs/ADMIN-SETUP.md.',
+            )
+          : null,
+      );
+    } else {
+      const max = Math.max(1, ...d.byDay.map((x) => x.visits));
+      const chart = el(
+        'div',
+        { class: 'chart', role: 'img', 'aria-label': `Visits per day, last ${d.days} days` },
+        ...d.byDay.map((x) =>
+          el(
+            'div',
+            { class: 'bar-day' },
+            el('i', { style: `height:${Math.max(1, Math.round((x.visits / max) * 100))}%` }),
+            el('span', {}, `${x.date.slice(5)} · ${n(x.visits)} visits · ${n(x.views)} views`),
+          ),
+        ),
+      );
+      const perDay = d.days ? Math.round(d.totals.visits / d.days) : 0;
+      body = el(
+        'div',
+        {},
+        el(
+          'div',
+          { class: 'tiles' },
+          tile(n(d.totals.visits), 'Visits'),
+          tile(n(d.totals.views), 'Page views'),
+          tile(n(perDay), 'Visits a day'),
+          tile(d.pages[0] ? d.pages[0].label : '—', 'Most read page'),
+        ),
+        chart,
+        el(
+          'div',
+          { class: 'chart-axis' },
+          el('span', {}, d.byDay[0]?.date || ''),
+          el('span', {}, d.byDay[d.byDay.length - 1]?.date || ''),
+        ),
+        el(
+          'div',
+          { class: 'insight-grid' },
+          table('Pages', d.pages, 'Page'),
+          table('Came from', d.referrers, 'Site'),
+          table('Countries', d.countries, 'Country'),
+          table('Devices', d.devices, 'Device'),
+        ),
+      );
+    }
+    $('#main').replaceChildren(
+      el(
+        'div',
+        { class: 'head' },
+        el(
+          'div',
+          {},
+          el('p', { class: 'eyebrow' }, 'Website'),
+          el('h1', {}, 'Insights'),
+          el(
+            'p',
+            { class: 'muted' },
+            'Who is reading the site, measured without cookies by Cloudflare Web Analytics. Bots are left out.',
+          ),
+        ),
+        el('div', { class: 'actions' }, range),
+      ),
+      body,
+    );
+    renderSections();
   }
 
   /* ---------- log (superadmin) ---------- */
@@ -2817,6 +2989,7 @@ p{margin:0 0 22px;color:#6d665c}
   $('#tab-home').addEventListener('click', () => showTab('home'));
   $('#tab-log').addEventListener('click', () => showTab('log'));
   $('#tab-users').addEventListener('click', () => showTab('users'));
+  $('#tab-insights').addEventListener('click', () => showTab('insights'));
   $('#tab-projects').addEventListener('click', () => showTab('projects'));
   $('#new-project').addEventListener('click', newProjectAnywhere);
   $('#save').addEventListener('click', publish);

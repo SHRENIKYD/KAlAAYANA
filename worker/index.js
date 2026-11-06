@@ -4,6 +4,7 @@
 // GitHub and opens a pull request into the base branch.
 import { client, treeEntries, commitAndOpenPr, acceptPr, rejectPr } from './github.js';
 import { syncAccessPolicy } from './policy.js';
+import { fetchInsights } from './insights.js';
 import { verifyAccessJwt } from './access.js';
 import { makeEntry, parseLog, decodePhoto } from './logbook.js';
 import {
@@ -249,6 +250,31 @@ async function handleApi(request, env) {
       projectFiles: [...projectFiles],
       bannerFiles: [...bannerFiles],
     });
+  }
+
+  // Website insights, for every editor. Needs CF_API_TOKEN with Account
+  // Analytics: Read and the Web Analytics site tag.
+  if (request.method === 'GET' && route === '/insights') {
+    if (!env.CF_API_TOKEN || !env.CF_ACCOUNT_ID || !env.CF_WEB_ANALYTICS_SITE_TAG)
+      return json(
+        {
+          error:
+            'Insights are not set up yet: the Worker needs CF_API_TOKEN (with Account Analytics: Read) and CF_WEB_ANALYTICS_SITE_TAG.',
+          unconfigured: true,
+        },
+        503,
+      );
+    try {
+      const data = await fetchInsights({
+        token: env.CF_API_TOKEN,
+        accountId: env.CF_ACCOUNT_ID,
+        siteTag: env.CF_WEB_ANALYTICS_SITE_TAG,
+        days: url.searchParams.get('days'),
+      });
+      return json(data);
+    } catch (e) {
+      return json({ error: e.message }, 502);
+    }
   }
 
   const image = route.match(/^\/image\/(projects|sections)\/([a-z0-9-]+\.(?:jpg|png))$/);

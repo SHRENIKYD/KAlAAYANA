@@ -283,12 +283,139 @@ body.role-admin .superadmin-only {
   display: none;
 }
 body.tab-log .side,
-body.tab-users .side {
+body.tab-users .side,
+body.tab-insights .side {
   display: none;
 }
 body.tab-log .shell,
-body.tab-users .shell {
+body.tab-users .shell,
+body.tab-insights .shell {
   grid-template-columns: 1fr;
+}
+/* ---------- insights ---------- */
+.range {
+  display: inline-flex;
+  gap: 4px;
+  border: 1px solid var(--line);
+  padding: 3px;
+  background: var(--panel);
+}
+.range button {
+  all: unset;
+  cursor: pointer;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.range button[aria-pressed='true'] {
+  background: var(--black);
+  color: #f5f1ea;
+}
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin: 24px 0 32px;
+}
+.tile {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 18px 20px;
+}
+.tile b {
+  display: block;
+  font: 400 2rem/1.1 var(--serif);
+}
+.tile small {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.chart {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: end;
+  gap: 4px;
+  height: 180px;
+  padding: 0 0 6px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+}
+.chart .bar-day {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+.chart .bar-day i {
+  display: block;
+  width: 100%;
+  background: var(--gold);
+  min-height: 2px;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+.chart .bar-day:hover i {
+  opacity: 1;
+}
+.chart .bar-day span {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.7rem;
+  background: var(--black);
+  color: #f5f1ea;
+  padding: 3px 8px;
+  opacity: 0;
+  pointer-events: none;
+}
+.chart .bar-day:hover span {
+  opacity: 1;
+}
+.chart-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 32px;
+}
+.insight-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+.insight-grid h2 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+.insight-grid td:last-child,
+.insight-grid th:last-child {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.insight-grid td:first-child {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.insight-note {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 20px 22px;
+  max-width: 720px;
+}
+.insight-note code {
+  font-size: 0.85em;
 }
 .log-block {
   margin-bottom: 36px;

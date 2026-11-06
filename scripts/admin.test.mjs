@@ -13,6 +13,7 @@ import {
 import { makeEntry, parseLog, isAppendOnly, decodePhoto } from '../worker/logbook.js';
 import { treeEntries, commitAndOpenPr, acceptPr, rejectPr, client } from '../worker/github.js';
 import { syncAccessPolicy } from '../worker/policy.js';
+import { fetchInsights } from '../worker/insights.js';
 
 const sections = {
   landmarks: {
@@ -520,5 +521,63 @@ test('the Access Allow policy is rewritten to exactly the editors', async () => 
       fetchImpl,
     }),
     /No Access application protects nowhere.test; found .*Admin \(kalaayana.example.workers.dev\)/,
+  );
+});
+
+test('insights fill every day of the window and name empty referrers', async () => {
+  const fetchImpl = async (url, init) => {
+    const v = JSON.parse(init.body).variables;
+    assert.equal(v.account, 'acc');
+    assert.equal(v.site, 'tag');
+    return new Response(
+      JSON.stringify({
+        data: {
+          viewer: {
+            accounts: [
+              {
+                byDay: [{ count: 10, sum: { visits: 4 }, dimensions: { date: '2026-11-05' } }],
+                pages: [{ count: 7, sum: { visits: 3 }, dimensions: { requestPath: '/murals/' } }],
+                referrers: [{ count: 7, sum: { visits: 3 }, dimensions: { refererHost: '' } }],
+                countries: [{ count: 7, sum: { visits: 3 }, dimensions: { countryName: 'India' } }],
+                devices: [{ count: 7, sum: { visits: 3 }, dimensions: { deviceType: 'mobile' } }],
+              },
+            ],
+          },
+        },
+        errors: null,
+      }),
+      { status: 200 },
+    );
+  };
+  const r = await fetchInsights({
+    token: 't',
+    accountId: 'acc',
+    siteTag: 'tag',
+    days: 3,
+    now: new Date('2026-11-06T12:00:00Z'),
+    fetchImpl,
+  });
+  assert.equal(r.days, 3);
+  assert.deepEqual(
+    r.byDay.map((d) => [d.date, d.visits]),
+    [
+      ['2026-11-04', 0],
+      ['2026-11-05', 4],
+      ['2026-11-06', 0],
+    ],
+  );
+  assert.deepEqual(r.totals, { views: 10, visits: 4 });
+  assert.equal(r.referrers[0].label, 'Direct / none');
+  assert.equal(r.pages[0].label, '/murals/');
+  await assert.rejects(
+    fetchInsights({
+      token: 't',
+      accountId: 'acc',
+      siteTag: 'tag',
+      days: 7,
+      fetchImpl: async () =>
+        new Response(JSON.stringify({ errors: [{ message: 'bad token' }] }), { status: 200 }),
+    }),
+    /bad token/,
   );
 });
