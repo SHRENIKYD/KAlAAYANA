@@ -3216,9 +3216,48 @@
      pull request merges and staging rebuilds; Close and the cross are held
      until the page is live (or something needs attention), then a link
      opens the published page. */
-  function publishingDialog(r, path) {
-    const started = Date.now();
-    const clock = el('span', { class: 'pub-clock' }, '0:00');
+  // The publish in progress is kept in this browser, so a refresh reopens the
+  // same dialog with the clock still counting from the original Accept.
+  const PUB_KEY = 'admin-publishing';
+  let publishingOpen = false;
+  const pubStore = {
+    get() {
+      try {
+        return JSON.parse(localStorage.getItem(PUB_KEY) || 'null');
+      } catch {
+        return null;
+      }
+    },
+    set(v) {
+      try {
+        localStorage.setItem(PUB_KEY, JSON.stringify(v));
+      } catch {
+        /* storage unavailable: the dialog still works until a refresh */
+      }
+    },
+    clear() {
+      try {
+        localStorage.removeItem(PUB_KEY);
+      } catch {
+        /* nothing stored */
+      }
+    },
+  };
+  function resumePublishing() {
+    const job = pubStore.get();
+    if (!job || publishingOpen) return;
+    if (job.owner !== state.email || Date.now() - job.started > 15 * 60000) return pubStore.clear();
+    publishingDialog(job.r, job.path, job.started);
+  }
+  function publishingDialog(r, path, resumedFrom) {
+    const started = resumedFrom || Date.now();
+    if (!resumedFrom) pubStore.set({ r, path, started, owner: state.email });
+    publishingOpen = true;
+    const elapsed = () => {
+      const s = Math.floor((Date.now() - started) / 1000);
+      return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    };
+    const clock = el('span', { class: 'pub-clock' }, elapsed());
     const status = el(
       'p',
       { class: 'pub-status' },
@@ -3251,10 +3290,11 @@
     lock(true);
     if (!$('#result').open) $('#result').showModal();
     const tick = setInterval(() => {
-      const s = Math.floor((Date.now() - started) / 1000);
-      clock.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+      clock.textContent = elapsed();
     }, 1000);
     const finish = (text, url, ok) => {
+      pubStore.clear();
+      publishingOpen = false;
       clearInterval(tick);
       clearTimeout(poll);
       status.textContent = text;
@@ -3283,14 +3323,8 @@
         );
       try {
         const p = await api(`/published/${r.number}`);
-        if (p.state === 'live') {
-          const s = Math.round((Date.now() - started) / 1000);
-          return finish(
-            `Live on staging, ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} after accepting.`,
-            url,
-            true,
-          );
-        }
+        if (p.state === 'live')
+          return finish(`Live on staging, ${elapsed()} after accepting.`, url, true);
         if (p.state === 'closed')
           return finish(
             'The pull request was closed without merging, so nothing was published.',
@@ -3306,7 +3340,7 @@
       }
       poll = setTimeout(check, 8000);
     };
-    poll = setTimeout(check, 4000);
+    poll = setTimeout(check, resumedFrom ? 0 : 4000);
   }
 
   function doneDialog(title, lines) {
@@ -3713,6 +3747,7 @@
     // The page is drawn behind the prompt, so the skeleton never lingers.
     if (!sessionName()) await askWhoIsHere();
     $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
+    if (!state.demo) resumePublishing();
   }
 
   $('#result-x').addEventListener('click', closeDialog);
