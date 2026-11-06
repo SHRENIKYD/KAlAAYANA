@@ -397,14 +397,14 @@ async function handleApi(request, env) {
     });
     try {
       const r = await commitToBase(gh, base, {
-        entries: [
+        entries: async (sha) => [
           {
             path: 'admin/users.json',
             mode: '100644',
             type: 'blob',
             content: JSON.stringify({ users: next }, null, 2) + '\n',
           },
-          ...(await logTreeEntries(gh, base, [item])),
+          ...(await logTreeEntries(gh, sha, [item])),
         ],
         message: `admin: ${body.action} ${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}\n\nBy ${name ? `${name} (${email})` : email} from the content admin.`,
         author,
