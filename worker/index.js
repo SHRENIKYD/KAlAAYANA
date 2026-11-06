@@ -114,44 +114,60 @@ async function logTreeEntries(gh, base, items) {
   return entries;
 }
 
-// One commit on the base branch; if the branch refuses direct commits, the
-// same commit goes up as a pull request that merges itself when it can.
-async function commitToBase(gh, base, { entries, message, author }) {
-  const head = await gh.call('GET', `/git/ref/heads/${base}`);
-  const baseCommit = await gh.call('GET', `/git/commits/${head.object.sha}`);
-  const tree = await gh.call('POST', '/git/trees', {
-    base_tree: baseCommit.tree.sha,
-    tree: entries,
-  });
-  const commit = await gh.call('POST', '/git/commits', {
-    message,
-    tree: tree.sha,
-    parents: [head.object.sha],
-    author,
-    committer: author,
-  });
-  try {
-    await gh.call('PATCH', `/git/refs/heads/${base}`, { sha: commit.sha });
-    return { commit: commit.sha };
-  } catch {
-    const branch = `log/${commit.sha.slice(0, 10)}`;
-    await gh.call('POST', '/git/refs', { ref: `refs/heads/${branch}`, sha: commit.sha });
-    const pr = await gh.call('POST', '/pulls', {
-      title: message.split('\n')[0],
-      head: branch,
-      base,
-      body: message,
+// One commit straight onto the base branch. Entries are built against the
+// branch head at the moment of the commit, so if another commit lands first
+// the head moves, the update is refused as not-a-fast-forward, and the whole
+// commit is rebuilt on the new head. If the branch refuses direct commits
+// altogether, the same commit goes up as a pull request that merges itself.
+async function commitToBase(gh, base, { entries, message, author }, attempts = 4) {
+  let commit;
+  for (let i = 0; i < attempts; i++) {
+    const head = await gh.call('GET', `/git/ref/heads/${base}`);
+    const baseCommit = await gh.call('GET', `/git/commits/${head.object.sha}`);
+    const tree = await gh.call('POST', '/git/trees', {
+      base_tree: baseCommit.tree.sha,
+      tree: typeof entries === 'function' ? await entries(head.object.sha) : entries,
+    });
+    commit = await gh.call('POST', '/git/commits', {
+      message,
+      tree: tree.sha,
+      parents: [head.object.sha],
+      author,
+      committer: author,
     });
     try {
-      await gh.graphql(
-        'mutation($id: ID!) { enablePullRequestAutoMerge(input: {pullRequestId: $id, mergeMethod: MERGE}) { clientMutationId } }',
-        { id: pr.node_id },
-      );
-    } catch {
-      /* merged by hand */
+      await gh.call('PATCH', `/git/refs/heads/${base}`, { sha: commit.sha });
+      return { commit: commit.sha };
+    } catch (e) {
+      if (!/fast forward/i.test(e.message)) break;
     }
-    return { commit: commit.sha, pr: pr.number };
   }
+  const branch = `log/${commit.sha.slice(0, 10)}`;
+  await gh.call('POST', '/git/refs', { ref: `refs/heads/${branch}`, sha: commit.sha });
+  const pr = await gh.call('POST', '/pulls', {
+    title: message.split('\n')[0],
+    head: branch,
+    base,
+    body: message,
+  });
+  try {
+    await gh.graphql(
+      'mutation($id: ID!) { enablePullRequestAutoMerge(input: {pullRequestId: $id, mergeMethod: MERGE}) { clientMutationId } }',
+      { id: pr.node_id },
+    );
+  } catch {
+    /* merged by hand */
+  }
+  return { commit: commit.sha, pr: pr.number };
+}
+
+// Appends log items to the branch head as it is at commit time.
+function logCommit(gh, base, items, message, author) {
+  return commitToBase(gh, base, {
+    entries: (sha) => logTreeEntries(gh, sha, items),
+    message,
+    author,
+  });
 }
 
 async function handleApi(request, env) {
@@ -319,7 +335,6 @@ async function handleApi(request, env) {
         banners: bannerShas,
         deletions,
       }),
-      ...(await logTreeEntries(gh, base, [saveItem])),
     ];
     const stamp = new Date()
       .toISOString()
@@ -345,6 +360,17 @@ async function handleApi(request, env) {
         title: `Content: ${summary}`,
         body,
       });
+      try {
+        await logCommit(
+          gh,
+          base,
+          [saveItem],
+          `log: proposed #${result.number ?? ''}`.trim(),
+          author,
+        );
+      } catch {
+        /* the proposal is the pull request itself */
+      }
       return json(result);
     } catch (e) {
       return json({ error: e.message }, 502);
@@ -418,10 +444,9 @@ async function handleApi(request, env) {
     });
     item.photoBytes = photoBytes;
     try {
-      const r = await commitToBase(gh, base, {
-        entries: await logTreeEntries(gh, base, [item]),
-        message: `log: ${who} signed in as ${email}`,
-        author: { name: who, email },
+      const r = await logCommit(gh, base, [item], `log: ${who} signed in as ${email}`, {
+        name: who,
+        email,
       });
       return json({ ok: true, name: who, ...r });
     } catch (e) {
@@ -445,11 +470,7 @@ async function handleApi(request, env) {
       details: body.details,
     });
     try {
-      const r = await commitToBase(gh, base, {
-        entries: await logTreeEntries(gh, base, [item]),
-        message: `log: error — ${item.entry.action}`,
-        author,
-      });
+      const r = await logCommit(gh, base, [item], `log: error — ${item.entry.action}`, author);
       return json({ ok: true, ...r });
     } catch (e) {
       return json({ error: e.message }, 502);
@@ -492,11 +513,7 @@ async function handleApi(request, env) {
         details: `pull request #${decide[2]}${body.previewUrl ? ` after previewing ${body.previewUrl}` : ''}`,
       });
       try {
-        await commitToBase(gh, base, {
-          entries: await logTreeEntries(gh, base, [item]),
-          message: `log: ${item.entry.action} #${decide[2]}`,
-          author,
-        });
+        await logCommit(gh, base, [item], `log: ${item.entry.action} #${decide[2]}`, author);
       } catch {
         /* the decision is already on the pull request */
       }
