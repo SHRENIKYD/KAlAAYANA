@@ -29,6 +29,7 @@ if [[ "$environment" == "staging" && -f "$out/preview/index.html" && -f "$out/in
   mkdir -p "$out/coming-soon"
   mv "$out/index.html" "$out/coming-soon/index.html"
   cp "$out/preview/index.html" "$out/index.html"
+  sed -i 's#<head>#<head><meta name="robots" content="noindex,nofollow">#' "$out/coming-soon/index.html"
   # Local development uses /preview/; staging serves that same page at /.
   # Keep section and policy return links on the current staging deployment.
   while IFS= read -r -d '' page; do
