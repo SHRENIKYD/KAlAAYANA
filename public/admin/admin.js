@@ -227,6 +227,39 @@
   }).observe(document.body, { childList: true, subtree: true });
   document.querySelectorAll('select:not([data-dd])').forEach(enhanceSelect);
 
+  /* ---------- times ----------
+     Every time the admin shows is the studio's local time (UTC+05:30), in
+     12-hour form: "6 Nov 2026, 1:23 pm". Stored times stay in UTC. */
+  const STUDIO_TZ = 'Asia/Kolkata';
+  const STUDIO_OFFSET = '+05:30';
+  const whenFmt = new Intl.DateTimeFormat('en-IN', {
+    timeZone: STUDIO_TZ,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+  const whenFmtSec = new Intl.DateTimeFormat('en-IN', {
+    timeZone: STUDIO_TZ,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
+  function when(iso, seconds = false) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return String(iso);
+    return (seconds ? whenFmtSec : whenFmt)
+      .format(d)
+      .replace(/\s*(am|pm)$/i, (m) => ` ${m.trim().toLowerCase()}`);
+  }
+
   /* ---------- tabs ----------
      The tab, and the open work on the Projects tab, live in the address
      (#projects/murals), so a refresh or the back button lands where you were. */
@@ -870,8 +903,8 @@
     const count = el('p', { class: 'muted' });
 
     const apply = () => {
-      const from = filters.from ? new Date(filters.from + 'T00:00:00') : null;
-      const to = filters.to ? new Date(filters.to + 'T23:59:59.999') : null;
+      const from = filters.from ? new Date(`${filters.from}T00:00:00${STUDIO_OFFSET}`) : null;
+      const to = filters.to ? new Date(`${filters.to}T23:59:59.999${STUDIO_OFFSET}`) : null;
       const user = filters.user.trim().toLowerCase();
       const text = filters.text.trim().toLowerCase();
       const rows = all.filter((e) => {
@@ -893,7 +926,7 @@
                 el(
                   'li',
                   { class: `log-${e.category}` },
-                  el('time', {}, e.at.replace('T', ' ').slice(0, 19)),
+                  el('time', { datetime: e.at }, when(e.at, true)),
                   el('span', { class: `pill pill-${e.category}` }, e.category),
                   el('b', {}, e.name ? `${e.name} (${e.email})` : e.email),
                   el('span', {}, `${e.action}${e.details ? ` · ${e.details}` : ''}`),
@@ -1032,9 +1065,9 @@
                         ),
                       ),
                       el('td', {}, d.title),
-                      el('td', {}, d.at?.replace('T', ' ').slice(0, 16) || ''),
+                      el('td', {}, when(d.at)),
                       el('td', {}, el('span', { class: `pill pill-${d.state}` }, d.state)),
-                      el('td', {}, d.decidedAt?.replace('T', ' ').slice(0, 16) || '—'),
+                      el('td', {}, d.decidedAt ? when(d.decidedAt) : '—'),
                     ),
                   ),
                 ),
@@ -1484,7 +1517,7 @@
                 'td',
                 {},
                 u.invitedAt
-                  ? `${u.invitedAt.replace('T', ' ').slice(0, 16)}${u.invitedBy ? ` by ${u.invitedBy}` : ''}`
+                  ? `${when(u.invitedAt)}${u.invitedBy ? ` by ${u.invitedBy}` : ''}`
                   : '—',
               ),
               el(
@@ -3476,7 +3509,7 @@ p{margin:0 0 22px;color:#6d665c}
             });
             state.pending = null;
             doneDialog('Accepted', [
-              `Accepted by ${r.email} at ${r.at}, recorded on pull request #${r.number}.`,
+              `Accepted by ${r.email} on ${when(r.at)}, recorded on pull request #${r.number}.`,
               r.merged
                 ? 'Merged. Staging rebuilds in three or four minutes.'
                 : 'It merges itself as soon as the checks pass; staging rebuilds after that.',
@@ -3495,7 +3528,7 @@ p{margin:0 0 22px;color:#6d665c}
             });
             state.pending = null;
             doneDialog('Rejected', [
-              `Rejected by ${r.email} at ${r.at}. The proposal is discarded and nothing was published.`,
+              `Rejected by ${r.email} on ${when(r.at)}. The proposal is discarded and nothing was published.`,
               'Your edits are still here to change and propose again.',
             ]);
           } catch (e) {
