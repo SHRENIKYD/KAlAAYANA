@@ -2,7 +2,7 @@
 // Serves the staging build and answers /admin/api/* from the working tree;
 // Save validates exactly as the Worker does, then writes the result into
 // .admin-demo/ instead of committing. Nothing in the repository changes.
-//   npm run build:staging && node scripts/admin-demo.mjs [port]
+//   npm run admin:demo   (or: npm run build && node scripts/admin-demo.mjs [port])
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';

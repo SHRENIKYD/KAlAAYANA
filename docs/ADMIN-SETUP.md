@@ -67,11 +67,20 @@ Open `https://<staging host>/admin/`, sign in through Access.
 Removed photographs are deleted from the repository in the same commit, so
 `git log` on `src/images/projects/` is the history of every image.
 
-## Local development
+## Trying it without Cloudflare or GitHub
+
+```
+npm run admin:demo
+```
+opens the admin at http://localhost:8788/admin/ against your working tree.
+Saves are validated exactly as on staging, then written to `.admin-demo/`
+instead of committed. Works on Windows without Git Bash.
+
+## Local development against the real Worker
 
 ```
 cp .dev.vars.example .dev.vars   # then fill in GITHUB_TOKEN and DEV_EMAIL
-npm run build:staging
+npm run build:staging            # needs bash (Git for Windows) and python on PATH
 npx wrangler dev
 ```
 
