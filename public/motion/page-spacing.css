@@ -95,7 +95,7 @@ body.homepage .collections-inner .collection-feature > img {
 body.homepage .collections-inner .collection-feature h3 {
   font-size: clamp(2.3rem, 3vw, 3.8rem);
 }
-body.homepage .collections-inner .collection-feature[href='/collectables.html'] > img {
+body.homepage .collections-inner .collection-feature[href='/collectables/'] > img {
   object-fit: contain;
   object-position: center;
   background: #bca58e;

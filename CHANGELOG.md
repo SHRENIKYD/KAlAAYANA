@@ -10,7 +10,29 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
-## [1.2.16] - Unreleased
+## [1.2.17] - Unreleased
+
+### Added
+- Shared canonical, Open Graph, Twitter and organisation metadata; staging stays noindex.
+- Privacy-safe, rate-limited browser diagnostics and recovery for contact drafts,
+  policy popups and image previews. Policy requests time out after 15 seconds.
+- Deployment guard tests, pinned GitHub Actions, least-privilege job permissions,
+  Dependabot and high-severity dependency auditing in CI.
+- Cloudflare security headers and report-only Content Security Policy.
+
+### Changed
+- Directory-based clean URLs throughout the website, with legacy .html redirects
+  and aliases preserving query strings and fragments.
+- Updated dependency lockfile to resolve known audit findings.
+- Production and rollback fail closed while develop/FREEZE exists, even after
+  its date; reviewed removal and explicit production approval remain required.
+
+See [release-notes/1.2.17.md](release-notes/1.2.17.md).
+
+
+## [1.2.16] - 2026-11-05
+
+Published staging prerelease at 6f6c3ec through PR #66. Production remains unchanged.
 
 ### Fixed
 - Pinterest-style masonry packing on all five project indexes: Temple Architecture,

@@ -172,16 +172,16 @@
   .project-card .media:after {
     display: none;
   }
-  .project-card[href='/temples.html'] .media img {
+  .project-card[href='/temples/'] .media img {
     object-position: 50% 48%;
   }
-  .project-card[href='/murals.html'] .media img {
+  .project-card[href='/murals/'] .media img {
     object-position: 45% 58%;
   }
-  .project-card[href='/landmarks.html'] .media img {
+  .project-card[href='/landmarks/'] .media img {
     object-position: 50% 32%;
   }
-  .project-card[href='/installations.html'] .media img {
+  .project-card[href='/installations/'] .media img {
     object-position: 50% 72%;
   }
   .project-card .caption {

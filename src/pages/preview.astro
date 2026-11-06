@@ -5,6 +5,7 @@
  * the approach line alone. Read, not retyped.
  */
 import site from '../data/site.json';
+import Seo from '../components/Seo.astro';
 import { Image } from 'astro:assets';
 import { photo, photoWidths } from '../lib/photos';
 import PolicyLinks from '../components/PolicyLinks.astro';
@@ -15,14 +16,16 @@ import ClientMarquee from '../components/ClientMarquee.astro';
 <!doctype html>
 <html lang="en">
   <head>
+    <script is:inline src="/motion/diagnostics.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="robots" content="noindex,nofollow" />
-    <meta
-      name="description"
-      content="Kalaayana Studios — monumental sculpture and sacred art shaped in Bengaluru."
+    <meta name="description" content={site.description} />
+    <title>Kalaayana Studios | Sculpture, Murals &amp; Temple Architecture in Bengaluru</title>
+    <Seo
+      title="Kalaayana Studios | Sculpture, Murals & Temple Architecture in Bengaluru"
+      description={site.description}
     />
-    <title>Kalaayana Studios — Art in Motion</title>
     <link rel="icon" type="image/png" href="/assets/img/favicon.png?v=2" />
     <link rel="stylesheet" href="/motion/styles.css" />
     <link rel="stylesheet" href="/motion/effects.css" />
@@ -166,7 +169,7 @@ import ClientMarquee from '../components/ClientMarquee.astro';
           <h2 class="collections-label" id="works-title">
             WORKS
           </h2>
-          <a class="collection-feature" href="/temples.html">
+          <a class="collection-feature" href="/temples/">
             <img
               src="/motion/assets/temples.jpg"
               alt="Intricately sculpted Kalaayana temple façade"
@@ -182,7 +185,7 @@ import ClientMarquee from '../components/ClientMarquee.astro';
               </span>
             </div>
           </a>
-          <a class="collection-feature" href="/portraits.html">
+          <a class="collection-feature" href="/portraits/">
             <img
               src="/motion/assets/portraits.jpg"
               alt="Kalaayana sculpted portrait"
@@ -198,7 +201,7 @@ import ClientMarquee from '../components/ClientMarquee.astro';
               </span>
             </div>
           </a>
-          <a class="collection-feature" href="/murals.html">
+          <a class="collection-feature" href="/murals/">
             <Image
               src={photo('sri-adi-shankaracharya-2.jpg')}
               alt="Finished Sri Adi Shankaracharya mural with four disciples beneath a tree in an ornate bronze frame"
@@ -215,7 +218,7 @@ import ClientMarquee from '../components/ClientMarquee.astro';
               </span>
             </div>
           </a>
-          <a class="collection-feature" href="/landmarks.html">
+          <a class="collection-feature" href="/landmarks/">
             <Image
               src={photo('hanuman-hangluru-1.jpg')}
               alt="The monumental standing Hanuman sculpture at Hangluru holding a mace"
@@ -232,7 +235,7 @@ import ClientMarquee from '../components/ClientMarquee.astro';
               </span>
             </div>
           </a>
-          <a class="collection-feature" href="/collectables.html">
+          <a class="collection-feature" href="/collectables/">
             <Image
               src={photo('collectables-hanuman-front.jpg')}
               alt="Hanuman collectable sculpture"
@@ -249,7 +252,7 @@ import ClientMarquee from '../components/ClientMarquee.astro';
               </span>
             </div>
           </a>
-          <a class="collection-feature" href="/installations.html">
+          <a class="collection-feature" href="/installations/">
             <img
               src="/motion/assets/installations.jpg"
               alt="Oversized sculptural installation by Kalaayana"

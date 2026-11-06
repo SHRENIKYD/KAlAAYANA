@@ -9,17 +9,18 @@
     "test:version": "node --test scripts/version.test.mjs",
     "version:next": "node scripts/bump-version.mjs",
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && python scripts/legacy_urls.py",
     "build:staging": "npm run build && bash scripts/stamp.sh staging",
     "preview": "astro preview",
     "check": "python3 scripts/check.py",
     "format": "prettier --write \"**/*.{astro,ts,js,css,html,json,jsonc,yml,yaml}\"",
-    "format:check": "prettier --check \"**/*.{astro,ts,js,css,html,json,jsonc,yml,yaml}\""
+    "format:check": "prettier --check \"**/*.{astro,ts,js,css,html,json,jsonc,yml,yaml}\"",
+    "test:diagnostics": "node --test scripts/diagnostics.test.mjs"
   },
   "devDependencies": {
     "astro": "^7.3.1",
     "prettier": "^3.9.10",
     "prettier-plugin-astro": "^1.1.2",
-    "sharp": "^0.34.2"
+    "sharp": "^0.35.5"
   }
 }

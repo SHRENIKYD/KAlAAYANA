@@ -10,10 +10,10 @@ const version = releaseVersion.trim();
     &copy; {year} {site.legalName}
   </small>
   <nav class="policy-navigation" aria-label="Website policies">
-    <a href="/policies/privacy.html">Privacy policy</a>
-    <a href="/policies/terms.html">Terms of use</a>
-    <a href="/policies/commissions.html">Commission &amp; refund policy</a>
-    <a href="/policies/copyright.html">Copyright &amp; licences</a>
+    <a href="/policies/privacy/">Privacy policy</a>
+    <a href="/policies/terms/">Terms of use</a>
+    <a href="/policies/commissions/">Commission &amp; refund policy</a>
+    <a href="/policies/copyright/">Copyright &amp; licences</a>
   </nav>
   <small class="site-version" aria-label={`Website version ${version}`}>
     Version {version}
@@ -31,6 +31,7 @@ const version = releaseVersion.trim();
 </dialog>
 
 <script>
+  import { report } from '../lib/diagnostics';
   const dialog = document.querySelector<HTMLDialogElement>('.policy-dialog');
   const content = dialog?.querySelector<HTMLElement>('.policy-dialog-content');
   const title = dialog?.querySelector<HTMLElement>('#policy-dialog-title');
@@ -49,12 +50,17 @@ const version = releaseVersion.trim();
         title.textContent = link.textContent;
         content.textContent = 'Loading document…';
         content.setAttribute('aria-busy', 'true');
-        if (!dialog.open) {
-          previousOverflow = document.body.style.overflow;
-          document.body.style.overflow = 'hidden';
-          dialog.showModal();
-        }
+        let timedOut = false;
+        const timeout = window.setTimeout(() => {
+          timedOut = true;
+          activeRequest.abort();
+        }, 15000);
         try {
+          if (!dialog.open) {
+            previousOverflow = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+            dialog.showModal();
+          }
           const response = await fetch(link.href, { signal: activeRequest.signal });
           if (!response.ok) throw new Error('Document unavailable');
           const page = new DOMParser().parseFromString(await response.text(), 'text/html');
@@ -65,7 +71,13 @@ const version = releaseVersion.trim();
           content.replaceChildren(document.importNode(documentContent, true));
           content.scrollTop = 0;
         } catch (error) {
-          if (activeRequest.signal.aborted) return;
+          if (activeRequest.signal.aborted && !timedOut) return;
+          report(timedOut ? 'policy_timeout' : 'policy_load_failed');
+          if (!dialog.open) {
+            document.body.style.overflow = previousOverflow;
+            window.location.assign(link.href);
+            return;
+          }
           const message = document.createElement('p');
           message.textContent = 'This document could not load. Please try again or ';
           const fallback = document.createElement('a');
@@ -74,7 +86,8 @@ const version = releaseVersion.trim();
           message.append(fallback);
           content.replaceChildren(message);
         } finally {
-          if (!activeRequest.signal.aborted) content.removeAttribute('aria-busy');
+          window.clearTimeout(timeout);
+          if (request === activeRequest) content.removeAttribute('aria-busy');
         }
       });
     });

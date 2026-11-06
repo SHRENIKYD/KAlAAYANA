@@ -370,19 +370,19 @@ body {
   filter: saturate(0.75);
   will-change: transform;
 }
-.project-card[href='/temples.html'] .media img {
+.project-card[href='/temples/'] .media img {
   object-position: 50% 46%;
 }
-.project-card[href='/portraits.html'] .media img {
+.project-card[href='/portraits/'] .media img {
   object-position: 50% 50%;
 }
-.project-card[href='/murals.html'] .media img {
+.project-card[href='/murals/'] .media img {
   object-position: 50% 58%;
 }
-.project-card[href='/landmarks.html'] .media img {
+.project-card[href='/landmarks/'] .media img {
   object-position: 50% 27%;
 }
-.project-card[href='/installations.html'] .media img {
+.project-card[href='/installations/'] .media img {
   object-position: 50% 68%;
 }
 .project-card .caption {

@@ -1,0 +1,41 @@
+---
+import site from '../data/site.json';
+interface Props {
+  title: string;
+  description: string;
+  path?: string;
+}
+const { title, description, path = Astro.url.pathname } = Astro.props;
+const origin = 'https://kalaayanastudios.com';
+const url = new URL(path === '/preview/' ? '/' : path, origin).href;
+const image = `${origin}/assets/img/social-card.jpg`;
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${origin}/#organization`,
+  name: site.name,
+  legalName: site.legalName,
+  url: origin,
+  logo: `${origin}/assets/img/favicon.png`,
+  description: site.description,
+  email: site.contact.email,
+  telephone: site.contact.phones[0],
+  sameAs: [`https://www.instagram.com/${site.contact.instagram}/`],
+};
+---
+
+<link rel="canonical" href={url} />
+<meta name="author" content={site.name} />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="en_IN" />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:url" content={url} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={image} />
+<meta property="og:image:alt" content="Kalaayana Studios ? sculpture and art in Bengaluru" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={image} />
+<script type="application/ld+json" set:html={JSON.stringify(schema).replace(/</g, '\\u003c')} />
