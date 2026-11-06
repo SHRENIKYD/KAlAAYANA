@@ -1,6 +1,6 @@
 # Website release versions
 
-`VERSION` is the source of truth. The current staging candidate is `1.2.18`; the last published tag is `v1.2.17`.
+`VERSION` is the source of truth. The current staging candidate is `1.2.19`; the last published tag is `v1.2.17` (`v1.2.18` is awaiting publication).
 Its GitHub Release records publication, merged commit and deployment status.
 The website footer reads this file during build; it must not have a separate
 hard-coded version. Deployment stamping adds the commit, environment and build
@@ -26,7 +26,7 @@ or deploy. Rebuild after changing it so the footer matches the release.
 Stable releases and staging prereleases share one increasing sequence. Do not
 derive the next number from the latest stable release alone. Published tags
 consume numbers even when not deployed to production. Never delete or move a
-historical tag to fill a gap. Current candidate 1.2.18 is reserved; the next bump command prepares 1.2.19.
+historical tag to fill a gap. Current candidate 1.2.19 is reserved; the next bump command prepares 1.2.20.
 
 After 1.2.99 comes 1.3.00. The example 1.20.99 -> 1.21.00 describes rollover,
 not the current version. Historical single-digit patches remain unchanged.
@@ -47,6 +47,8 @@ Reviewed on 2 November 2026 against GitHub releases, branch refs and local histo
 | 1.2.15  | Tag at 9c28e17, PR #65                             | Staging prerelease published 5 November 2026.                                                                                                                                 |
 | 1.2.16  | Merged PR #66 at 6f6c3ec                           | Published staging prerelease, 5 November 2026.                                                                                                                                |
 | 1.2.17  | VERSION and Unreleased changelog                   | Security, clean URLs, SEO and diagnostics staging candidate.                                                                                                                  |
+| 1.2.18  | Merged to develop                                  | Content admin staging candidate; prerelease awaiting publication.                                                                                                             |
+| 1.2.19  | VERSION and changelog                              | Page-shaped skeletons, publish tracking, single sign-in, keep editing.                                                                                                        |
 
 The earlier explanation that 1.2.9 had no release record was incomplete: its
 changelog entry already existed. Its missing tag was subsequently restored at

@@ -10,6 +10,29 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.19] - 2026-11-06
+
+### Changed
+
+- Every public page is its own loading skeleton: the real layout is drawn at
+  once with a grey bar over each line of text and a shimmer in each
+  photograph's frame, so the loading state matches the page exactly. Text is
+  never hidden for more than 4 s, even if the skeleton script fails.
+- Admin tab skeletons follow each tab's own layout: buttons, rows, drop-down
+  boxes, the log filters and the invite form.
+- Admin: "Preview this page" appears only once there are edits; a "View site"
+  link sits beside Sign out.
+- Admin: the preview-building page shows a thinking line in the style of
+  Claude Code: a turning star, a word with light passing over it, and the
+  time so far.
+- Admin: after Accept, the dialog shows a running timer and status until
+  staging serves the change, then a link to the published page; Close stays
+  disabled until then, and a page refresh resumes the same progress.
+- Admin: one sign-in per browser: new admin tabs reuse the name and photograph
+  step until the hour ends or the editor signs out.
+- Admin: "Keep editing" after a preview; the next preview updates the same
+  proposal instead of starting a new one.
+
 ## [1.2.18] - 2026-11-06
 
 ### Added
