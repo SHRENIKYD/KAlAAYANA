@@ -308,15 +308,19 @@ async function handleApi(request, env) {
     const commit = url.searchParams.get('commit') || '';
     if (!/^content\/[a-z0-9]+$/.test(branch) || !/^[0-9a-f]{7,40}$/.test(commit))
       return json({ error: 'Bad branch or commit' }, 400);
+    // The preview host sits behind Access like the admin, so readiness is
+    // read from the build check Cloudflare posts on the commit instead.
     const previewHost = `${branchAlias(branch)}-${url.hostname}`;
     try {
-      const res = await fetch(`https://${previewHost}/version.json`, {
-        headers: { accept: 'application/json' },
-        cf: { cacheTtl: 0 },
-      });
-      const v = res.ok ? await res.json() : null;
-      const ready = Boolean(v && String(v.commit || '').startsWith(commit.slice(0, 7)));
-      return json({ ready, url: ready ? `https://${previewHost}` : null });
+      const r = await gh.call('GET', `/commits/${commit}/check-runs?per_page=20`);
+      const build = (r.check_runs || []).find((c) => /^Workers Builds/i.test(c.name || ''));
+      const ready = Boolean(
+        build && build.status === 'completed' && build.conclusion === 'success',
+      );
+      const failed = Boolean(
+        build && build.status === 'completed' && build.conclusion !== 'success',
+      );
+      return json({ ready, failed, url: ready ? `https://${previewHost}` : null });
     } catch {
       return json({ ready: false, url: null });
     }

@@ -133,6 +133,100 @@
     renderSections();
   }
 
+  /* ---------- drop-downs ----------
+     Browsers draw a <select>'s open list themselves, in the system's colours,
+     and most will not let a page style it. So every select in the admin keeps
+     its native element for value and change events, hidden, and gets a button
+     and a list of the admin's own next to it. */
+  function enhanceSelect(sel) {
+    if (sel.dataset.dd) return;
+    sel.dataset.dd = '1';
+    const wrap = el('div', { class: 'dd' });
+    const btn = el('button', {
+      type: 'button',
+      class: 'dd-btn',
+      'aria-haspopup': 'listbox',
+      'aria-expanded': 'false',
+    });
+    const list = el('ul', { class: 'dd-list', role: 'listbox', hidden: '', tabindex: '-1' });
+    const items = () => [...list.children];
+    const close = () => {
+      list.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+    };
+    const choose = (i) => {
+      if (sel.selectedIndex !== i) {
+        sel.selectedIndex = i;
+        sel.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      render();
+      close();
+      btn.focus();
+    };
+    const render = () => {
+      const current = sel.options[sel.selectedIndex];
+      btn.replaceChildren(
+        el('span', { class: 'dd-text' }, current ? current.text : ''),
+        el('i', { class: 'dd-chev', 'aria-hidden': 'true' }),
+      );
+      btn.disabled = sel.disabled;
+      list.replaceChildren(
+        ...[...sel.options].map((o, i) =>
+          el(
+            'li',
+            {
+              role: 'option',
+              'aria-selected': String(o.selected),
+              tabindex: '-1',
+              onclick: () => choose(i),
+            },
+            o.text,
+          ),
+        ),
+      );
+    };
+    const open = () => {
+      render();
+      list.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+      const cur = items()[sel.selectedIndex] || items()[0];
+      if (cur) cur.focus();
+    };
+    btn.addEventListener('click', () => (list.hidden ? open() : close()));
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        open();
+      }
+    });
+    list.addEventListener('keydown', (e) => {
+      const all = items();
+      const at = all.indexOf(document.activeElement);
+      if (e.key === 'ArrowDown') all[Math.min(all.length - 1, at + 1)]?.focus();
+      else if (e.key === 'ArrowUp') all[Math.max(0, at - 1)]?.focus();
+      else if (e.key === 'Enter' || e.key === ' ') choose(Math.max(0, at));
+      else if (e.key === 'Escape' || e.key === 'Tab') {
+        close();
+        btn.focus();
+      } else return;
+      e.preventDefault();
+    });
+    document.addEventListener('pointerdown', (e) => {
+      if (!wrap.contains(e.target)) close();
+    });
+    sel.addEventListener('change', render);
+    new MutationObserver(render).observe(sel, { attributes: true, childList: true, subtree: true });
+    sel.classList.add('dd-native');
+    sel.tabIndex = -1;
+    sel.insertAdjacentElement('afterend', wrap);
+    wrap.append(btn, list);
+    render();
+  }
+  new MutationObserver(() => {
+    document.querySelectorAll('select:not([data-dd])').forEach(enhanceSelect);
+  }).observe(document.body, { childList: true, subtree: true });
+  document.querySelectorAll('select:not([data-dd])').forEach(enhanceSelect);
+
   /* ---------- tabs ----------
      The tab, and the open work on the Projects tab, live in the address
      (#projects/murals), so a refresh or the back button lands where you were. */
@@ -2963,6 +3057,7 @@ p{margin:0 0 22px;color:#6d665c}
     for (let i = 0; i < 40; i += 1) {
       const r = await api(`/preview-ready?${q}`);
       if (r.ready && r.url) return r.url.replace(/\/$/, '') + previewPath();
+      if (r.failed) return null;
       await sleep(10000);
     }
     return null;

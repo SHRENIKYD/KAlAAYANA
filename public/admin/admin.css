@@ -896,56 +896,105 @@ body.signin .tabs {
   outline: none;
   border-color: var(--cream);
 }
-/* Drop-downs: the admin's own look for the control and, where the browser
-   allows it, for the open list; elsewhere the list at least stays light. */
-select {
-  color-scheme: light;
-  accent-color: var(--black);
+/* Drop-downs: the native select stays for its value, hidden; the button and
+   list beside it carry the admin's look in every browser. */
+select.dd-native {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0;
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
-.log-table select {
-  appearance: none;
-  -webkit-appearance: none;
-  background: var(--panel)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%231a1816' stroke-width='1.5'/%3E%3C/svg%3E")
-    no-repeat right 10px center;
+.dd {
+  position: relative;
+  min-width: 0;
+}
+.dd-btn {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  background: var(--panel);
   color: var(--black);
   border: 1px solid var(--line);
-  padding: 7px 30px 7px 12px;
+  padding: 7px 12px;
   font: 300 0.9rem/1.4 var(--sans);
-  cursor: pointer;
+  white-space: nowrap;
 }
-.log-table select:focus-visible {
+.dd-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.dd-btn:focus-visible {
   outline: 2px solid var(--black);
   outline-offset: 2px;
 }
-@supports (appearance: base-select) {
-  select,
-  select::picker(select) {
-    appearance: base-select;
-  }
-  select::picker(select) {
-    background: var(--panel);
-    color: var(--black);
-    border: 1px solid var(--line);
-    border-radius: 0;
-    padding: 4px 0;
-    box-shadow: 0 10px 30px #1a181622;
-    font: 300 0.9rem/1.4 var(--sans);
-  }
-  select option {
-    padding: 9px 14px;
-  }
-  select option:hover,
-  select option:focus-visible {
-    background: var(--bg);
-  }
-  select option:checked {
-    background: var(--black);
-    color: #f5f1ea;
-  }
-  select::picker-icon {
-    display: none;
-  }
+.dd-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dd-chev {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+.dd-btn[aria-expanded='true'] .dd-chev {
+  transform: translateY(2px) rotate(225deg);
+}
+.dd-list {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  min-width: 100%;
+  max-height: 280px;
+  overflow: auto;
+  background: var(--panel);
+  color: var(--black);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 30px #1a181622;
+  font: 300 0.9rem/1.4 var(--sans);
+}
+.dd-list li {
+  padding: 9px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.dd-list li:hover,
+.dd-list li:focus-visible {
+  background: var(--bg);
+  outline: none;
+}
+.dd-list li[aria-selected='true'] {
+  background: var(--black);
+  color: #f5f1ea;
+}
+/* in a form field the button sits on the field's rule, like an input */
+.f .dd-btn {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  padding: 12px 0;
+  font: 300 1rem/1.5 var(--sans);
+}
+.f .dd-btn:focus-visible {
+  outline: none;
+  border-color: var(--cream);
+}
+.f .dd-list {
+  font-size: 1rem;
 }
 .f small {
   color: var(--muted);
