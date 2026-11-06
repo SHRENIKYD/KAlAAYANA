@@ -806,6 +806,9 @@
       input,
       hint ? el('small', {}, hint) : null,
     );
+    // A required field that is already empty is shown as such from the start,
+    // so "Take me there" lands on a marked field.
+    if (props.required && !String(props.value ?? '').trim()) wrap.classList.add('invalid');
     return wrap;
   }
 
@@ -2100,6 +2103,87 @@
       return `/${state.editing}/`;
     return '/';
   }
+  /* ---------- what the server would refuse, caught here first ----------
+     Mirrors the Worker's rules for the things an editor can fix in the form,
+     so a missing alt text is pointed at, not reported after a round trip. */
+  const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  function localProblems() {
+    const out = [];
+    const need = (ok, text, go) => {
+      if (!ok) out.push({ text, go });
+    };
+    Object.entries(state.sections).forEach(([key, sec]) => {
+      const go = () => editSection(key);
+      for (const f of ['eyebrow', 'title', 'lede'])
+        need(String(sec?.[f] ?? '').trim(), `Work "${workName(key)}" is missing its ${f}`, go);
+      need(sec?.banner, `Work "${workName(key)}" has no banner photograph`, go);
+    });
+    (state.home?.works || []).forEach((w, i) => {
+      const go = () => {
+        state.openWork = i;
+        showTab('home');
+      };
+      need(String(w?.title ?? '').trim(), `Homepage work ${i + 1} is missing its title`, go);
+      need(String(w?.eyebrow ?? '').trim(), `Homepage work ${i + 1} is missing its eyebrow`, go);
+      need(
+        String(w?.image?.alt ?? '').trim(),
+        `Homepage work ${i + 1} (${w?.title || 'untitled'}) needs alt text for its image`,
+        go,
+      );
+    });
+    const slugs = new Set();
+    state.projects.forEach((pr, i) => {
+      const name = pr?.title || pr?.slug || `#${i + 1}`;
+      const go = () => editProject(pr);
+      for (const f of ['title', 'slug', 'scale', 'description'])
+        need(String(pr?.[f] ?? '').trim(), `Project "${name}" is missing its ${f}`, go);
+      need(
+        !pr?.slug || SLUG_RE.test(pr.slug),
+        `Project "${name}": the slug must be lowercase letters, digits and hyphens`,
+        go,
+      );
+      need(!slugs.has(pr?.slug), `Project "${name}": the slug ${pr?.slug} is already used`, go);
+      slugs.add(pr?.slug);
+      need(pr?.images?.length, `Project "${name}" needs at least one photograph`, go);
+      (pr?.images || []).forEach((img, j) =>
+        need(
+          String(img?.alt ?? '').trim(),
+          `Project "${name}": photograph ${j + 1} needs alt text`,
+          go,
+        ),
+      );
+    });
+    return out;
+  }
+  function showProblems(problems, verb) {
+    const first = problems[0];
+    $('#result-body').replaceChildren(
+      el('h2', {}, `Finish these before ${verb}`),
+      el('p', { class: 'muted' }, 'The site needs every field below. Nothing has been sent.'),
+      el(
+        'ul',
+        {},
+        ...problems.slice(0, 12).map((pr) => el('li', {}, pr.text)),
+        problems.length > 12 ? el('li', {}, `and ${problems.length - 12} more`) : null,
+      ),
+    );
+    $('#result-close').hidden = false;
+    $('#result-close').disabled = false;
+    $('#result-close').textContent = 'Take me there';
+    $('#result-close').onclick = () => {
+      closeDialog();
+      if (first.go) first.go();
+      setTimeout(() => {
+        const bad = $('.f.invalid input, .f.invalid textarea');
+        if (bad) {
+          bad.scrollIntoView({ block: 'center' });
+          bad.focus();
+        }
+      }, 50);
+    };
+    if (!$('#result').open) $('#result').showModal();
+  }
+
   function payload() {
     return {
       projects: state.projects,
@@ -2145,6 +2229,10 @@
   /* Look only: the top-bar button. */
   async function previewCurrent() {
     const btn = $('#preview-btn');
+    if (state.dirty) {
+      const problems = localProblems();
+      if (problems.length) return showProblems(problems, 'previewing');
+    }
     const tab = openTab();
     btn.disabled = true;
     try {
@@ -2228,6 +2316,7 @@
   }
   function doneDialog(title, lines) {
     $('#result-close').hidden = false;
+    $('#result-close').disabled = false;
     $('#result-body').replaceChildren(el('h2', {}, title), ...lines.map((l) => el('p', {}, l)));
     $('#result-close').textContent = 'Close';
     $('#result-close').onclick = () => $('#result').close();
@@ -2403,6 +2492,8 @@
   /* ---------- Preview & publish ---------- */
   async function publish() {
     const btn = $('#save');
+    const problems = localProblems();
+    if (problems.length) return showProblems(problems, 'previewing');
     if (!$('#message').value.trim()) {
       $('#message').focus();
       return alertBox('Say what changed', 'One line, for the log and the commit.');
