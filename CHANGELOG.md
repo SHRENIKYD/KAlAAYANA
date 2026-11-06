@@ -33,6 +33,10 @@ is a holding page. `1.0.0` marks the launch of the full site.
 - Admin: "Keep editing" after a preview; the next preview updates the same
   proposal instead of starting a new one.
 
+### Removed
+
+- The "Our clients" logo strip on the homepage, with its logos and data.
+
 ## [1.2.18] - 2026-11-06
 
 ### Added
