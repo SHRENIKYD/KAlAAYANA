@@ -1016,5 +1016,46 @@
         "alt": "oversized sandwich sculpture, view 7"
       }
     ]
+  },
+  {
+    "slug": "test",
+    "group": "test",
+    "title": "test",
+    "scale": "34",
+    "description": "test",
+    "images": [
+      {
+        "file": "test-1.jpg",
+        "alt": "test"
+      },
+      {
+        "file": "test-1.png",
+        "alt": "test"
+      },
+      {
+        "file": "test-2.jpg",
+        "alt": "test"
+      },
+      {
+        "file": "test-3.jpg",
+        "alt": "test"
+      },
+      {
+        "file": "test-4.jpg",
+        "alt": "test"
+      },
+      {
+        "file": "test-5.jpg",
+        "alt": "test"
+      },
+      {
+        "file": "test-2.png",
+        "alt": "test"
+      },
+      {
+        "file": "test-6.jpg",
+        "alt": "test"
+      }
+    ]
   }
 ]

@@ -96,7 +96,12 @@
       "label": "Core materials"
     }
   ],
-  "materials": ["FRP", "Metal", "Concrete", "GFRC"],
+  "materials": [
+    "FRP",
+    "Metal",
+    "Concrete",
+    "GFRC"
+  ],
   "sections": {
     "landmarks": {
       "eyebrow": "Monumental",
@@ -142,6 +147,15 @@
       "bannerAlt": "An oversized burger sculpture installed inside a restaurant",
       "href": "/installations/",
       "bannerFocus": "50% 55%"
+    },
+    "test": {
+      "eyebrow": "test",
+      "title": "test",
+      "lede": "test",
+      "banner": "test.jpg",
+      "bannerAlt": "test",
+      "href": "/test/",
+      "bannerFocus": "50% 50%"
     }
   },
   "story": [
@@ -154,9 +168,16 @@
   ],
   "contact": {
     "email": "contact@kalaayanastudios.com",
-    "phones": ["+918886870796", "+918310660720"],
+    "phones": [
+      "+918886870796",
+      "+918310660720"
+    ],
     "instagram": "kalaayana_studios",
-    "address": ["No. 46, 47, BM Kaval,", "Kengeri, Bangalore South,", "Karnataka — 560060"]
+    "address": [
+      "No. 46, 47, BM Kaval,",
+      "Kengeri, Bangalore South,",
+      "Karnataka — 560060"
+    ]
   },
   "home": {
     "works": [
@@ -235,6 +256,19 @@
           "file": "installations.jpg",
           "alt": "Oversized sculptural installation by Kalaayana",
           "focus": "50% 72%"
+        }
+      },
+      {
+        "section": "test",
+        "href": "/test/",
+        "eyebrow": "test",
+        "title": "test",
+        "link": "Discover collection",
+        "image": {
+          "from": "sections",
+          "file": "test.jpg",
+          "alt": "test",
+          "focus": "50% 50%"
         }
       }
     ]
