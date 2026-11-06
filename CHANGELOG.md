@@ -52,6 +52,17 @@ is a holding page. `1.0.0` marks the launch of the full site.
 - The admin shows a progress line during requests, skeleton placeholders
   while loading, opens the Log and Users tabs at once, carries the studio
   mark in its header, and its dialogs close on Escape or the corner cross.
+- An Insights tab for every editor: visits and page views with change against
+  the previous period, a per-day chart with a crosshair tooltip, pages,
+  sources, countries and devices, and a table view, from Cloudflare Web
+  Analytics once its beacon token and site tag are set.
+- Every public page shows a soft shimmer where a photograph is still loading.
+- Admin: a refresh keeps the tab and open work; sign-out returns to the admin
+  sign-in; the sign-in photograph is required and never black; missing fields
+  are listed and focused before a preview; the users table updates at once;
+  Accept, Reject and Continue show that they are working; a decision cannot
+  be recorded twice; the Access lookup matches any hostname the application
+  names.
 
 ## [1.2.17] - Unreleased
 
