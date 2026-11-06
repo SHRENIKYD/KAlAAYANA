@@ -215,13 +215,13 @@
         "section": "landmarks",
         "href": "/landmarks/",
         "eyebrow": "Landmarks",
-        "title": "Monumental Test",
+        "title": "Monumental",
         "link": "Discover collection",
         "image": {
           "from": "projects",
           "file": "hanuman-hangluru-1.jpg",
           "alt": "The monumental standing Hanuman sculpture at Hangluru holding a mace",
-          "focus": "50% 0%"
+          "focus": "50% 10%"
         }
       },
       {
@@ -233,7 +233,9 @@
           "from": "projects",
           "file": "collectables-hanuman-front.jpg",
           "alt": "Hanuman collectable sculpture",
-          "focus": "50% 48%"
+          "focus": "50% 0%",
+          "background": "#a78d79",
+          "fit": "contain"
         }
       },
       {
