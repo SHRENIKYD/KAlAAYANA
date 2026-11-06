@@ -37,6 +37,15 @@ is a holding page. `1.0.0` marks the launch of the full site.
   tiers and a vertical central axis (from #69); the original is retained.
 - Story paragraphs from `site.json` keep emphasis tags only before rendering.
 - The studio map embed sends only the origin as referrer.
+- Admin log entries (sign-ins, decisions, errors, invitations) commit straight
+  onto `develop` and retry on a moved head; content pull requests carry no log
+  lines, so neither can conflict with the other.
+- The admin lays out for phones: wrapped header, scrolling tabs, one-column
+  editors, nothing wider than the screen.
+- Admin pages allow the camera, so the identity photo can be taken; the
+  site-wide policy still blocks it everywhere else.
+- The preview link read from the Cloudflare deployment comment no longer
+  carries a trailing quote.
 
 ## [1.2.17] - Unreleased
 

@@ -45,12 +45,20 @@ type **Secret**, name `GITHUB_TOKEN`, paste the token. Deploy.
 
 Or from a machine with Wrangler logged in: `npx wrangler secret put GITHUB_TOKEN`.
 
-### 4. Let accepted changes merge once checks pass (recommended)
+### 4. Let the Worker write the log, and let accepted changes merge
+
+GitHub → repository Settings → Rules → Rulesets → the `develop` ruleset →
+**Bypass list** → add **Repository admin**. The token from step 2 acts as
+the repository owner, so log entries (sign-ins, decisions, errors,
+invitations) commit straight onto `develop`; every other push still has to
+come through a pull request with passing checks. Without the bypass each log
+entry opens its own pull request, and two open at once conflict.
 
 GitHub → repository Settings → General → Pull Requests → tick
 **Allow auto-merge**. When an editor accepts a preview while CI is still
-running, the pull request then merges on its own as soon as CI passes.
-Without it, acceptance while CI is running asks you to merge on GitHub.
+running, the content pull request then merges on its own as soon as CI
+passes. Without it, acceptance while CI is running asks you to merge on
+GitHub.
 
 ## Roles and invitations
 

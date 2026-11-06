@@ -65,15 +65,28 @@
       return '';
     }
   };
+  // Every request in flight shows the progress line under the header.
+  let inflight = 0;
+  function busy(delta) {
+    inflight = Math.max(0, inflight + delta);
+    document.body.classList.toggle('busy', inflight > 0);
+    document.body.setAttribute('aria-busy', inflight > 0 ? 'true' : 'false');
+  }
   async function api(path, init) {
-    const res = await fetch(`/admin/api${path}`, {
-      ...init,
-      headers: {
-        'content-type': 'application/json',
-        ...(sessionName() ? { 'x-admin-name': sessionName() } : {}),
-        ...(init?.headers || {}),
-      },
-    });
+    busy(1);
+    let res;
+    try {
+      res = await fetch(`/admin/api${path}`, {
+        ...init,
+        headers: {
+          'content-type': 'application/json',
+          ...(sessionName() ? { 'x-admin-name': sessionName() } : {}),
+          ...(init?.headers || {}),
+        },
+      });
+    } finally {
+      busy(-1);
+    }
     const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
     if (!res.ok) {
       if (res.status === 401 && !path.startsWith('/login') && !path.startsWith('/content')) {
@@ -137,7 +150,15 @@
   }
   async function showLog() {
     state.view = 'log';
-    await refreshAdminData();
+    renderLog();
+    try {
+      await refreshAdminData();
+    } catch {
+      return;
+    }
+    if (state.view === 'log') renderLog();
+  }
+  function renderLog() {
     const all = (Array.isArray(state.log) ? state.log : []).slice().reverse();
     const filters =
       state.logFilters ||
@@ -240,7 +261,7 @@
     const clear = el('button', { class: 'btn btn-ghost btn-sm', type: 'button' }, 'Clear');
     clear.addEventListener('click', () => {
       Object.assign(filters, { from: '', to: '', user: '', category: 'all', text: '' });
-      showLog();
+      renderLog();
     });
 
     main.replaceChildren(
@@ -432,8 +453,9 @@
         form,
       );
       $('#result-close').hidden = true;
+      $('#result-x').hidden = true;
+      state.dialogLocked = true;
       $('#result').showModal();
-      $('#result').addEventListener('cancel', (e) => e.preventDefault(), { once: true });
       name.focus();
     });
   }
@@ -460,18 +482,39 @@
   );
 
   /* ---------- users (superadmin) ---------- */
-  async function changeUser(body, note) {
+  async function changeUser(body, note, button) {
     note.textContent = '';
+    const label = button ? button.textContent : '';
+    if (button) {
+      button.disabled = true;
+      button.textContent = 'Saving…';
+    }
     try {
-      await api('/users', { method: 'POST', body: JSON.stringify(body) });
-      await showUsers();
+      const r = await api('/users', { method: 'POST', body: JSON.stringify(body) });
+      if (Array.isArray(r.users)) state.users = r.users;
+      state.usersPending = r.pr
+        ? `Recorded in pull request #${r.pr}; it takes effect once that merges.`
+        : '';
+      renderUsers();
     } catch (e) {
       note.textContent = e.message;
+      if (button) {
+        button.disabled = false;
+        button.textContent = label;
+      }
     }
   }
   async function showUsers() {
     state.view = 'users';
-    await refreshAdminData();
+    renderUsers();
+    try {
+      await refreshAdminData();
+    } catch {
+      return;
+    }
+    if (state.view === 'users') renderUsers();
+  }
+  function renderUsers() {
     const note = el('p', { class: 'signin-error', role: 'alert' });
     const email = el('input', {
       type: 'email',
@@ -485,6 +528,7 @@
       el('option', { value: 'admin' }, 'Admin — add and update projects'),
       el('option', { value: 'superadmin' }, 'Superadmin — everything, including users and the log'),
     );
+    const inviteBtn = el('button', { class: 'btn', type: 'submit' }, 'Invite');
     const form = el(
       'form',
       { class: 'invite' },
@@ -494,7 +538,7 @@
         el('div', { class: 'f' }, el('label', { for: 'invite-email' }, 'Email'), email),
         el('div', { class: 'f' }, el('label', { for: 'invite-role' }, 'Role'), role),
       ),
-      el('button', { class: 'btn', type: 'submit' }, 'Invite'),
+      inviteBtn,
       el(
         'small',
         { class: 'muted' },
@@ -506,7 +550,11 @@
     );
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      changeUser({ action: 'invite', email: email.value.trim(), role: role.value }, note);
+      changeUser(
+        { action: 'invite', email: email.value.trim(), role: role.value },
+        note,
+        inviteBtn,
+      );
     });
     const main = $('#main');
     main.replaceChildren(
@@ -523,6 +571,7 @@
             { class: 'muted' },
             'Who can sign in to the admin, and what they may do. Admins add and update projects; superadmins can do everything, see the log and manage users.',
           ),
+          state.usersPending ? el('p', { class: 'pending-note' }, state.usersPending) : null,
         ),
       ),
       el(
@@ -2114,8 +2163,10 @@
     $('#result').showModal();
   }
   function closeDialog() {
+    state.dialogLocked = false;
     $('#result').close();
     $('#result-close').hidden = false;
+    $('#result-x').hidden = false;
     $('#result-close').textContent = 'Close';
     $('#result-close').onclick = () => $('#result').close();
   }
@@ -2384,7 +2435,37 @@
   }
 
   /* ---------- boot ---------- */
+  /* ---------- skeleton while the content loads ---------- */
+  function skeleton() {
+    const line = (w) => el('span', { class: 'skel skel-line', style: `width:${w}` });
+    const card = (h) =>
+      el(
+        'div',
+        { class: 'skel-card' },
+        el('span', { class: 'skel skel-thumb', style: `height:${h}px` }),
+        line('70%'),
+        line('40%'),
+      );
+    $('#sections').replaceChildren(
+      ...[72, 58, 64, 48, 66].map((w) =>
+        el('div', { class: 'skel-row' }, line(`${w}%`), line('14px')),
+      ),
+    );
+    $('#main').replaceChildren(
+      el(
+        'div',
+        { class: 'skel-page', 'aria-hidden': 'true' },
+        line('120px'),
+        el('span', { class: 'skel skel-title' }),
+        line('60%'),
+        el('div', { class: 'grid' }, ...[260, 180, 220, 300, 200, 240].map(card)),
+      ),
+      el('p', { class: 'sr-only', role: 'status' }, 'Loading…'),
+    );
+  }
+
   async function load() {
+    skeleton();
     const data = await api('/content');
     Object.assign(state, {
       email: data.email,
@@ -2408,10 +2489,6 @@
     state.original = snapshot();
     $('#who').textContent = `${data.email} · ${data.role || 'admin'}`;
     if (data.sessionEnds) startSessionClock(Number(data.sessionEnds));
-    if (!sessionName()) {
-      await askWhoIsHere();
-      $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
-    } else $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
     document.body.classList.toggle('role-admin', data.role !== 'superadmin');
     document.body.classList.toggle('role-superadmin', data.role === 'superadmin');
     if (data.role !== 'superadmin' && ['home', 'log', 'users'].includes(state.tab))
@@ -2421,8 +2498,17 @@
     $('#message').value = '';
     markDirty();
     showTab(state.tab);
+    // The page is drawn behind the prompt, so the skeleton never lingers.
+    if (!sessionName()) await askWhoIsHere();
+    $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
   }
 
+  $('#result-x').addEventListener('click', closeDialog);
+  // Escape closes any dialog except the one asking who is here.
+  $('#result').addEventListener('cancel', (e) => {
+    e.preventDefault();
+    if (!state.dialogLocked) closeDialog();
+  });
   $('#new-section').addEventListener('click', newWork);
   $('#preview-btn').addEventListener('click', previewCurrent);
   $('#signout').addEventListener('click', () => signOut('manual'));

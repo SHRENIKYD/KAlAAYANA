@@ -16,7 +16,9 @@
   </head>
   <body>
     <header class="bar">
-      <a class="bar-brand" href="/">Kalaayana Studios</a>
+      <a class="bar-brand" href="/" aria-label="Kalaayana Studios">
+        <span class="mark" aria-hidden="true"></span>
+      </a>
       <span class="bar-title">Content admin</span>
       <button class="btn btn-ghost btn-sm bar-preview" id="preview-btn" type="button">
         Preview this page ↗
@@ -63,6 +65,7 @@
     </div>
 
     <dialog id="result" class="dialog">
+      <button class="dialog-x" id="result-x" type="button" aria-label="Close">×</button>
       <div id="result-body"></div>
       <button class="btn" id="result-close" type="button">Close</button>
     </dialog>
