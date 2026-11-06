@@ -6,8 +6,22 @@
   "name": "kalaayana",
   "compatibility_date": "2026-09-07",
 
-  // No `main` script: assets-only Worker, serving the repo root as a static site.
+  // The Worker script answers only the content admin's API. Every other
+  // request is a static asset and never invokes the script.
+  "main": "worker/index.js",
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": ["/admin/api/*"],
+  },
+
+  // Non-secret settings. GITHUB_TOKEN is a Worker secret set in the dashboard
+  // (never here); ACCESS_* come from the Access application for staging.
+  "vars": {
+    "GITHUB_REPO": "SHRENIKYD/KAlAAYANA",
+    "GITHUB_BASE": "develop",
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": "",
+    "ADMIN_EMAILS": "",
   },
 }

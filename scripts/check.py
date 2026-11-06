@@ -112,7 +112,17 @@ if os.path.exists(os.path.join(OUT, '_headers')) and '__SCRIPT_HASHES__' in open
 # 5. Content data must be well formed — a malformed project must fail the build,
 #    not reach a visitor. Presentation is not consulted; this checks data alone.
 REQUIRED = ('slug', 'group', 'title', 'scale', 'description')
-GROUPS = {'landmarks', 'temples', 'portraits', 'murals', 'installations'}
+try:
+    GROUPS = set(json.load(open('src/data/site.json', encoding='utf-8'))['sections'])
+except Exception as e:
+    GROUPS = set()
+    bad('site.json sections are unreadable: %s' % e)
+for key, section in (json.load(open('src/data/site.json', encoding='utf-8')).get('sections', {}) if GROUPS else {}).items():
+    for field in ('eyebrow', 'title', 'lede', 'banner', 'bannerAlt', 'href'):
+        if not str(section.get(field, '')).strip():
+            bad('section %s is missing %s' % (key, field))
+    if section.get('banner') and not os.path.exists(os.path.join('src/images/sections', section['banner'])):
+        bad('section %s banner is missing: %s' % (key, section.get('banner')))
 try:
     projects = json.load(open('src/data/projects.json', encoding='utf-8'))
 except Exception as e:

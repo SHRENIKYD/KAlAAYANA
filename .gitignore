@@ -5,3 +5,5 @@ version.json
 
 __pycache__/
 *.pyc
+
+.dev.vars

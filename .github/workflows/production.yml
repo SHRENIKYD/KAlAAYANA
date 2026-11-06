@@ -58,6 +58,7 @@ jobs:
         id: stamp
         run: |
           ./scripts/stamp.sh production "$GITHUB_SHA" "$GITHUB_REF_NAME"
+          test ! -e dist/admin || { echo "::error::content admin must not ship to production"; exit 1; }
           echo "version=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5

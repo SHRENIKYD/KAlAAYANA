@@ -38,6 +38,14 @@ if [[ ( "$environment" == "staging" || -f LIVE ) && -f "$out/preview/index.html"
   echo "$environment: serving the full site at / (holding page at /coming-soon/)"
 fi
 
+# The content admin exists only on staging, where Cloudflare Access fronts it
+# and the Worker answers its API. Every other environment ships without it.
+if [[ "$environment" != "staging" && -d "$out/admin" ]]; then
+  rm -r "$out/admin" "$out/admin.html"
+  [[ -f "$out/_redirects" ]] && sed -i '\#^/admin.html #d' "$out/_redirects"
+  echo "$environment: content admin removed from the build"
+fi
+
 while IFS= read -r -d '' f; do
   [[ -e "$f" ]] || continue
   # 1. Asset URLs carry the commit, so a deploy cannot be hidden by a cache.

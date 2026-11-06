@@ -84,6 +84,13 @@ marks every page indexable, claims `https://kalaayanastudios.com/` as the
 canonical origin and lists every route in `sitemap.xml`. `scripts/check.py`
 enforces each of those in both states, so a build cannot half-launch.
 
+## Content admin
+
+Staging carries a content admin at `/admin/` for sections, projects and
+photographs. Each save is one commit and one pull request into `develop`,
+validated by the same `scripts/check.py` as any other change. Production
+never includes it. Setup and use are in [docs/ADMIN-SETUP.md](docs/ADMIN-SETUP.md).
+
 ## Building locally
 
 ```bash

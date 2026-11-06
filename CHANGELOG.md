@@ -13,6 +13,10 @@ is a holding page. `1.0.0` marks the launch of the full site.
 ## [1.2.18] - Unreleased
 
 ### Added
+- Content admin at `/admin/` on staging: edit sections, projects and
+  photographs; each save commits to a branch and opens a pull request into
+  `develop`. Gated by Cloudflare Access and an email allow-list in the Worker;
+  stripped from production and rollback builds.
 - Enforced Content Security Policy on every page: inline scripts are hashed at
   build time, so the policy ships as a `<meta>` tag that GitHub Pages can serve
   and as a Cloudflare header. `img-src` no longer admits arbitrary HTTPS hosts.
