@@ -96,7 +96,12 @@
       "label": "Core materials"
     }
   ],
-  "materials": ["FRP", "Metal", "Concrete", "GFRC"],
+  "materials": [
+    "FRP",
+    "Metal",
+    "Concrete",
+    "GFRC"
+  ],
   "sections": {
     "landmarks": {
       "eyebrow": "Monumental",
@@ -154,9 +159,16 @@
   ],
   "contact": {
     "email": "contact@kalaayanastudios.com",
-    "phones": ["+918886870796", "+918310660720"],
+    "phones": [
+      "+918886870796",
+      "+918310660720"
+    ],
     "instagram": "kalaayana_studios",
-    "address": ["No. 46, 47, BM Kaval,", "Kengeri, Bangalore South,", "Karnataka — 560060"]
+    "address": [
+      "No. 46, 47, BM Kaval,",
+      "Kengeri, Bangalore South,",
+      "Karnataka — 560060"
+    ]
   },
   "home": {
     "works": [

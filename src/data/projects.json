@@ -1016,5 +1016,30 @@
         "alt": "oversized sandwich sculpture, view 7"
       }
     ]
+  },
+  {
+    "slug": "ganesha",
+    "group": "landmarks",
+    "title": "Ganesha",
+    "scale": "13",
+    "description": "Test work",
+    "images": [
+      {
+        "file": "ganesha-1.png",
+        "alt": "Test"
+      },
+      {
+        "file": "ganesha-2.png",
+        "alt": "Test"
+      },
+      {
+        "file": "ganesha-1.jpg",
+        "alt": "Test"
+      },
+      {
+        "file": "ganesha-2.jpg",
+        "alt": "Test"
+      }
+    ]
   }
 ]
