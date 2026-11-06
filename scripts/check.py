@@ -111,28 +111,51 @@ for key, sec in (site.get('sections') or {}).items():
     if not os.path.exists(img):
         bad('section %s references a missing banner image: %s' % (key, img))
 
-# 5c. Production freeze. A date in the FREEZE file blocks merges into main until
-#     it passes. This runs in the "Checks" job, which the repository ruleset makes
-#     a required status check on main, so the gate is enforced rather than advisory
-#     — the last freeze lived only in CONTRIBUTING.md and a PR went straight past it.
-#     It also expires by itself: no edit is needed on the day, and the file can then
-#     be deleted.
+# 5c. Production freeze. FREEZE holds the moment the freeze is scheduled to lift,
+#     and blocks merges into main until it passes. This runs in the "Checks" job,
+#     which the repository ruleset makes a required status check on main, so the
+#     gate is enforced rather than advisory — the last freeze lived only in
+#     CONTRIBUTING.md and a PR went straight past it.
+#
+#     A bare date (2026-11-09) means midnight UTC on it. A launch is set in the
+#     team's own clock, not UTC, so a timestamp with an offset is also accepted
+#     and is the clearer form: 2026-11-08T22:00:00+05:30 is 22:00 IST, which no
+#     bare date can express. Both are compared as instants, so the gate cannot
+#     drift with the runner's timezone.
+#
+#     Note that scripts/deploy_guard.py blocks a deploy while the FREEZE file
+#     exists at all, whatever it says. That is deliberate: the timestamp lets a
+#     release PR merge, and deleting the file is the separate, reviewed act that
+#     lets it deploy.
 base_ref = os.environ.get('BASE_REF', '').strip()
 try:
     freeze_until = open('FREEZE', encoding='utf-8').read().strip()
 except FileNotFoundError:
     freeze_until = ''
 if freeze_until:
-    if not re.fullmatch(r'\d{4}-\d{2}-\d{2}', freeze_until):
-        bad('FREEZE is not an ISO date (YYYY-MM-DD): %r' % freeze_until)
-    elif base_ref == 'main':
-        today = datetime.date.today().isoformat()
-        if today < freeze_until:
-            bad('production is frozen until %s (today is %s) — this PR targets main. '
-                'Merge into develop and review on staging; see CONTRIBUTING.md.'
-                % (freeze_until, today))
+    moment = None
+    if re.fullmatch(r'\d{4}-\d{2}-\d{2}', freeze_until):
+        moment = datetime.datetime.fromisoformat(freeze_until).replace(
+            tzinfo=datetime.timezone.utc)
+    else:
+        try:
+            parsed = datetime.datetime.fromisoformat(freeze_until)
+        except ValueError:
+            parsed = None
+        if parsed is None or parsed.tzinfo is None:
+            bad('FREEZE must be an ISO date (2026-11-09) or a timestamp carrying a '
+                'UTC offset (2026-11-08T22:00:00+05:30): %r' % freeze_until)
         else:
-            print('freeze lapsed on %s — delete the FREEZE file' % freeze_until)
+            moment = parsed
+    if moment is not None and base_ref == 'main':
+        now = datetime.datetime.now(datetime.timezone.utc)
+        if now < moment:
+            bad('production is frozen until %s (now %s) — this PR targets main. '
+                'Merge into develop and review on staging; see CONTRIBUTING.md.'
+                % (freeze_until, now.isoformat(timespec='seconds')))
+        else:
+            print('freeze lapsed at %s — delete the FREEZE file to allow a deploy'
+                  % freeze_until)
 
 # 6. Every changed release version requires notes, including staging milestones.
 base = os.environ.get('BASE_VERSION', '').strip()
