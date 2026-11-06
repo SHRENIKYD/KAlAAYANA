@@ -1,16 +1,16 @@
 # Launch readiness
 
-Updated 5 November 2026. Candidate **1.2.16** is local and unreleased.
+Updated 6 November 2026. Candidate **1.2.17** is local and unreleased.
 This checklist is a release record, not launch approval.
 
 ## Verified repository state
 
 - Production main: 611c1347909f9833ff84e39624c6b3de1e82e016.
-- Staging develop: 9c28e17310c4db5e0ee10d900e63fba825523a14 (merged PR #65).
-- GitHub Latest release: v1.2.12. Latest staging prerelease: v1.2.15 (published 4 November 2026).
-- Active ruleset requires PRs and Checks on both branches, prohibits force pushes
-  and deletion, but currently requires zero approving reviews.
-- develop/FREEZE contains 2026-11-07. Keep it unchanged during feature work.
+- Staging develop: 6f6c3ec988b60ab41dc1d1d90e04af29f1f01413 (PR #66).
+- Latest published staging prerelease: v1.2.16; GitHub Latest: v1.2.12.
+- FREEZE remains 2026-11-07. Production remains unchanged.
+- Candidate workflow guards fail closed until reviewed removal of FREEZE;
+  main has not received those guards yet. Account MFA was confirmed by user.
 
 ## Production blockers
 
@@ -18,9 +18,9 @@ This checklist is a release record, not launch approval.
   lack develop's guards. Manual runs from main are not fully blocked. Require
   approval on the github-pages environment or equivalent release protection,
   and verify settings directly before claiming protection.
-- [ ] Confirm freeze timing. Current workflow code compares UTC dates and permits
-  release from 05:30 IST on 7 November, not after the end of that day. Reaching
-  that time is not release approval. Do not shorten the existing freeze.
+- [ ] Before production, integrate and verify candidate fail-closed guards on main.
+  The candidate blocks while FREEZE exists regardless of date. Main still uses
+  its earlier date-based guard; reaching the date is not release approval.
 - [x] Privacy contacts supplied: Rashmi Jadhav (Chairperson), with Vijaya Bai
   (Chairperson) as alternate; enquiries use contact@kalaayanastudios.com.
 - [ ] Complete final policy review. Policy notices now display an effective date of 7 November 2026 at the
@@ -33,12 +33,15 @@ This checklist is a release record, not launch approval.
 ## Candidate verification
 
 - [ ] Review and commit accumulated local changes through a PR to develop.
-- [ ] Match VERSION, footer, changelog, tag and release title to 1.2.16.
-- [ ] Run npm ci, npm run build and python scripts/check.py; require passing CI.
+- [x] Match local VERSION, rebuilt footer and candidate notes to 1.2.17.
+- [ ] Create matching tag and release only at the approved merged commit.
+- [x] Local build, staging stamp, catalogue check, eight tests and audit passed.
+- [ ] Clean npm ci and GitHub CI: Windows compiler file lock blocked local npm ci;
+  npm install restored dependencies and the subsequent build passed.
 - [ ] Compare staging version.json with the reviewed version and commit.
 - [ ] Check desktop/mobile menu, Works, six Works categories, image framing, links,
   contact mail draft, map, policy pages and favicon in a browser.
-- [ ] When requested, publish staging v1.2.16 as a prerelease with an actual date,
+- [ ] When requested, publish staging v1.2.17 as a prerelease with an actual date,
   detailed notes and accurate deployment status, without marking it latest.
 
 ## Approved production rollout

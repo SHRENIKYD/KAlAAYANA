@@ -4,6 +4,7 @@ import os, re, sys, json, datetime
 
 OUT = os.environ.get('OUT_DIR', 'dist')
 FAIL = []
+staging = os.environ.get('BUILD_ENV') == 'staging'
 def bad(msg): FAIL.append(msg)
 
 if not os.path.isdir(OUT):
@@ -42,14 +43,14 @@ if 'index.html' in html:
     home = open(os.path.join(OUT, 'index.html'), encoding='utf-8').read()
     if 'rel="canonical"' not in home:
         bad('index.html has no canonical link')
-    if 'noindex' in home:
+    if not staging and 'noindex' in home:
         bad('index.html is marked noindex — it is the public page')
 
 # 4. Staged pages must stay out of search. Every page except the public entry
 #    point is staged, so this is checked by exclusion — a new route added later
 #    is covered without anyone remembering to list it here.
 for page in sorted(html):
-    if page == 'index.html':
+    if page == 'index.html' and not staging:
         continue
     if 'noindex' not in open(os.path.join(OUT, page), encoding='utf-8').read():
         bad('%s is not marked noindex but is not the public page' % page)

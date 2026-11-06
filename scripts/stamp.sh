@@ -25,24 +25,26 @@ built="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 # development at its root. Production keeps the holding page there until a
 # release deliberately swaps them. Guarded on the environment name: only
 # "staging" swaps, so production and rollback builds are untouched.
-if [[ "$environment" == "staging" && -f "$out/preview.html" && -f "$out/index.html" ]]; then
-  mv "$out/index.html" "$out/coming-soon.html"
-  mv "$out/preview.html" "$out/index.html"
-  # Local development uses /preview.html; staging serves that same page at /.
+if [[ "$environment" == "staging" && -f "$out/preview/index.html" && -f "$out/index.html" ]]; then
+  mkdir -p "$out/coming-soon"
+  mv "$out/index.html" "$out/coming-soon/index.html"
+  cp "$out/preview/index.html" "$out/index.html"
+  sed -i 's#<head>#<head><meta name="robots" content="noindex,nofollow">#' "$out/coming-soon/index.html"
+  # Local development uses /preview/; staging serves that same page at /.
   # Keep section and policy return links on the current staging deployment.
   while IFS= read -r -d '' page; do
-    sed -i 's#href="/preview.html#href="/#g' "$page"
+    sed -i 's#href="/preview/#href="/#g' "$page"
   done < <(find "$out" -type f -name '*.html' -print0)
-  echo "staging: serving the site under development at / (holding page at /coming-soon.html)"
+  echo "staging: serving the site under development at / (holding page at /coming-soon/)"
 fi
 
-for f in "$out"/*.html; do
+while IFS= read -r -d '' f; do
   [[ -e "$f" ]] || continue
   # 1. Asset URLs carry the commit, so a deploy cannot be hidden by a cache.
   sed -i "s/?v=dev/?v=$short/g" "$f"
   # 2. Every page states its version.
   sed -i "s#<head>#<head>\n<meta name=\"version\" content=\"$version+$short\">#" "$f"
-done
+done < <(find "$out" -type f -name '*.html' -print0)
 
 # 3. A machine-readable record at a stable URL.
 cat > "$out/version.json" <<JSON

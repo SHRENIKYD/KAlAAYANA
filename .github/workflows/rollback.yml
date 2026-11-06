@@ -10,8 +10,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: production
@@ -22,51 +20,39 @@ jobs:
     name: Production freeze
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
 
-      # The freeze is declared on develop, so read it from there rather than from
-      # whatever ref this run checked out — a tag or an old branch would not carry
-      # it. Falls back to the checked-out copy if develop cannot be reached.
-      - name: Honour the production freeze
-        run: |
-          set -euo pipefail
-          git fetch --quiet --depth=1 origin develop 2>/dev/null || true
-          freeze="$(git show origin/develop:FREEZE 2>/dev/null | tr -d '[:space:]' || true)"
-          if [ -z "$freeze" ] && [ -f FREEZE ]; then
-            freeze="$(tr -d '[:space:]' < FREEZE)"
-          fi
-          if [ -z "$freeze" ]; then
-            echo "No FREEZE file. Production is open."
-            exit 0
-          fi
-          case "$freeze" in
-            [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;;
-            *) echo "::error::FREEZE is not an ISO date (YYYY-MM-DD): $freeze"; exit 1 ;;
-          esac
-          today="$(date -u +%F)"
-          if [ "$today" \< "$freeze" ]; then
-            echo "::error::Production is frozen until $freeze (today is $today). Every route to production is blocked, including a manual run of this workflow. Delete the FREEZE file on develop to release."
-            exit 1
-          fi
-          echo "Freeze lapsed on $freeze — delete the FREEZE file on develop."
+      - name: Test deployment guards
+        run: python3 -m unittest discover -s scripts -p 'test_deploy_guard.py'
+
+      - name: Validate production ref and freeze
+        env:
+          ROLLBACK_TAG: ${{ inputs.tag }}
+        run: python3 scripts/deploy_guard.py
 
   rollback:
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     name: Redeploy ${{ inputs.tag }}
     needs: freeze
+    env:
+      ROLLBACK_TAG: ${{ inputs.tag }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ inputs.tag }}
 
       - name: Confirm the tag resolved
-        run: echo "Rolling production back to ${{ inputs.tag }} ($GITHUB_SHA)"
-      - uses: actions/setup-node@v4
+        run: echo "Rolling production back to $ROLLBACK_TAG ($GITHUB_SHA)"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm
@@ -76,11 +62,11 @@ jobs:
         run: npm run build
 
       - name: Stamp the build
-        run: ./scripts/stamp.sh production "$GITHUB_SHA" "${{ inputs.tag }}"
+        run: ./scripts/stamp.sh production "$GITHUB_SHA" "$ROLLBACK_TAG"
 
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: ./dist
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
