@@ -22,6 +22,9 @@ Zero Trust → Access → Applications → the staging application → Overview.
 - **Team domain**: `<team>.cloudflareaccess.com` (Zero Trust → Settings → Custom pages shows the team name).
 - **Application Audience (AUD) tag**: the long hex string on the application's overview.
 
+Set the application's **Session duration** to 1 hour: the Worker signs editors
+out one hour after sign-in regardless, and the admin shows the time left.
+
 Put both in `wrangler.jsonc` under `vars` (`ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`).
 Editors and their roles are in `admin/users.json` (see Roles below);
 `ADMIN_EMAILS` is only a fallback while that file is missing. These are not

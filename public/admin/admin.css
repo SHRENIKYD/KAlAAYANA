@@ -105,8 +105,28 @@ body.tab-home .side {
 body.tab-home .shell {
   grid-template-columns: 1fr;
 }
+body.signin .bar,
 body.signin #preview-btn {
   display: none;
+}
+body.signin .shell {
+  min-height: 100%;
+}
+.bar-session {
+  margin-left: auto;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+.bar-session.soon {
+  color: var(--danger);
+}
+.bar-user {
+  margin-left: 16px;
+}
+#signout {
+  margin-left: 12px;
 }
 body.role-admin .superadmin-only {
   display: none;
@@ -885,15 +905,30 @@ body.signin .main {
   padding-bottom: 36px;
 }
 .signin-card {
-  width: min(440px, 100%);
+  width: min(400px, 100%);
   background: var(--panel);
   border: 1px solid var(--line);
-  padding: 36px 32px;
+  box-shadow: 0 24px 60px #1a181614;
+  overflow: hidden;
+}
+.signin-brand {
+  background: var(--black);
+  padding: 36px 32px 28px;
+  display: grid;
+  place-items: center;
+}
+.signin-brand img {
+  width: 150px;
+  height: auto;
+  display: block;
+}
+.signin-body {
+  padding: 28px 32px 32px;
   display: grid;
   gap: 14px;
 }
 .signin-card h1 {
-  font-size: 2.4rem;
+  font-size: 1.9rem;
   line-height: 1.05;
 }
 .signin-form {

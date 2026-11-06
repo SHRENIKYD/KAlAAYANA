@@ -63,13 +63,18 @@
       headers: { 'content-type': 'application/json', ...(init?.headers || {}) },
     });
     const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
-    if (!res.ok)
+    if (!res.ok) {
+      if (res.status === 401 && !path.startsWith('/login') && !path.startsWith('/content')) {
+        showSignIn({ demo: data.demo, status: 401, expired: true, email: data.email });
+      }
       throw Object.assign(new Error(data.error || `HTTP ${res.status}`), {
         status: res.status,
         problems: data.problems,
         demo: data.demo,
         email: data.email,
+        expired: Boolean(data.expired),
       });
+    }
     return data;
   }
 
@@ -1889,22 +1894,34 @@
      list. This screen covers the two cases the page itself can see: a
      signed-in account that is not an editor, and the local demo's sign-in. */
   function showSignIn(err) {
+    stopSessionClock();
     document.body.classList.add('signin');
     const main = $('#main');
-    const box = el('div', { class: 'signin-card' });
+    const brand = el(
+      'div',
+      { class: 'signin-brand' },
+      el('img', { src: '/assets/img/logo.svg', alt: 'Kalaayana Studios' }),
+    );
+    const box = el('div', { class: 'signin-card' }, brand);
+    const expired = err.status === 401 || err.expired;
     if (err.demo) {
       const input = el('input', {
         type: 'email',
         id: 'signin-email',
         autocomplete: 'email',
-        placeholder: 'you@kalaayanastudios.com',
+        placeholder: 'Email',
         required: '',
+        'aria-label': 'Email',
       });
-      const note = el('p', { class: 'signin-error', role: 'alert' });
+      const note = el(
+        'p',
+        { class: 'signin-error', role: 'alert' },
+        expired ? 'Your session ended. Sign in again.' : '',
+      );
       const form = el(
         'form',
         { class: 'signin-form' },
-        el('div', { class: 'f' }, el('label', { for: 'signin-email' }, 'Studio email'), input),
+        el('div', { class: 'f' }, input),
         el('button', { class: 'btn', type: 'submit' }, 'Sign in'),
         note,
       );
@@ -1922,42 +1939,74 @@
           note.textContent = x.message;
         }
       });
-      box.append(
-        el('p', { class: 'eyebrow' }, 'Content admin'),
-        el('h1', {}, 'Sign in'),
-        el(
-          'p',
-          { class: 'muted' },
-          'Only authorised studio accounts can edit the site. Anyone else is turned away here.',
-        ),
-        form,
-        el(
-          'p',
-          { class: 'muted signin-small' },
-          'Local demo: on staging this page is Cloudflare Access, which sends a one-time code to the email.',
-        ),
-      );
+      box.append(el('div', { class: 'signin-body' }, el('h1', {}, 'Content admin'), form));
     } else {
       box.append(
-        el('p', { class: 'eyebrow' }, 'Content admin'),
-        el('h1', {}, err.status === 403 ? 'Not authorised' : 'Sign in'),
-        el(
-          'p',
-          { class: 'muted' },
-          err.email
-            ? `${err.email} is signed in but is not on the editor list. Ask the studio to add it, or sign in with another account.`
-            : 'Only authorised studio accounts can edit the site. Sign in with your studio email to continue.',
-        ),
         el(
           'div',
-          { class: 'signin-form' },
-          el('a', { class: 'btn', href: '/cdn-cgi/access/logout' }, 'Sign in with another account'),
-          el('a', { class: 'btn btn-ghost', href: '/' }, 'Back to the site'),
+          { class: 'signin-body' },
+          el('h1', {}, err.status === 403 ? 'Not authorised' : 'Content admin'),
+          el(
+            'p',
+            { class: 'muted' },
+            expired
+              ? 'Your session ended. Sign in again.'
+              : err.email
+                ? `${err.email} does not have access.`
+                : 'Sign in with your studio email.',
+          ),
+          el(
+            'div',
+            { class: 'signin-form' },
+            el(
+              'a',
+              { class: 'btn', href: '/cdn-cgi/access/logout' },
+              err.status === 403 ? 'Sign in with another account' : 'Sign in',
+            ),
+          ),
         ),
       );
     }
     main.replaceChildren(box);
-    $('#who').textContent = err.email || '';
+    $('#who').textContent = '';
+  }
+
+  /* ---------- session clock: one hour, then automatic sign-out ---------- */
+  let clockTimer = null;
+  function stopSessionClock() {
+    if (clockTimer) clearInterval(clockTimer);
+    clockTimer = null;
+    $('#session').textContent = '';
+  }
+  async function signOut(reason) {
+    stopSessionClock();
+    if (state.demo) {
+      try {
+        await api('/logout', { method: 'POST' });
+      } catch {
+        /* the cookie expires on its own */
+      }
+      showSignIn({ demo: true, status: 401, expired: reason === 'expired' });
+    } else {
+      window.location.assign('/cdn-cgi/access/logout');
+    }
+  }
+  function startSessionClock(ends) {
+    stopSessionClock();
+    const out = $('#session');
+    const tick = () => {
+      const left = Math.max(0, ends - Date.now());
+      if (left === 0) {
+        signOut('expired');
+        return;
+      }
+      const m = Math.floor(left / 60000);
+      const s = Math.floor((left % 60000) / 1000);
+      out.textContent = `Signs out in ${m}:${String(s).padStart(2, '0')}`;
+      out.classList.toggle('soon', left < 5 * 60000);
+    };
+    tick();
+    clockTimer = setInterval(tick, 1000);
   }
 
   /* ---------- dialogs ---------- */
@@ -2114,6 +2163,7 @@
     });
     state.original = snapshot();
     $('#who').textContent = `${data.email} · ${data.role || 'admin'}`;
+    if (data.sessionEnds) startSessionClock(Number(data.sessionEnds));
     document.body.classList.toggle('role-admin', data.role !== 'superadmin');
     document.body.classList.toggle('role-superadmin', data.role === 'superadmin');
     if (data.role !== 'superadmin' && ['home', 'log', 'users'].includes(state.tab))
@@ -2127,6 +2177,7 @@
 
   $('#new-section').addEventListener('click', newWork);
   $('#preview-btn').addEventListener('click', previewCurrent);
+  $('#signout').addEventListener('click', () => signOut('manual'));
   $('#tab-home').addEventListener('click', () => showTab('home'));
   $('#tab-log').addEventListener('click', () => showTab('log'));
   $('#tab-users').addEventListener('click', () => showTab('users'));

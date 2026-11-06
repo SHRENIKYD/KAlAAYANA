@@ -27,11 +27,16 @@ let previewReady = false;
 const usersFile = 'admin/users.json';
 const users = () =>
   fs.existsSync(usersFile) ? parseUsers(fs.readFileSync(usersFile, 'utf8')) : [];
-const signedIn = (req) => {
+const SESSION_MS = 60 * 60 * 1000;
+const session = (req) => {
   const m = /(?:^|;\s*)demo-user=([^;]+)/.exec(req.headers.cookie || '');
-  const email = m ? decodeURIComponent(m[1]).toLowerCase() : '';
-  return roleOf(users(), email) ? email : null;
+  if (!m) return null;
+  const [email, since] = decodeURIComponent(m[1]).toLowerCase().split('|');
+  const ends = Number(since) + SESSION_MS;
+  if (!roleOf(users(), email) || !(ends > Date.now())) return null;
+  return { email, ends };
 };
+const signedIn = (req) => session(req)?.email || null;
 const walk = (d) =>
   fs.readdirSync(d).flatMap((f) => {
     const p = path.join(d, f);
@@ -130,12 +135,26 @@ http
         );
       res.setHeader(
         'set-cookie',
-        `demo-user=${encodeURIComponent(email)}; Path=/admin; HttpOnly; SameSite=Lax`,
+        `demo-user=${encodeURIComponent(`${email}|${Date.now()}`)}; Path=/admin; HttpOnly; SameSite=Lax; Max-Age=${SESSION_MS / 1000}`,
       );
       return json(res, { ok: true, email });
     }
-    if (url.pathname.startsWith('/admin/api/') && !signedIn(req))
-      return json(res, { error: 'Sign in to edit the site.', demo: true }, 401);
+    if (req.method === 'POST' && url.pathname === '/admin/api/logout') {
+      res.setHeader('set-cookie', 'demo-user=; Path=/admin; HttpOnly; SameSite=Lax; Max-Age=0');
+      return json(res, { ok: true });
+    }
+    if (url.pathname.startsWith('/admin/api/') && !signedIn(req)) {
+      const expired = /demo-user=[^;]/.test(req.headers.cookie || '');
+      return json(
+        res,
+        {
+          error: expired ? 'Your session ended. Sign in again.' : 'Sign in to edit the site.',
+          demo: true,
+          expired,
+        },
+        401,
+      );
+    }
     if (url.pathname === '/admin/api/content') {
       const site = readJson('src/data/site.json');
       const me = signedIn(req);
@@ -143,6 +162,7 @@ http
       const superadmin = role === 'superadmin';
       return json(res, {
         email: me,
+        sessionEnds: session(req).ends,
         role,
         users: superadmin ? users() : undefined,
         log:

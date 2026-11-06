@@ -21,14 +21,24 @@ const json = (data, status = 200) =>
     headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
   });
 
+// Sessions last one hour from sign-in, whatever Access itself allows.
+const SESSION_SECONDS = 3600;
+
 async function identify(request, env) {
   const url = new URL(request.url);
+  const now = Math.floor(Date.now() / 1000);
   if (env.DEV_EMAIL && (url.hostname === 'localhost' || url.hostname === '127.0.0.1'))
-    return env.DEV_EMAIL;
-  return verifyAccessJwt(request.headers.get('cf-access-jwt-assertion'), {
+    return { email: env.DEV_EMAIL, sessionEnds: (now + SESSION_SECONDS) * 1000 };
+  const { email, iat } = await verifyAccessJwt(request.headers.get('cf-access-jwt-assertion'), {
     teamDomain: env.ACCESS_TEAM_DOMAIN,
     aud: env.ACCESS_AUD,
   });
+  if (now - iat > SESSION_SECONDS)
+    throw Object.assign(new Error('Your session has ended. Sign in again.'), {
+      email,
+      expired: true,
+    });
+  return { email, sessionEnds: (iat + SESSION_SECONDS) * 1000 };
 }
 
 // Who may edit, and as what, lives in admin/users.json on the base branch.
@@ -65,10 +75,14 @@ async function handleApi(request, env) {
   const url = new URL(request.url);
   const route = url.pathname.replace(/^\/admin\/api/, '');
   let email;
+  let sessionEnds;
   try {
-    email = await identify(request, env);
+    ({ email, sessionEnds } = await identify(request, env));
   } catch (e) {
-    return json({ error: e.message, email: e.email }, 403);
+    return json(
+      { error: e.message, email: e.email, expired: Boolean(e.expired) },
+      e.expired ? 401 : 403,
+    );
   }
   const gh = client(env.GITHUB_TOKEN, env.GITHUB_REPO);
   const base = env.GITHUB_BASE || 'develop';
@@ -106,6 +120,7 @@ async function handleApi(request, env) {
     }
     return json({
       email,
+      sessionEnds,
       role,
       users: superadmin ? users : undefined,
       log,

@@ -45,5 +45,5 @@ export async function verifyAccessJwt(token, { teamDomain, aud }, fetchImpl = fe
   const auds = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
   if (!auds.includes(aud)) throw new Error('Token is for another application');
   if (!payload.email) throw new Error('Token carries no email');
-  return payload.email.toLowerCase();
+  return { email: payload.email.toLowerCase(), iat: Number(payload.iat) || now };
 }
