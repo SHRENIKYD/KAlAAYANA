@@ -26,7 +26,7 @@ export function imageType(bytes) {
  */
 export function validate(payload, existingProjectFiles, existingBannerFiles) {
   const bad = [];
-  const { projects, sections, uploads = {}, banners = {} } = payload || {};
+  const { projects, sections, uploads = {}, banners = {}, bannerCopies = {} } = payload || {};
   if (!Array.isArray(projects)) return ['projects must be a list'];
   if (!sections || typeof sections !== 'object' || Array.isArray(sections))
     return ['sections must be an object'];
@@ -42,7 +42,12 @@ export function validate(payload, existingProjectFiles, existingBannerFiles) {
       bad.push(`section ${key} banner focus must look like 50% 40%`);
     if (s?.banner && !FILE.test(s.banner))
       bad.push(`section ${key} banner ${s.banner} must be a lowercase .jpg or .png name`);
-    if (s?.banner && !existingBannerFiles.has(s.banner) && !(s.banner in banners))
+    if (
+      s?.banner &&
+      !existingBannerFiles.has(s.banner) &&
+      !(s.banner in banners) &&
+      !(s.banner in bannerCopies)
+    )
       bad.push(`section ${key} banner ${s.banner} is not uploaded`);
   }
 
@@ -102,6 +107,13 @@ export function validate(payload, existingProjectFiles, existingBannerFiles) {
   });
   for (const file of Object.keys(uploads))
     if (!referenced.has(file)) bad.push(`uploaded ${file} is not used by any project`);
+  for (const [file, source] of Object.entries(bannerCopies)) {
+    if (!FILE.test(file)) bad.push(`banner ${file} must be a lowercase .jpg or .png name`);
+    if (!existingProjectFiles.has(source) && !(source in uploads))
+      bad.push(`banner ${file} copies ${source}, which is not a project photograph`);
+    if (!Object.values(sections).some((s) => s.banner === file))
+      bad.push(`banner ${file} is not used by any section`);
+  }
   for (const file of Object.keys(banners)) {
     if (!Object.values(sections).some((s) => s.banner === file))
       bad.push(`uploaded banner ${file} is not used by any section`);

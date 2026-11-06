@@ -22,6 +22,7 @@
     bannerFiles: new Set(),
     uploads: {},
     banners: {},
+    bannerCopies: {},
     previews: {},
     current: null,
     view: 'section',
@@ -35,6 +36,7 @@
       h: state.home,
       u: Object.keys(state.uploads),
       b: Object.keys(state.banners),
+      c: state.bannerCopies,
     });
   const slugify = (s) =>
     s
@@ -299,6 +301,22 @@
                 },
                 '↓',
               ),
+              i === 0
+                ? el('span', { class: 'cover-badge' }, 'Cover')
+                : el(
+                    'button',
+                    {
+                      class: 'btn btn-ghost btn-sm',
+                      type: 'button',
+                      title: 'Use this photograph as the project cover',
+                      onclick: () => {
+                        p.images.unshift(...p.images.splice(i, 1));
+                        renderImages();
+                        markDirty();
+                      },
+                    },
+                    'Set as cover',
+                  ),
               el(
                 'button',
                 {
@@ -815,14 +833,23 @@
     state.view = 'section-edit';
     state.current = key;
     const bannerBox = el('div', { class: 'images' });
+    const bannerSrc = () =>
+      s.banner in state.bannerCopies
+        ? imageUrl('projects', state.bannerCopies[s.banner])
+        : imageUrl('sections', s.banner);
     const renderBanner = () => {
-      const have = state.bannerFiles.has(s.banner) || s.banner in state.banners;
+      const have =
+        state.bannerFiles.has(s.banner) ||
+        s.banner in state.banners ||
+        s.banner in state.bannerCopies;
       bannerBox.replaceChildren(
         have
           ? el(
               'div',
-              { class: `image${s.banner in state.banners ? ' new' : ''}` },
-              el('img', { src: imageUrl('sections', s.banner), alt: '' }),
+              {
+                class: `image${s.banner in state.banners || s.banner in state.bannerCopies ? ' new' : ''}`,
+              },
+              el('img', { src: bannerSrc(), alt: '' }),
               el(
                 'div',
                 {},
@@ -836,7 +863,7 @@
                   },
                 }),
                 focusPicker({
-                  src: imageUrl('sections', s.banner),
+                  src: bannerSrc(),
                   get: () => s.bannerFocus,
                   set: (v) => {
                     s.bannerFocus = v;
@@ -950,12 +977,37 @@
           { class: 'f' },
           el('label', {}, `Banner · page at /${key}/`),
           bannerBox,
+          (() => {
+            const sel = el('select', {});
+            sel.append(el('option', { value: '' }, 'Choose a project photograph as the banner…'));
+            for (const p of state.projects)
+              for (const img of p.images) {
+                const o = el('option', { value: img.file }, `${p.title} — ${img.file}`);
+                if (state.bannerCopies[s.banner] === img.file) o.selected = true;
+                sel.append(o);
+              }
+            sel.addEventListener('change', () => {
+              if (!sel.value) return;
+              delete state.banners[s.banner];
+              delete state.bannerCopies[s.banner];
+              s.banner = `${key}.${sel.value.split('.').pop()}`;
+              state.bannerCopies[s.banner] = sel.value;
+              const source = state.projects
+                .flatMap((p) => p.images)
+                .find((i) => i.file === sel.value);
+              if (source && !s.bannerAlt) s.bannerAlt = source.alt;
+              renderBanner();
+              markDirty();
+            });
+            return el('div', { class: 'f' }, el('label', {}, 'Use an existing photograph'), sel);
+          })(),
           dropZone(
-            'Drop the banner photograph here, or click to choose',
+            'Or drop a new banner photograph here, or click to choose',
             async (files) => {
               if (!files[0]) return;
               const ext = files[0].type === 'image/png' ? 'png' : 'jpg';
               delete state.banners[s.banner];
+              delete state.bannerCopies[s.banner];
               s.banner = `${key}.${ext}`;
               await stageUpload(files[0], s.banner, state.banners);
               renderBanner();
@@ -1160,6 +1212,7 @@
           home: state.home,
           uploads: state.uploads,
           banners: state.banners,
+          bannerCopies: state.bannerCopies,
           message: $('#message').value,
         }),
       });
@@ -1243,6 +1296,7 @@
       bannerFiles: new Set(data.bannerFiles),
       uploads: {},
       banners: {},
+      bannerCopies: {},
       previews: {},
       dirty: false,
     });

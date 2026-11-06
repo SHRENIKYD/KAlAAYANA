@@ -58,7 +58,12 @@ Open `https://<staging host>/admin/`, sign in through Access.
 - **Projects** are cards. Click one to edit the title, slug, scale, section,
   description and photographs. Drop photographs on the editor to add them;
   every photograph needs alt text. Reorder with the arrows; the first is the
-  cover.
+  **cover** — the photograph that stands for the project in section grids —
+  and _Set as cover_ on any other photograph moves it there.
+- A section's **banner** (its face on the section page) can be chosen from any
+  project photograph with _Use an existing photograph_, or uploaded. Choosing
+  an existing one copies it into the section's banner slot; the original stays
+  with its project.
 - **Homepage** (top of the sidebar) is the WORKS list: order, eyebrow, title,
   link target, link text and photograph for each feature, plus **framing** —
   click the photograph where the subject is and the desktop and phone crops

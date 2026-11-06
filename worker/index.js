@@ -114,6 +114,18 @@ async function handleApi(request, env) {
     const bannerShas = Object.fromEntries(
       await Promise.all(Object.entries(banners).map(async ([f, b]) => [f, await blobSha(b)])),
     );
+    // A banner chosen from an existing photograph reuses that blob: no re-upload.
+    const copies = payload.bannerCopies || {};
+    for (const [file, source] of Object.entries(copies)) {
+      bannerShas[file] = uploadShas[source]
+        ? uploadShas[source]
+        : (
+            await gh.call(
+              'GET',
+              `/contents/src/images/projects/${source}?ref=${encodeURIComponent(base)}`,
+            )
+          ).sha;
+    }
     const deletions = orphans(
       before,
       payload.projects,

@@ -146,6 +146,13 @@ http
       fs.writeFileSync(path.join(out, 'site.json'), JSON.stringify(site, null, 2) + '\n');
       for (const [f, b] of Object.entries(uploads))
         fs.writeFileSync(path.join(out, 'images/projects', f), b);
+      for (const [f, source] of Object.entries(payload.bannerCopies || {}))
+        fs.copyFileSync(
+          uploads[source]
+            ? path.join(out, 'images/projects', source)
+            : path.join('src/images/projects', source),
+          path.join(out, 'images/sections', f),
+        );
       for (const [f, b] of Object.entries(banners))
         fs.writeFileSync(path.join(out, 'images/sections', f), b);
       const deletions = orphans(

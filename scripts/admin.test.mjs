@@ -141,6 +141,39 @@ test('homepage works are validated and keep their photographs alive', () => {
   assert.deepEqual(orphans(before, [project()], files, ['old-1.jpg']), []);
 });
 
+test('a section banner can be chosen from a project photograph', () => {
+  const sec = {
+    ...sections,
+    gardens: {
+      eyebrow: 'G',
+      title: 'G',
+      lede: 'G',
+      banner: 'gardens.jpg',
+      bannerAlt: 'G',
+      href: '/gardens/',
+    },
+  };
+  assert.deepEqual(
+    validate(
+      {
+        projects: [project()],
+        sections: sec,
+        home,
+        bannerCopies: { 'gardens.jpg': 'hanuman-1.jpg' },
+      },
+      files,
+      banners,
+    ),
+    [],
+  );
+  const bad = validate(
+    { projects: [project()], sections: sec, home, bannerCopies: { 'gardens.jpg': 'missing.jpg' } },
+    files,
+    banners,
+  );
+  assert.ok(bad.some((m) => m.includes('copies missing.jpg')));
+});
+
 test('only photographs removed by this save are deleted; never-referenced files are left alone', () => {
   const before = [
     project({
