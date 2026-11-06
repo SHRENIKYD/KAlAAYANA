@@ -10,6 +10,14 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Changed
+
+- Admin roles: contact@kalaayanastudios.com is the fixed **Master** account,
+  with every right, always photographed at sign-in, and the only account that
+  decides who else must be photographed. Superadmins have every other right;
+  admins are unchanged. The Users table shows the master's role as fixed and
+  offers no Remove for it.
+
 ## [1.2.19] - 2026-11-06
 
 ### Changed

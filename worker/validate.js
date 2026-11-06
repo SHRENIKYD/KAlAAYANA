@@ -144,7 +144,7 @@ export function orphans(before, after, existingProjectFiles, keep = []) {
 }
 
 export const ROLES = ['superadmin', 'admin'];
-/** The studio's own address: always a superadmin, whatever the file says. */
+/** The studio's own address: always the master account, whatever the file says. */
 export const PERMANENT_SUPERADMIN = 'contact@kalaayanastudios.com';
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -162,9 +162,15 @@ export function parseUsers(text) {
   }
 }
 
+/** Master: the studio account. Fixed, every right, and the only one who
+    decides who must be photographed at sign-in. Superadmins have every other
+    right; admins add and update projects. */
+export const MASTER = 'master';
+export const hasFullRights = (role) => role === MASTER || role === 'superadmin';
+
 export function roleOf(users, email) {
   const target = String(email || '').toLowerCase();
-  if (target === PERMANENT_SUPERADMIN) return 'superadmin';
+  if (target === PERMANENT_SUPERADMIN) return MASTER;
   return users.find((u) => u.email === target)?.role || null;
 }
 
@@ -200,7 +206,9 @@ export function applyUserChange(users, { action, email, role, photo }, by) {
   if (action === 'photo') {
     // Only the studio account decides who may sign in without a photograph.
     if (by !== PERMANENT_SUPERADMIN)
-      throw new Error(`Only ${PERMANENT_SUPERADMIN} can change who needs a photograph`);
+      throw new Error(
+        `Only the master account (${PERMANENT_SUPERADMIN}) can change who needs a photograph`,
+      );
     if (target === PERMANENT_SUPERADMIN)
       throw new Error(`${PERMANENT_SUPERADMIN} is always photographed at sign-in`);
     if (!PHOTO_MODES.includes(photo)) throw new Error('Choose required or optional');
@@ -209,7 +217,7 @@ export function applyUserChange(users, { action, email, role, photo }, by) {
     return list;
   }
   if (target === PERMANENT_SUPERADMIN && action !== 'invite')
-    throw new Error(`${PERMANENT_SUPERADMIN} is always a superadmin and cannot be changed`);
+    throw new Error(`${PERMANENT_SUPERADMIN} is the master account and cannot be changed`);
   if (action === 'invite') {
     if (!ROLES.includes(role)) throw new Error('Choose a role');
     if (i >= 0) throw new Error(`${target} already has access`);

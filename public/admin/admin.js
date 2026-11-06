@@ -347,6 +347,7 @@
     views: { label: 'Page views', color: '#2a6fa8' },
   };
   const PERMANENT_SUPERADMIN_EMAIL = 'contact@kalaayanastudios.com';
+  const fullRights = () => state.role === 'master' || state.role === 'superadmin';
   const svgNS = 'http://www.w3.org/2000/svg';
   const svg = (tag, attrs = {}, ...children) => {
     const node = document.createElementNS(svgNS, tag);
@@ -1458,7 +1459,7 @@
           el(
             'p',
             { class: 'muted' },
-            'Who can sign in to the admin, and what they may do. Admins add and update projects; superadmins can do everything, see the log and manage users.',
+            'Who can sign in to the admin, and what they may do. Admins add and update projects. Superadmins can do everything else too: works, homepage, clients, the log and users. The master account (contact@kalaayanastudios.com) is fixed, is always photographed, and alone decides who else must be photographed at sign-in.',
           ),
           busy ? el('p', { class: 'pending-note' }, state.usersBusy) : null,
           state.usersPending ? el('p', { class: 'pending-note' }, state.usersPending) : null,
@@ -1484,19 +1485,25 @@
           'tbody',
           {},
           ...state.users.map((u) => {
-            const sel = el(
-              'select',
-              {},
-              ...['admin', 'superadmin'].map((r) => {
-                const o = el('option', { value: r }, r);
-                if (r === u.role) o.selected = true;
-                return o;
-              }),
-            );
-            sel.disabled = busy;
-            sel.addEventListener('change', () =>
-              changeUser({ action: 'role', email: u.email, role: sel.value }),
-            );
+            // The master account's role is fixed, so it is shown, not offered.
+            const sel =
+              u.email === PERMANENT_SUPERADMIN_EMAIL
+                ? el('span', { class: 'role-fixed' }, 'Master')
+                : el(
+                    'select',
+                    {},
+                    ...['admin', 'superadmin'].map((r) => {
+                      const o = el('option', { value: r }, r);
+                      if (r === u.role) o.selected = true;
+                      return o;
+                    }),
+                  );
+            if (sel.tagName === 'SELECT') {
+              sel.disabled = busy;
+              sel.addEventListener('change', () =>
+                changeUser({ action: 'role', email: u.email, role: sel.value }),
+              );
+            }
             let photoSel = null;
             if (state.canSetPhoto) {
               if (u.email === PERMANENT_SUPERADMIN_EMAIL)
@@ -1540,7 +1547,7 @@
               el(
                 'td',
                 {},
-                u.email === state.email
+                u.email === state.email || u.email === PERMANENT_SUPERADMIN_EMAIL
                   ? null
                   : el(
                       'button',
@@ -1610,7 +1617,7 @@
         el(
           'div',
           { class: 'actions' },
-          state.role === 'superadmin'
+          fullRights()
             ? el(
                 'button',
                 { class: 'btn btn-ghost', type: 'button', onclick: () => editSection(key) },
@@ -1868,7 +1875,7 @@
             },
             '← Back',
           ),
-          isNew || state.role !== 'superadmin'
+          isNew || !fullRights()
             ? null
             : el(
                 'button',
@@ -4037,9 +4044,9 @@
     $('#who').textContent = `${data.email} · ${data.role || 'admin'}`;
     state.sessionEnds = Number(data.sessionEnds) || 0;
     if (data.sessionEnds) startSessionClock(Number(data.sessionEnds));
-    document.body.classList.toggle('role-admin', data.role !== 'superadmin');
-    document.body.classList.toggle('role-superadmin', data.role === 'superadmin');
-    if (data.role !== 'superadmin' && ['home', 'clients', 'log', 'users'].includes(state.tab))
+    document.body.classList.toggle('role-admin', !fullRights());
+    document.body.classList.toggle('role-superadmin', fullRights());
+    if (!fullRights() && ['home', 'clients', 'log', 'users'].includes(state.tab))
       state.tab = 'projects';
     $('#base-note').textContent =
       `Editing the ${data.base} branch. Nothing is recorded until you preview and accept; accepting opens and merges a pull request, and staging updates after that.`;
