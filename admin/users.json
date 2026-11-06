@@ -2,7 +2,7 @@
   "users": [
     {
       "email": "shrenikyd@gmail.com",
-      "role": "admin",
+      "role": "superadmin",
       "invitedBy": null,
       "invitedAt": "2026-11-06T06:00:00Z"
     },
