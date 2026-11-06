@@ -96,12 +96,7 @@
       "label": "Core materials"
     }
   ],
-  "materials": [
-    "FRP",
-    "Metal",
-    "Concrete",
-    "GFRC"
-  ],
+  "materials": ["FRP", "Metal", "Concrete", "GFRC"],
   "sections": {
     "landmarks": {
       "eyebrow": "Monumental",
@@ -150,22 +145,18 @@
     }
   },
   "story": [
-    "Embarking upon a legacy spanning five generations, our family lineage is steeped in artistic brilliance. Commencing in the 19th century, our esteemed ancestor, <strong>Sri Tippaji</strong>, emerged as a luminary in the realm of Mysore style painting. His magnum opus, <em>“Vishwaroopa Darshana,”</em> stands as an epitome of excellence within the traditional Mysore painting genre, earning him the distinction of a Gold Medal recipient from the British government.",
-    "Continuing this rich heritage, great grandson of Sri Tippaji, <strong>Shilpi K. Narayana Rao</strong>, distinguished himself through exceptional contributions to traditional temple architecture and the crafting of monumental cement sculptures, gracing diverse landscapes across India.",
-    "Carrying the torch of inspiration ignited by these revered masters, <strong>Vishal Kavatekar</strong>, alongside a devoted team of artists, founded Kalaayana Studios. Here, the confluence of tradition and innovation unfolds, embodying a commitment to artistic excellence and a profound connection with our storied artistic legacy."
+    "<em>Rooted in legacy. Driven by contemporary possibilities.</em>",
+    "Kalaayana Studios is a creative studio founded by artists <strong>Vishal Kavatekar</strong> and <strong>Vinay Kumar S.</strong>, built on a foundation of artistic tradition, craftsmanship, and contemporary thinking.",
+    "The studio carries forward the sculptural legacy of <strong>Shilpi K. Narayana Rao</strong>, a traditional sculptor whose dedication and contribution to temple art and monumental sculpture continue to inspire its practice.",
+    "Bringing together generations of artistic knowledge, fine arts education, and contemporary production techniques, Kalaayana Studios works across sculpture, murals, installations, restoration, and customised commissions.",
+    "We believe in preserving the essence of traditional craftsmanship while exploring new materials, techniques, and possibilities.",
+    "For us, continuing a legacy is not simply about preserving the past, but keeping its spirit alive through new expressions."
   ],
   "contact": {
     "email": "contact@kalaayanastudios.com",
-    "phones": [
-      "+918886870796",
-      "+918310660720"
-    ],
+    "phones": ["+918886870796", "+918310660720"],
     "instagram": "kalaayana_studios",
-    "address": [
-      "No. 46, 47, BM Kaval,",
-      "Kengeri, Bangalore South,",
-      "Karnataka — 560060"
-    ]
+    "address": ["No. 46, 47, BM Kaval,", "Kengeri, Bangalore South,", "Karnataka — 560060"]
   },
   "home": {
     "works": [
