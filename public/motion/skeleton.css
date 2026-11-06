@@ -1,0 +1,30 @@
+/* Photographs shimmer until their bytes arrive. Only while skeleton.js is
+   running (html.skel), only until each image has loaded (img.is-loaded), and
+   never on logos or the client marquee, which are drawn on transparency. The
+   image itself is untouched: no fade, no resize, so the design is unchanged
+   once the photograph is there. */
+html.skel img:not(.is-loaded):not(.logo):not(.menu-logo):not(.client-item img) {
+  background-color: rgba(128, 120, 108, 0.12);
+  background-image: linear-gradient(
+    90deg,
+    rgba(128, 120, 108, 0) 0%,
+    rgba(128, 120, 108, 0.18) 50%,
+    rgba(128, 120, 108, 0) 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: skel-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes skel-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.skel img:not(.is-loaded) {
+    animation: none;
+  }
+}
