@@ -133,8 +133,22 @@
     renderSections();
   }
 
-  /* ---------- tabs ---------- */
+  /* ---------- tabs ----------
+     The tab, and the open work on the Projects tab, live in the address
+     (#projects/murals), so a refresh or the back button lands where you were. */
   const TABS = ['home', 'projects', 'log', 'users'];
+  function readPlace() {
+    const [tab, key] = location.hash.replace(/^#/, '').split('/');
+    if (TABS.includes(tab)) state.tab = tab;
+    if (tab === 'projects' && key) state.current = decodeURIComponent(key);
+  }
+  function writePlace() {
+    const hash =
+      state.tab === 'projects' && state.current
+        ? `#projects/${encodeURIComponent(state.current)}`
+        : `#${state.tab}`;
+    if (location.hash !== hash) history.replaceState(null, '', hash);
+  }
   function showTab(tab) {
     state.tab = tab;
     for (const t of TABS) {
@@ -150,6 +164,7 @@
           ? state.current
           : Object.keys(state.sections)[0],
       );
+    writePlace();
   }
 
   /* ---------- log (superadmin) ---------- */
@@ -696,6 +711,7 @@
     state.view = 'section';
     state.editing = key;
     state.current = key;
+    if (state.tab === 'projects') writePlace();
     const s = state.sections[key];
     const items = state.projects.filter((p) => p.group === key);
     const main = $('#main');
@@ -2511,6 +2527,7 @@
     });
     state.original = snapshot();
     state.adminFetchedAt = Date.now();
+    readPlace();
     $('#who').textContent = `${data.email} · ${data.role || 'admin'}`;
     if (data.sessionEnds) startSessionClock(Number(data.sessionEnds));
     document.body.classList.toggle('role-admin', data.role !== 'superadmin');
@@ -2536,6 +2553,11 @@
   $('#new-section').addEventListener('click', newWork);
   $('#preview-btn').addEventListener('click', previewCurrent);
   $('#signout').addEventListener('click', () => signOut('manual'));
+  window.addEventListener('hashchange', () => {
+    if (!state.email) return;
+    readPlace();
+    showTab(state.tab);
+  });
   $('#tab-home').addEventListener('click', () => showTab('home'));
   $('#tab-log').addEventListener('click', () => showTab('log'));
   $('#tab-users').addEventListener('click', () => showTab('users'));
