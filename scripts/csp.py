@@ -2,8 +2,10 @@
 
 Every inline script is hashed, so the policy can be enforced without
 'unsafe-inline'. Each page gets a <meta http-equiv> policy carrying its own
-hashes, which is the only CSP GitHub Pages can serve. dist/_headers gets the
-same policy with every hash, plus the directives a meta tag cannot express.
+hashes, which is the only CSP GitHub Pages can serve. The Cloudflare header
+in public/_headers carries only frame-ancestors, which a meta tag cannot
+express: Cloudflare limits a _headers line to 2000 characters, far short of
+every page's hashes, and both policies would apply to every page anyway.
 
   python scripts/csp.py           inject
   python scripts/csp.py --verify  recompute after stamping and fail on drift
@@ -73,17 +75,20 @@ def main(verify):
 
     headers = root / '_headers'
     if verify:
-        if PLACEHOLDER in headers.read_text(encoding='utf-8'):
+        if headers.exists() and PLACEHOLDER in headers.read_text(encoding='utf-8'):
             drift.append('_headers still carries the hash placeholder')
         if drift:
             print('\n'.join('FAIL: ' + d for d in drift), file=sys.stderr)
             sys.exit(1)
         print('CSP: %d page(s) verified, %d script hash(es)' % (len(pages), len(union)))
         return
-    text = headers.read_text(encoding='utf-8')
-    if PLACEHOLDER not in text:
-        raise SystemExit('csp: public/_headers has no %s placeholder' % PLACEHOLDER)
-    headers.write_text(text.replace(PLACEHOLDER, ''.join(' ' + h for h in sorted(union))), encoding='utf-8')
+    if headers.exists():
+        text = headers.read_text(encoding='utf-8')
+        if PLACEHOLDER in text:
+            headers.write_text(text.replace(PLACEHOLDER, ''.join(' ' + h for h in sorted(union))), encoding='utf-8')
+        for n, line in enumerate(text.splitlines(), 1):
+            if len(line) > 2000:
+                raise SystemExit('csp: _headers line %d exceeds Cloudflare\'s 2000-character limit' % n)
     print('CSP: %d page(s) stamped, %d distinct script hash(es)' % (len(pages), len(union)))
 
 
