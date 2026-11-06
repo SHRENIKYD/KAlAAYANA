@@ -56,6 +56,17 @@
     state.sections[key]?.title ||
     key;
   const imageUrl = (kind, file) => state.previews[file] || `/admin/api/image/${kind}/${file}`;
+  // A photograph that shimmers until its bytes arrive, and is only fetched
+  // when it is near the screen.
+  const pic = (src, attrs = {}) => {
+    const img = el('img', { src, alt: '', loading: 'lazy', decoding: 'async', ...attrs });
+    img.classList.add('pic');
+    const done = () => img.classList.add('loaded');
+    img.addEventListener('load', done, { once: true });
+    img.addEventListener('error', done, { once: true });
+    if (img.complete && img.naturalWidth) done();
+    return img;
+  };
 
   // Who is using the account this session. Kept for the hour in this tab.
   const sessionName = () => {
@@ -142,11 +153,16 @@
   }
 
   /* ---------- log (superadmin) ---------- */
-  async function refreshAdminData() {
+  // Log and users come with the content; a tab switch within twenty seconds
+  // of the last fetch reuses it rather than asking GitHub again.
+  const FRESH_MS = 20000;
+  async function refreshAdminData(force = false) {
+    if (!force && state.adminFetchedAt && Date.now() - state.adminFetchedAt < FRESH_MS) return;
     const data = await api('/content');
     state.users = data.users || [];
     state.log = data.log || '';
     state.decisions = data.decisions || [];
+    state.adminFetchedAt = Date.now();
   }
   async function showLog() {
     state.view = 'log';
@@ -492,9 +508,13 @@
     try {
       const r = await api('/users', { method: 'POST', body: JSON.stringify(body) });
       if (Array.isArray(r.users)) state.users = r.users;
-      state.usersPending = r.pr
-        ? `Recorded in pull request #${r.pr}; it takes effect once that merges.`
-        : '';
+      state.adminFetchedAt = Date.now();
+      state.usersPending = [
+        r.pr ? `Recorded in pull request #${r.pr}; it takes effect once that merges.` : '',
+        r.access || '',
+      ]
+        .filter(Boolean)
+        .join(' ');
       renderUsers();
     } catch (e) {
       note.textContent = e.message;
@@ -544,7 +564,7 @@
         { class: 'muted' },
         state.demo
           ? 'Locally: the person signs in with this email on the sign-in page.'
-          : 'They sign in at the staging address with this email; Cloudflare Access emails them a one-time code. Their email must also be allowed by the Access policy.',
+          : 'They sign in at the staging address with this email; Cloudflare Access emails them a one-time code. The Access policy is updated to match this list.',
       ),
       note,
     );
@@ -716,10 +736,13 @@
 
   function projectCard(p) {
     const node = $('#tpl-project-card').content.firstElementChild.cloneNode(true);
-    const img = $('.card-thumb', node);
+    const slot = $('.card-thumb', node);
     if (p.images[0]) {
-      img.src = imageUrl('projects', p.images[0].file);
-      img.alt = p.images[0].alt;
+      const img = pic(imageUrl('projects', p.images[0].file), {
+        class: 'card-thumb',
+        alt: p.images[0].alt,
+      });
+      slot.replaceWith(img);
     }
     $('.card-title', node).textContent = p.title;
     $('.card-meta', node).textContent =
@@ -817,7 +840,7 @@
           el(
             'div',
             { class: `image photo${img.file in state.uploads ? ' new' : ''}` },
-            el('img', { src: imageUrl('projects', img.file), alt: '' }),
+            pic(imageUrl('projects', img.file)),
             el(
               'div',
               {},
@@ -1137,7 +1160,7 @@
     const swatchPreview = el(
       'div',
       { class: 'fit-preview' },
-      el('img', { src: imageUrl(w.image.from, w.image.file), alt: '' }),
+      pic(imageUrl(w.image.from, w.image.file)),
     );
     swatchPreview.style.background = w.image.background || '#29251f';
     const colour = el('input', {
@@ -1431,7 +1454,7 @@
                   render();
                 },
               },
-              el('img', { src: imageUrl(w.image.from, w.image.file), alt: '' }),
+              pic(imageUrl(w.image.from, w.image.file)),
               el('span', { class: 'work-head-num' }, String(i + 1).padStart(2, '0')),
               el(
                 'span',
@@ -1452,7 +1475,7 @@
               ),
               el('span', { class: 'work-head-chevron', 'aria-hidden': 'true' }, '⌄'),
             ),
-            el('img', { src: imageUrl(w.image.from, w.image.file), alt: '' }),
+            pic(imageUrl(w.image.from, w.image.file)),
             el(
               'div',
               { class: 'form work-form' },
@@ -1727,7 +1750,7 @@
               {
                 class: `image${s.banner in state.banners || s.banner in state.bannerCopies ? ' new' : ''}`,
               },
-              el('img', { src: bannerSrc(), alt: '' }),
+              pic(bannerSrc()),
               el(
                 'div',
                 {},
@@ -2487,6 +2510,7 @@
       dirty: false,
     });
     state.original = snapshot();
+    state.adminFetchedAt = Date.now();
     $('#who').textContent = `${data.email} · ${data.role || 'admin'}`;
     if (data.sessionEnds) startSessionClock(Number(data.sessionEnds));
     document.body.classList.toggle('role-admin', data.role !== 'superadmin');

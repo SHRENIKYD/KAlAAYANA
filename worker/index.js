@@ -3,6 +3,7 @@
 // JWT for an allow-listed email; the Worker then commits content changes to
 // GitHub and opens a pull request into the base branch.
 import { client, treeEntries, commitAndOpenPr, acceptPr, rejectPr } from './github.js';
+import { syncAccessPolicy } from './policy.js';
 import { verifyAccessJwt } from './access.js';
 import { makeEntry, parseLog, decodePhoto } from './logbook.js';
 import {
@@ -185,6 +186,20 @@ async function handleApi(request, env) {
   }
   const gh = client(env.GITHUB_TOKEN, env.GITHUB_REPO);
   const base = env.GITHUB_BASE || 'develop';
+  // Everything /content needs is requested at once, before the role is known,
+  // so the page waits for one round trip to GitHub rather than three.
+  const content =
+    request.method === 'GET' && route === '/content'
+      ? {
+          projects: gh.file('src/data/projects.json', base).then((r) => r.json()),
+          site: gh.file('src/data/site.json', base).then((r) => r.json()),
+          projectFiles: gh.listDir('src/images/projects', base),
+          bannerFiles: gh.listDir('src/images/sections', base),
+          log: textOr(gh, 'logs/admin-log.jsonl', base),
+          prs: gh.call('GET', '/pulls?state=all&sort=created&direction=desc&per_page=30'),
+        }
+      : null;
+  if (content) for (const p of Object.values(content)) p.catch(() => {});
   const users = await usersOf(gh, base, env);
   const role = roleOf(users, email);
   if (!role) return json({ error: `${email} is not an admin`, email }, 403);
@@ -198,16 +213,16 @@ async function handleApi(request, env) {
 
   if (request.method === 'GET' && route === '/content') {
     const [projects, site, projectFiles, bannerFiles] = await Promise.all([
-      gh.file('src/data/projects.json', base).then((r) => r.json()),
-      gh.file('src/data/site.json', base).then((r) => r.json()),
-      gh.listDir('src/images/projects', base),
-      gh.listDir('src/images/sections', base),
+      content.projects,
+      content.site,
+      content.projectFiles,
+      content.bannerFiles,
     ]);
     let log = null;
     let decisions = null;
     if (superadmin) {
-      log = parseLog(await textOr(gh, 'logs/admin-log.jsonl', base));
-      const prs = await gh.call('GET', '/pulls?state=all&sort=created&direction=desc&per_page=30');
+      log = parseLog(await content.log);
+      const prs = await content.prs.catch(() => []);
       decisions = prs
         .filter((pr) => pr.head?.ref?.startsWith('content/'))
         .map((pr) => ({
@@ -242,7 +257,7 @@ async function handleApi(request, env) {
     return new Response(res.body, {
       headers: {
         'content-type': image[2].endsWith('.png') ? 'image/png' : 'image/jpeg',
-        'cache-control': 'private, max-age=300',
+        'cache-control': 'private, max-age=1800',
       },
     });
   }
@@ -390,10 +405,27 @@ async function handleApi(request, env) {
     } catch (e) {
       return json({ error: e.message }, 422);
     }
+    // Access decides who may sign in at all; keep its Allow list equal to
+    // the editors' emails. A failure here is recorded, not fatal: the user
+    // change still commits, and the note tells the superadmin what to do.
+    let access = 'Access policy not managed here';
+    if (env.CF_API_TOKEN && env.CF_ACCOUNT_ID) {
+      try {
+        await syncAccessPolicy({
+          token: env.CF_API_TOKEN,
+          accountId: env.CF_ACCOUNT_ID,
+          hostname: url.hostname,
+          emails: next.map((u) => u.email),
+        });
+        access = 'Access policy updated';
+      } catch (e) {
+        access = `Access policy NOT updated: ${e.message}`;
+      }
+    }
     const item = logItem({
       category: 'admin',
       action: `users: ${body.action}`,
-      details: `${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}`,
+      details: `${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''} · ${access}`,
     });
     try {
       const r = await commitToBase(gh, base, {
@@ -409,7 +441,7 @@ async function handleApi(request, env) {
         message: `admin: ${body.action} ${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}\n\nBy ${name ? `${name} (${email})` : email} from the content admin.`,
         author,
       });
-      return json({ users: next, ...r });
+      return json({ users: next, access, ...r });
     } catch (e) {
       return json({ error: e.message }, 502);
     }
