@@ -604,12 +604,37 @@ body.signin .tabs {
 }
 
 .dialog {
+  position: relative;
   background: var(--panel);
   color: var(--cream);
   border: 1px solid var(--line);
   padding: 28px;
   max-width: 560px;
   width: calc(100% - 32px);
+}
+.dialog-x {
+  all: unset;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--muted);
+  border-radius: 50%;
+}
+.dialog-x:hover,
+.dialog-x:focus-visible {
+  color: var(--black);
+  background: var(--bg);
+  outline: none;
+}
+.dialog-x[hidden] {
+  display: none;
 }
 .dialog::backdrop {
   background: #1a181699;

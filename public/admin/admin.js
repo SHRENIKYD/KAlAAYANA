@@ -453,8 +453,9 @@
         form,
       );
       $('#result-close').hidden = true;
+      $('#result-x').hidden = true;
+      state.dialogLocked = true;
       $('#result').showModal();
-      $('#result').addEventListener('cancel', (e) => e.preventDefault(), { once: true });
       name.focus();
     });
   }
@@ -2162,8 +2163,10 @@
     $('#result').showModal();
   }
   function closeDialog() {
+    state.dialogLocked = false;
     $('#result').close();
     $('#result-close').hidden = false;
+    $('#result-x').hidden = false;
     $('#result-close').textContent = 'Close';
     $('#result-close').onclick = () => $('#result').close();
   }
@@ -2471,6 +2474,12 @@
     showTab(state.tab);
   }
 
+  $('#result-x').addEventListener('click', closeDialog);
+  // Escape closes any dialog except the one asking who is here.
+  $('#result').addEventListener('cancel', (e) => {
+    e.preventDefault();
+    if (!state.dialogLocked) closeDialog();
+  });
   $('#new-section').addEventListener('click', newWork);
   $('#preview-btn').addEventListener('click', previewCurrent);
   $('#signout').addEventListener('click', () => signOut('manual'));
