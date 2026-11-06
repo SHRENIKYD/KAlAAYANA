@@ -8,3 +8,4 @@
 /admin/*
   ! Permissions-Policy
   Permissions-Policy: camera=(self), microphone=(), geolocation=(), payment=()
+  Cache-Control: no-cache

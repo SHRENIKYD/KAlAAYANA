@@ -142,11 +142,16 @@
   }
 
   /* ---------- log (superadmin) ---------- */
-  async function refreshAdminData() {
+  // Log and users come with the content; a tab switch within twenty seconds
+  // of the last fetch reuses it rather than asking GitHub again.
+  const FRESH_MS = 20000;
+  async function refreshAdminData(force = false) {
+    if (!force && state.adminFetchedAt && Date.now() - state.adminFetchedAt < FRESH_MS) return;
     const data = await api('/content');
     state.users = data.users || [];
     state.log = data.log || '';
     state.decisions = data.decisions || [];
+    state.adminFetchedAt = Date.now();
   }
   async function showLog() {
     state.view = 'log';
@@ -492,6 +497,7 @@
     try {
       const r = await api('/users', { method: 'POST', body: JSON.stringify(body) });
       if (Array.isArray(r.users)) state.users = r.users;
+      state.adminFetchedAt = Date.now();
       state.usersPending = [
         r.pr ? `Recorded in pull request #${r.pr}; it takes effect once that merges.` : '',
         r.access || '',
@@ -2490,6 +2496,7 @@
       dirty: false,
     });
     state.original = snapshot();
+    state.adminFetchedAt = Date.now();
     $('#who').textContent = `${data.email} · ${data.role || 'admin'}`;
     if (data.sessionEnds) startSessionClock(Number(data.sessionEnds));
     document.body.classList.toggle('role-admin', data.role !== 'superadmin');

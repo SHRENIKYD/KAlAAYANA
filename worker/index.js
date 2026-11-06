@@ -186,6 +186,20 @@ async function handleApi(request, env) {
   }
   const gh = client(env.GITHUB_TOKEN, env.GITHUB_REPO);
   const base = env.GITHUB_BASE || 'develop';
+  // Everything /content needs is requested at once, before the role is known,
+  // so the page waits for one round trip to GitHub rather than three.
+  const content =
+    request.method === 'GET' && route === '/content'
+      ? {
+          projects: gh.file('src/data/projects.json', base).then((r) => r.json()),
+          site: gh.file('src/data/site.json', base).then((r) => r.json()),
+          projectFiles: gh.listDir('src/images/projects', base),
+          bannerFiles: gh.listDir('src/images/sections', base),
+          log: textOr(gh, 'logs/admin-log.jsonl', base),
+          prs: gh.call('GET', '/pulls?state=all&sort=created&direction=desc&per_page=30'),
+        }
+      : null;
+  if (content) for (const p of Object.values(content)) p.catch(() => {});
   const users = await usersOf(gh, base, env);
   const role = roleOf(users, email);
   if (!role) return json({ error: `${email} is not an admin`, email }, 403);
@@ -199,16 +213,16 @@ async function handleApi(request, env) {
 
   if (request.method === 'GET' && route === '/content') {
     const [projects, site, projectFiles, bannerFiles] = await Promise.all([
-      gh.file('src/data/projects.json', base).then((r) => r.json()),
-      gh.file('src/data/site.json', base).then((r) => r.json()),
-      gh.listDir('src/images/projects', base),
-      gh.listDir('src/images/sections', base),
+      content.projects,
+      content.site,
+      content.projectFiles,
+      content.bannerFiles,
     ]);
     let log = null;
     let decisions = null;
     if (superadmin) {
-      log = parseLog(await textOr(gh, 'logs/admin-log.jsonl', base));
-      const prs = await gh.call('GET', '/pulls?state=all&sort=created&direction=desc&per_page=30');
+      log = parseLog(await content.log);
+      const prs = await content.prs.catch(() => []);
       decisions = prs
         .filter((pr) => pr.head?.ref?.startsWith('content/'))
         .map((pr) => ({
