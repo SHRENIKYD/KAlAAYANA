@@ -59,6 +59,11 @@ export function validate(payload, existingProjectFiles, existingBannerFiles) {
     for (const f of ['href', 'eyebrow', 'title', 'link']) {
       if (!String(w?.[f] ?? '').trim()) bad.push(`${where} is missing ${f}`);
     }
+    if (w?.section != null) {
+      if (!(w.section in sections))
+        bad.push(`${where} names a work that does not exist: ${w.section}`);
+      else if (w.href !== `/${w.section}/`) bad.push(`${where} must link to /${w.section}/`);
+    }
     if (w?.href && !/^\/[a-z0-9-]+\/$/.test(w.href) && !/^#[a-z0-9-]+$/.test(w.href))
       bad.push(`${where} link must look like /section/`);
     const img = w?.image || {};

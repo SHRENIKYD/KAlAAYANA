@@ -49,27 +49,25 @@ it the admin shows the pull request link and you merge it by hand.
 
 ## Using it
 
-Open `https://<staging host>/admin/`, sign in through Access.
+Open `https://<staging host>/admin/`, sign in through Access. Two tabs:
 
-- **Sections** are in the sidebar. _Edit section_ changes the eyebrow, title,
-  lede and banner. _New section_ needs a key (becomes `/<key>/`), the text,
-  and a banner photograph. A new section gets its own page and project pages
-  automatically; linking it from the homepage is a code change.
-- **Projects** are cards. Click one to edit the title, slug, scale, section,
-  description and photographs. Drop photographs on the editor to add them;
-  every photograph needs alt text. Reorder with the arrows; the first is the
-  **cover** — the photograph that stands for the project in section grids —
-  and _Set as cover_ on any other photograph moves it there.
-- A section's **banner** (its face on the section page) can be chosen from any
-  project photograph with _Use an existing photograph_, or uploaded. Choosing
-  an existing one copies it into the section's banner slot; the original stays
-  with its project.
-- **+ New project** (sidebar) asks for the section, then opens a blank project.
-- **Homepage** (top of the sidebar) is the list of collection tiles under WORKS — one per section, not individual projects: order, eyebrow, title,
-  link target, link text and photograph for each feature, plus **framing** —
-  the photograph is shown whole with the crop the site will use drawn over
-  it; drag the frame to the part that should show, switching between the
-  desktop and phone crops. Section banners have the same control.
+- **Homepage** — the _works_ shown under WORKS on the homepage, in order
+  (Temple Architecture, Portraits, Murals…). Each has an eyebrow, a name,
+  a link, a photograph and **framing**: the photograph shows whole with the
+  crop the site will use drawn over it; drag the frame to the part that
+  should show, switching between the desktop and phone crops.
+  **+ Add a work** asks for the name, eyebrow, one line and a cover
+  photograph, then creates the work on the homepage _and_ in the Projects
+  tab, ready for its projects. _Remove from homepage_ takes a work off the
+  homepage without deleting it. _Projects in this work →_ jumps to them.
+- **Projects** — the works in the sidebar, each with its projects. Click a
+  project to edit its title, slug, scale, work, description and
+  photographs; drop photographs to add them, every one needs alt text; the
+  first is the **cover** shown in grids, and _Set as cover_ moves any other
+  there. **+ New project** asks for the work first. _Edit work_ changes the
+  work's text and banner (choose any project photograph with _Use an
+  existing photograph_, or upload) and its framing; _Delete work_ removes
+  its page and its homepage tile.
 - **Save & publish to staging** validates everything the way CI does, then
   commits. Problems are listed and nothing is saved until they are fixed.
   A saved change shows on staging three or four minutes after the pull

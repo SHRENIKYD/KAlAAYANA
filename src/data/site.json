@@ -158,6 +158,7 @@
   "home": {
     "works": [
       {
+        "section": "temples",
         "href": "/temples/",
         "eyebrow": "Sacred spaces",
         "title": "Temple Architecture",
@@ -170,6 +171,7 @@
         }
       },
       {
+        "section": "portraits",
         "href": "/portraits/",
         "eyebrow": "Portraiture",
         "title": "Portrait",
@@ -182,6 +184,7 @@
         }
       },
       {
+        "section": "murals",
         "href": "/murals/",
         "eyebrow": "Narrative relief",
         "title": "Murals",
@@ -194,6 +197,7 @@
         }
       },
       {
+        "section": "landmarks",
         "href": "/landmarks/",
         "eyebrow": "Landmarks",
         "title": "Monumental",
@@ -218,6 +222,7 @@
         }
       },
       {
+        "section": "installations",
         "href": "/installations/",
         "eyebrow": "Experiential",
         "title": "Other Installations",

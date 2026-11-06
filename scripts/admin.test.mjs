@@ -102,6 +102,38 @@ test('new sections need a banner and a matching href', () => {
   assert.ok(bad.some((m) => m.includes('gardens.jpg is not uploaded')));
 });
 
+test('a tile that names a work must point at an existing work', () => {
+  const tile = (over) => ({
+    href: '/landmarks/',
+    eyebrow: 'L',
+    title: 'T',
+    link: 'Go',
+    image: { from: 'projects', file: 'hanuman-1.jpg', alt: 'a' },
+    ...over,
+  });
+  assert.deepEqual(
+    validate(
+      { projects: [project()], sections, home: { works: [tile({ section: 'landmarks' })] } },
+      files,
+      banners,
+    ),
+    [],
+  );
+  const bad = validate(
+    {
+      projects: [project()],
+      sections,
+      home: {
+        works: [tile({ section: 'gardens' }), tile({ section: 'landmarks', href: '/temples/' })],
+      },
+    },
+    files,
+    banners,
+  );
+  assert.ok(bad.some((m) => m.includes('does not exist: gardens')));
+  assert.ok(bad.some((m) => m.includes('must link to /landmarks/')));
+});
+
 test('homepage works are validated and keep their photographs alive', () => {
   const bad = validate(
     {

@@ -25,6 +25,7 @@
     bannerCopies: {},
     previews: {},
     current: null,
+    tab: 'projects',
     view: 'section',
     dirty: false,
     original: '',
@@ -81,20 +82,26 @@
     renderSections();
   }
 
+  /* ---------- tabs ---------- */
+  function showTab(tab) {
+    state.tab = tab;
+    document.body.classList.toggle('tab-home', tab === 'home');
+    document.body.classList.toggle('tab-projects', tab === 'projects');
+    $('#tab-home').setAttribute('aria-current', tab === 'home' ? 'page' : 'false');
+    $('#tab-projects').setAttribute('aria-current', tab === 'projects' ? 'page' : 'false');
+    if (tab === 'home') editHome();
+    else
+      openSection(
+        state.current && state.sections[state.current]
+          ? state.current
+          : Object.keys(state.sections)[0],
+      );
+  }
+
   /* ---------- sections sidebar ---------- */
   function renderSections() {
     const nav = $('#sections');
     nav.replaceChildren(
-      el(
-        'button',
-        {
-          type: 'button',
-          'aria-current': String(state.view === 'home'),
-          onclick: editHome,
-        },
-        el('span', {}, 'Homepage'),
-        el('b', {}, String((state.home?.works || []).length)),
-      ),
       ...Object.entries(state.sections).map(([key, s]) =>
         el(
           'button',
@@ -736,6 +743,9 @@
                   }
                   sel.addEventListener('change', () => {
                     w.href = sel.value;
+                    const key = sel.value.replace(/^\/|\/$/g, '');
+                    if (state.sections[key]) w.section = key;
+                    else delete w.section;
                     markDirty();
                   });
                   return el('div', { class: 'f' }, el('label', {}, 'Links to'), sel);
@@ -869,8 +879,22 @@
                     markDirty();
                   },
                 },
-                'Remove',
+                w.section ? 'Remove from homepage' : 'Remove',
               ),
+              w.section && state.sections[w.section]
+                ? el(
+                    'button',
+                    {
+                      class: 'work-link',
+                      type: 'button',
+                      onclick: () => {
+                        state.current = w.section;
+                        showTab('projects');
+                      },
+                    },
+                    `Projects in this work (${state.projects.filter((p) => p.group === w.section).length}) →`,
+                  )
+                : null,
             ),
           ),
         ),
@@ -885,11 +909,11 @@
           'div',
           {},
           el('p', { class: 'eyebrow' }, 'Homepage'),
-          el('h1', {}, 'Collection tiles'),
+          el('h1', {}, 'Works'),
           el(
             'p',
             { class: 'muted' },
-            'The tiles under WORKS on the homepage, one per collection, in this order. To add a piece of work, create a project in its section instead.',
+            'The works shown under WORKS on the homepage, in this order. Each work holds its projects in the Projects tab. Adding a work here creates it there too.',
           ),
         ),
         el(
@@ -897,29 +921,10 @@
           { class: 'actions' },
           el(
             'button',
-            {
-              class: 'btn',
-              type: 'button',
-              onclick: () => {
-                const first = imageChoices()[0];
-                works.push({
-                  href: Object.keys(state.sections).length
-                    ? `/${Object.keys(state.sections)[0]}/`
-                    : '/collectables/',
-                  eyebrow: '',
-                  title: '',
-                  link: 'Discover collection',
-                  image: first
-                    ? { from: first.from, file: first.file, alt: first.alt }
-                    : { from: 'projects', file: '', alt: '' },
-                });
-                render();
-                markDirty();
-                list.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              },
-            },
-            '+ Add a tile',
+            { class: 'btn btn-ghost', type: 'button', onclick: newProjectAnywhere },
+            '+ New project',
           ),
+          el('button', { class: 'btn', type: 'button', onclick: newWork }, '+ Add a work'),
         ),
       ),
       list,
@@ -1027,17 +1032,18 @@
                   type: 'button',
                   onclick: () =>
                     confirmBox(
-                      `Delete section “${s.title}”?`,
-                      'Its page is removed from the site on save.',
+                      `Delete work “${s.title}”?`,
+                      'Its page and its homepage tile are removed from the site on save.',
                       () => {
                         delete state.sections[key];
                         delete state.banners[s.banner];
+                        state.home.works = state.home.works.filter((w) => w.section !== key);
                         markDirty();
                         openSection(Object.keys(state.sections)[0]);
                       },
                     ),
                 },
-                'Delete section',
+                'Delete work',
               ),
         ),
       ),
@@ -1157,33 +1163,100 @@
     $('#result').showModal();
   }
 
-  function newSection() {
-    const box = el('div', { class: 'form' });
-    let key = '';
+  function newWork() {
+    const draft = { title: '', eyebrow: '', lede: '', file: null };
     const dlg = $('#result');
+    const picked = el('p', { class: 'muted' }, 'No photograph yet.');
+    const note = el('p', { class: 'signin-error', role: 'alert' });
     $('#result-body').replaceChildren(
-      el('h2', {}, 'New section'),
-      field(
-        'Key (URL)',
-        {
+      el('h2', {}, 'New work'),
+      el(
+        'p',
+        { class: 'muted' },
+        'A work is a collection on the homepage, with its own page and its projects in the Projects tab.',
+      ),
+      el(
+        'div',
+        { class: 'form' },
+        field(
+          'Name',
+          {
+            value: '',
+            required: true,
+            placeholder: 'Garden sculpture',
+            oninput: (v) => (draft.title = v),
+          },
+          'Shown on the homepage and as the page title. The address becomes /<name>/.',
+        ),
+        field(
+          'Eyebrow',
+          {
+            value: '',
+            required: true,
+            placeholder: 'Outdoor works',
+            oninput: (v) => (draft.eyebrow = v),
+          },
+          'The small label above the name.',
+        ),
+        field('One line about it', {
           value: '',
           required: true,
-          placeholder: 'gardens',
-          oninput: (v) => {
-            key = slugify(v);
-          },
-        },
-        'Becomes /<key>/ and the section id. Lowercase letters, digits, hyphens.',
+          multiline: true,
+          rows: 2,
+          oninput: (v) => (draft.lede = v),
+        }),
+        el(
+          'div',
+          { class: 'f' },
+          el('label', {}, 'Cover photograph'),
+          picked,
+          dropZone(
+            'Drop the photograph that represents this work, or click to choose',
+            (files) => {
+              if (!files[0]) return;
+              draft.file = files[0];
+              picked.textContent = files[0].name;
+            },
+            false,
+          ),
+        ),
+        note,
       ),
-      box,
     );
-    $('#result-close').textContent = 'Create';
-    $('#result-close').onclick = () => {
-      if (!key || state.sections[key]) return;
+    $('#result-close').textContent = 'Create work';
+    $('#result-close').onclick = async () => {
+      const key = slugify(draft.title);
+      if (!key) return (note.textContent = 'Give the work a name.');
+      if (state.sections[key]) return (note.textContent = `“${draft.title}” already exists.`);
+      if (!draft.eyebrow.trim() || !draft.lede.trim())
+        return (note.textContent = 'Fill in the eyebrow and the line about it.');
+      if (!draft.file) return (note.textContent = 'Add a cover photograph.');
+      const ext = draft.file.type === 'image/png' ? 'png' : 'jpg';
+      const banner = `${key}.${ext}`;
+      await stageUpload(draft.file, banner, state.banners);
+      state.sections[key] = {
+        eyebrow: draft.eyebrow.trim(),
+        title: draft.title.trim(),
+        lede: draft.lede.trim(),
+        banner,
+        bannerAlt: draft.title.trim(),
+        href: `/${key}/`,
+        bannerFocus: '50% 50%',
+      };
+      (state.home.works ||= []).push({
+        section: key,
+        href: `/${key}/`,
+        eyebrow: draft.eyebrow.trim(),
+        title: draft.title.trim(),
+        link: 'Discover collection',
+        image: { from: 'sections', file: banner, alt: draft.title.trim(), focus: '50% 50%' },
+      });
       dlg.close();
       $('#result-close').textContent = 'Close';
       $('#result-close').onclick = () => dlg.close();
-      editSection(key, true);
+      markDirty();
+      state.current = key;
+      showTab('projects');
     };
     dlg.showModal();
   }
@@ -1441,14 +1514,12 @@
       `Editing the ${data.base} branch. Saves open a pull request; staging updates once it merges.`;
     $('#message').value = '';
     markDirty();
-    openSection(
-      state.current && state.sections[state.current]
-        ? state.current
-        : Object.keys(state.sections)[0],
-    );
+    showTab(state.tab);
   }
 
-  $('#new-section').addEventListener('click', newSection);
+  $('#new-section').addEventListener('click', newWork);
+  $('#tab-home').addEventListener('click', () => showTab('home'));
+  $('#tab-projects').addEventListener('click', () => showTab('projects'));
   $('#new-project').addEventListener('click', newProjectAnywhere);
   $('#save').addEventListener('click', save);
   $('#discard').addEventListener('click', () =>

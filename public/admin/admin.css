@@ -70,6 +70,52 @@ h3 {
   letter-spacing: 0;
 }
 
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 5vw;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+.tab {
+  all: unset;
+  cursor: pointer;
+  padding: 14px 18px;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.tab:hover {
+  color: var(--black);
+}
+.tab[aria-current='page'] {
+  color: var(--black);
+  border-bottom-color: var(--gold);
+}
+.tab:focus-visible {
+  outline: 2px solid var(--black);
+  outline-offset: -2px;
+}
+body.tab-home .side {
+  display: none;
+}
+body.tab-home .shell {
+  grid-template-columns: 1fr;
+}
+body.signin .tabs {
+  display: none;
+}
+.work-link {
+  all: unset;
+  cursor: pointer;
+  color: var(--gold);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
 .shell {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
@@ -299,7 +345,7 @@ h3 {
   background: var(--panel);
   padding: 12px;
 }
-.image img {
+.image > img {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
@@ -313,7 +359,7 @@ h3 {
   grid-template-columns: 180px minmax(0, 1fr) auto;
   align-items: start;
 }
-.image.work img {
+.image.work > img {
   aspect-ratio: 1;
 }
 .work-form {
@@ -454,9 +500,6 @@ h3 {
   grid-template-columns: 180px minmax(0, 1fr) auto;
   align-items: start;
 }
-.image.work img {
-  aspect-ratio: 1;
-}
 .work-form {
   gap: 14px;
 }
@@ -517,6 +560,8 @@ h3 {
   display: block;
   width: 100%;
   height: auto;
+  aspect-ratio: auto;
+  object-fit: fill;
   pointer-events: none;
 }
 .frame-shade {

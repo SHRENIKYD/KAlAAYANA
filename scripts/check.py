@@ -136,6 +136,11 @@ for i, w in enumerate(works):
     for field in ('href', 'eyebrow', 'title', 'link'):
         if not str(w.get(field, '')).strip():
             bad('%s is missing %s' % (where, field))
+    if w.get('section') is not None:
+        if w['section'] not in GROUPS:
+            bad('%s names a work that does not exist: %s' % (where, w['section']))
+        elif w.get('href') != '/%s/' % w['section']:
+            bad('%s must link to /%s/' % (where, w['section']))
     image = w.get('image') or {}
     if image.get('from') not in ('projects', 'sections'):
         bad('%s image.from must be projects or sections' % where)
