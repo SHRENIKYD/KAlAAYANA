@@ -1016,5 +1016,18 @@
         "alt": "oversized sandwich sculpture, view 7"
       }
     ]
+  },
+  {
+    "slug": "test",
+    "group": "test",
+    "title": "test",
+    "scale": "e",
+    "description": "tesd",
+    "images": [
+      {
+        "file": "test-1.jpg",
+        "alt": "test"
+      }
+    ]
   }
 ]
