@@ -86,15 +86,48 @@ export async function commitAndOpenPr(gh, { base, branch, message, author, entri
   });
   await gh.call('POST', '/git/refs', { ref: `refs/heads/${branch}`, sha: commit.sha });
   const pr = await gh.call('POST', '/pulls', { title, head: branch, base, body });
-  let autoMerge = false;
+  return { url: pr.html_url, number: pr.number, branch, commit: commit.sha };
+}
+
+/**
+ * The editor has looked at the preview and accepted it: record who and when
+ * on the pull request, then merge. If the checks are still running, ask
+ * GitHub to merge as soon as they pass.
+ */
+export async function acceptPr(gh, number, { email, at, previewUrl }) {
+  await gh.call('POST', `/issues/${number}/comments`, {
+    body: `Accepted by ${email} at ${at} after previewing ${previewUrl || 'the build'}.\n\n---\n_Recorded by the content admin_`,
+  });
   try {
+    const r = await gh.call('PUT', `/pulls/${number}/merge`, { merge_method: 'merge' });
+    return { merged: Boolean(r.merged), autoMerge: false };
+  } catch (e) {
+    if (!/405|422/.test(e.message)) throw e;
+    const pr = await gh.call('GET', `/pulls/${number}`);
     const result = await gh.graphql(
       'mutation($id: ID!) { enablePullRequestAutoMerge(input: {pullRequestId: $id, mergeMethod: MERGE}) { clientMutationId } }',
       { id: pr.node_id },
     );
-    autoMerge = !result.errors;
-  } catch {
-    autoMerge = false;
+    if (result.errors)
+      throw new Error(
+        'Checks are still running and auto-merge is not enabled on the repository. Merge the pull request on GitHub once they pass.',
+      );
+    return { merged: false, autoMerge: true };
   }
-  return { url: pr.html_url, number: pr.number, branch, commit: commit.sha, autoMerge };
+}
+
+/** The editor rejected the preview: close the pull request and drop its branch. */
+export async function rejectPr(gh, number, branch, { email, at }) {
+  await gh.call('POST', `/issues/${number}/comments`, {
+    body: `Rejected by ${email} at ${at}. Nothing was published.\n\n---\n_Recorded by the content admin_`,
+  });
+  await gh.call('PATCH', `/pulls/${number}`, { state: 'closed' });
+  if (branch) {
+    try {
+      await gh.call('DELETE', `/git/refs/heads/${branch}`);
+    } catch {
+      /* the branch may be protected or already gone */
+    }
+  }
+  return { closed: true };
 }

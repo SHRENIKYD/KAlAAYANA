@@ -148,6 +148,10 @@ for i, w in enumerate(works):
         bad('%s image is missing: %s/%s' % (where, image['from'], image.get('file')))
     if not str(image.get('alt', '')).strip():
         bad('%s image needs alt text' % where)
+    if image.get('fit') is not None and image['fit'] not in ('cover', 'contain'):
+        bad('%s image fit must be cover or contain' % where)
+    if image.get('background') is not None and not re.fullmatch(r'#[0-9a-fA-F]{6}', str(image['background'])):
+        bad('%s image background must be a hex colour' % where)
     if image.get('focus') is not None and not re.fullmatch(r'\d{1,3}% \d{1,3}%', str(image['focus'])):
         bad('%s image focus must look like "50%% 40%%"' % where)
 try:

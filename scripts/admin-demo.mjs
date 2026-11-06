@@ -177,13 +177,38 @@ http
         return json(res, { error: isPreview ? 'Cannot preview yet' : 'Not saved', problems }, 422);
       const target = isPreview ? path.join(previewRoot, 'input') : out;
       const deletions = materialize(target, payload, uploads, banners, projectFiles);
+      if (!isPreview && !(payload.accepted && payload.accepted.at))
+        return json(res, { error: 'Preview the change and accept it before saving.' }, 400);
       if (!isPreview) {
+        // Apply to the working tree: the edit is then a change in git, to be
+        // committed and pushed like any other.
+        fs.copyFileSync(path.join(out, 'projects.json'), 'src/data/projects.json');
+        fs.copyFileSync(path.join(out, 'site.json'), 'src/data/site.json');
+        for (const kind of ['projects', 'sections'])
+          for (const f of fs.readdirSync(path.join(out, 'images', kind)))
+            fs.copyFileSync(path.join(out, 'images', kind, f), path.join('src/images', kind, f));
+        for (const f of deletions) fs.rmSync(path.join('src/images/projects', f), { force: true });
+        const who = signedIn(req);
+        const logPath = 'CONTENT-LOG.md';
+        const head = fs.existsSync(logPath)
+          ? fs.readFileSync(logPath, 'utf8').replace(/\n*$/, '\n')
+          : '# Content log\n\nOne line per change made through the content admin.\n\n';
+        fs.writeFileSync(
+          logPath,
+          head +
+            `- ${new Date().toISOString()} · ${who} · "${String(payload.message || 'Content update')
+              .trim()
+              .slice(
+                0,
+                72,
+              )}" · ${Object.keys(uploads).length} photograph(s) added, ${deletions.length} deleted · previewed ${payload.accepted.previewUrl || ''} and accepted at ${payload.accepted.at}\n`,
+        );
         console.log(
-          `saved → ${out} (${Object.keys(uploads).length} image(s) added, ${deletions.length} to delete) — "${payload.message || ''}"`,
+          `saved → src/ (${Object.keys(uploads).length} image(s) added, ${deletions.length} deleted) — "${payload.message || ''}"`,
         );
         return json(res, {
           demo: true,
-          folder: '.admin-demo/',
+          applied: true,
           added: Object.keys(uploads).length,
           removed: deletions.length,
         });

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validate, orphans, imageType } from '../worker/validate.js';
-import { treeEntries, commitAndOpenPr, client } from '../worker/github.js';
+import { treeEntries, commitAndOpenPr, acceptPr, rejectPr, client } from '../worker/github.js';
 
 const sections = {
   landmarks: {
@@ -245,7 +245,44 @@ test('tree entries write data, add uploads and delete orphans', () => {
   );
 });
 
-test('one commit on a fresh branch, then a pull request, auto-merge best effort', async () => {
+test('accept records who and when on the pull request, then merges or arms auto-merge', async () => {
+  const calls = [];
+  const fake =
+    (mergeStatus) =>
+    async (url, init = {}) => {
+      calls.push([
+        init.method || 'GET',
+        url.replace('https://api.github.com/repos/o/r', ''),
+        init.body,
+      ]);
+      if (url.endsWith('/merge'))
+        return new Response(mergeStatus === 200 ? '{"merged":true}' : 'checks pending', {
+          status: mergeStatus,
+        });
+      if (url.endsWith('/pulls/9')) return new Response('{"node_id":"N"}', { status: 200 });
+      if (url.endsWith('/graphql')) return new Response('{"data":{}}', { status: 200 });
+      return new Response('{}', { status: 200 });
+    };
+  let r = await acceptPr(client('t', 'o/r', fake(200)), 9, {
+    email: 'a@b',
+    at: '2026-11-06T10:00:00Z',
+    previewUrl: 'https://p',
+  });
+  assert.deepEqual(r, { merged: true, autoMerge: false });
+  assert.ok(calls[0][2].includes('Accepted by a@b at 2026-11-06T10:00:00Z'));
+  calls.length = 0;
+  r = await acceptPr(client('t', 'o/r', fake(405)), 9, { email: 'a@b', at: 'T' });
+  assert.deepEqual(r, { merged: false, autoMerge: true });
+  calls.length = 0;
+  r = await rejectPr(client('t', 'o/r', fake(200)), 9, 'content/x', { email: 'a@b', at: 'T' });
+  assert.deepEqual(r, { closed: true });
+  assert.deepEqual(
+    calls.map((c) => c[0] + ' ' + c[1]),
+    ['POST /issues/9/comments', 'PATCH /pulls/9', 'DELETE /git/refs/heads/content/x'],
+  );
+});
+
+test('one commit on a fresh branch, then a pull request that waits for acceptance', async () => {
   const calls = [];
   const fakeFetch = async (url, init = {}) => {
     calls.push([init.method || 'GET', url.replace('https://api.github.com/repos/o/r', '')]);
@@ -275,10 +312,9 @@ test('one commit on a fresh branch, then a pull request, auto-merge best effort'
     number: 9,
     branch: 'content/x',
     commit: 'c1',
-    autoMerge: false,
   });
   assert.deepEqual(
     calls.map((c) => c[0]),
-    ['GET', 'GET', 'POST', 'POST', 'POST', 'POST', 'POST'],
+    ['GET', 'GET', 'POST', 'POST', 'POST', 'POST'],
   );
 });

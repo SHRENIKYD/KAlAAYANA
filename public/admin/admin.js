@@ -25,9 +25,10 @@
     bannerCopies: {},
     previews: {},
     current: null,
+    openWork: null,
     editing: null,
     demo: false,
-    lastPr: null,
+    pending: null,
     tab: 'projects',
     view: 'section',
     dirty: false,
@@ -516,6 +517,136 @@
     renderSections();
   }
 
+  /* ---------- fit: crop to fill, or show the whole photograph ----------
+     A cut-out on a plain ground (a bronze on beige) should not be cropped.
+     "Show whole" letterboxes it on a background sampled from the
+     photograph's own edges, so the tile reads as one continuous surface. */
+  function sampleEdge(src) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const c = document.createElement('canvas');
+          c.width = 48;
+          c.height = 48;
+          const g = c.getContext('2d');
+          g.drawImage(img, 0, 0, 48, 48);
+          const d = g.getImageData(0, 0, 48, 48).data;
+          let r = 0,
+            gg = 0,
+            b = 0,
+            n = 0;
+          for (let y = 0; y < 48; y += 1)
+            for (let x = 0; x < 48; x += 1) {
+              if (x > 2 && x < 45 && y > 2 && y < 45) continue;
+              const i = (y * 48 + x) * 4;
+              r += d[i];
+              gg += d[i + 1];
+              b += d[i + 2];
+              n += 1;
+            }
+          const hex = (v) =>
+            Math.round(v / n)
+              .toString(16)
+              .padStart(2, '0');
+          resolve(`#${hex(r)}${hex(gg)}${hex(b)}`);
+        } catch {
+          resolve(null);
+        }
+      };
+      img.onerror = () => resolve(null);
+      img.src = src;
+    });
+  }
+
+  function fitControl(w, rerender) {
+    const seg = el('div', { class: 'frame-tabs', role: 'tablist' });
+    const mk = (label, value) => {
+      const t = el(
+        'button',
+        {
+          type: 'button',
+          role: 'tab',
+          'aria-selected': String((w.image.fit || 'cover') === value),
+        },
+        label,
+      );
+      t.addEventListener('click', async () => {
+        if ((w.image.fit || 'cover') === value) return;
+        if (value === 'contain') {
+          w.image.fit = 'contain';
+          if (!w.image.background)
+            w.image.background =
+              (await sampleEdge(imageUrl(w.image.from, w.image.file))) || '#29251f';
+        } else {
+          delete w.image.fit;
+        }
+        markDirty();
+        rerender();
+      });
+      return t;
+    };
+    seg.append(mk('Crop to fill', 'cover'), mk('Show whole', 'contain'));
+    const swatchPreview = el(
+      'div',
+      { class: 'fit-preview' },
+      el('img', { src: imageUrl(w.image.from, w.image.file), alt: '' }),
+    );
+    swatchPreview.style.background = w.image.background || '#29251f';
+    const colour = el('input', {
+      type: 'color',
+      value: w.image.background || '#29251f',
+      'aria-label': 'Background colour',
+    });
+    colour.addEventListener('input', () => {
+      w.image.background = colour.value;
+      swatchPreview.style.background = colour.value;
+      markDirty();
+    });
+    const resample = el(
+      'button',
+      { class: 'btn btn-ghost btn-sm', type: 'button' },
+      'Match photograph',
+    );
+    resample.addEventListener('click', async () => {
+      const hex = await sampleEdge(imageUrl(w.image.from, w.image.file));
+      if (!hex) return;
+      w.image.background = hex;
+      colour.value = hex;
+      swatchPreview.style.background = hex;
+      markDirty();
+    });
+    return el(
+      'div',
+      { class: 'f' },
+      el('label', {}, 'How the photograph fills the tile'),
+      el('div', { class: 'frame-bar' }, seg),
+      w.image.fit === 'contain'
+        ? el(
+            'div',
+            { class: 'fit-row' },
+            swatchPreview,
+            el(
+              'div',
+              { class: 'fit-tools' },
+              el('label', { class: 'fit-label' }, 'Background', colour),
+              resample,
+              el(
+                'small',
+                {},
+                'Sampled from the photograph’s edges so the tile looks like one surface. Adjust if needed.',
+              ),
+            ),
+          )
+        : el(
+            'small',
+            {},
+            'Crop to fill is the usual choice. Use Show whole for a cut-out on a plain background.',
+          ),
+    );
+  }
+
   /* ---------- framing ----------
      The photograph is shown whole, with the crop the site will use drawn over
      it. Drag the frame to the part that should show. One frame per layout
@@ -706,7 +837,41 @@
         ...works.map((w, i) =>
           el(
             'div',
-            { class: `image work${w.image.file in state.uploads ? ' new' : ''}` },
+            {
+              class: `image work${w.image.file in state.uploads ? ' new' : ''}${state.openWork === i ? ' open' : ''}`,
+            },
+            el(
+              'button',
+              {
+                class: 'work-head',
+                type: 'button',
+                'aria-expanded': String(state.openWork === i),
+                onclick: () => {
+                  state.openWork = state.openWork === i ? null : i;
+                  render();
+                },
+              },
+              el('img', { src: imageUrl(w.image.from, w.image.file), alt: '' }),
+              el('span', { class: 'work-head-num' }, String(i + 1).padStart(2, '0')),
+              el(
+                'span',
+                { class: 'work-head-text' },
+                el('b', {}, w.title || 'Untitled work'),
+                el(
+                  'small',
+                  {},
+                  [
+                    w.eyebrow,
+                    w.section
+                      ? `${state.projects.filter((p) => p.group === w.section).length} projects`
+                      : w.href,
+                  ]
+                    .filter(Boolean)
+                    .join(' · '),
+                ),
+              ),
+              el('span', { class: 'work-head-chevron', 'aria-hidden': 'true' }, '⌄'),
+            ),
             el('img', { src: imageUrl(w.image.from, w.image.file), alt: '' }),
             el(
               'div',
@@ -814,17 +979,20 @@
                   markDirty();
                 },
               }),
-              focusPicker({
-                src: imageUrl(w.image.from, w.image.file),
-                get: () => w.image.focus || '50% 48%',
-                set: (v) => {
-                  w.image.focus = v;
-                },
-                crops: [
-                  ['Desktop', '2 / 1'],
-                  ['Phone', '4 / 3'],
-                ],
-              }),
+              fitControl(w, () => render()),
+              w.image.fit === 'contain'
+                ? null
+                : focusPicker({
+                    src: imageUrl(w.image.from, w.image.file),
+                    get: () => w.image.focus || '50% 48%',
+                    set: (v) => {
+                      w.image.focus = v;
+                    },
+                    crops: [
+                      ['Desktop', '2 / 1'],
+                      ['Phone', '4 / 3'],
+                    ],
+                  }),
               dropZone(
                 'Drop a new photograph for this work',
                 async (files) => {
@@ -1256,7 +1424,8 @@
         href: `/${key}/`,
         bannerFocus: '50% 50%',
       };
-      (state.home.works ||= []).push({
+      state.openWork = (state.home.works ||= []).length;
+      state.home.works.push({
         section: key,
         href: `/${key}/`,
         eyebrow: draft.eyebrow.trim(),
@@ -1274,11 +1443,14 @@
     dlg.showModal();
   }
 
-  /* ---------- preview this page ----------
-     The page being edited, as the site will show it. In the demo the real
-     site is built from the current edits, saved or not. On staging a save
-     is needed first: Cloudflare builds the pull request's branch and posts
-     the URL on it, which the Worker reads back. */
+  /* ---------- preview, then accept, then save ----------
+     Nothing is saved until the editor has looked at the page as the site
+     will show it and accepted it. In the demo the real site is built from
+     the current edits; accepting writes the files and a line in
+     CONTENT-LOG.md with who, when and what. On staging the save opens a
+     pull request that does not merge by itself; Cloudflare builds it; the
+     editor accepts (recorded on the PR by email and time, then merged) or
+     rejects (closed, branch deleted). */
   function previewPath() {
     if (state.view === 'home') return '/#works';
     if (state.view === 'project' && state.editing?.slug)
@@ -1298,51 +1470,65 @@
       message: $('#message').value,
     };
   }
+  const openTab = () => window.open('', '_blank');
+  const sendTo = (tab, url) => {
+    if (tab) tab.location.replace(url);
+    else window.location.assign(url);
+  };
+  const waiting = (tab, text) => {
+    if (tab) tab.document.write(`<p style="font:16px/1.5 system-ui;padding:24px">${text}</p>`);
+  };
+  const sleep = (ms) => new Promise((ok) => setTimeout(ok, ms));
+
+  async function demoPreviewUrl(tab) {
+    waiting(
+      tab,
+      'Building the site with your current edits — about a minute the first time, a few seconds after…',
+    );
+    const r = await api('/preview', { method: 'POST', body: JSON.stringify(payload()) });
+    return r.url.replace(/\/$/, '') + previewPath();
+  }
+  async function cloudflarePreviewUrl(number, tab) {
+    waiting(
+      tab,
+      'Cloudflare is building your proposed change. This page will open the preview as soon as it is ready — usually two to three minutes.',
+    );
+    for (let i = 0; i < 40; i += 1) {
+      const r = await api(`/preview-url/${number}`);
+      if (r.url) return r.url.replace(/\/$/, '') + previewPath();
+      await sleep(15000);
+    }
+    return null;
+  }
+
+  /* Look only: the top-bar button. */
   async function previewCurrent() {
     const btn = $('#preview-btn');
-    const tab = window.open('', '_blank');
-    const show = (html) => {
-      if (tab) tab.document.write(html);
-    };
+    const tab = openTab();
     btn.disabled = true;
     try {
       if (state.demo) {
         btn.textContent = 'Building preview…';
-        show(
-          '<p style="font:16px/1.5 system-ui;padding:24px">Building the site with your current edits — about a minute the first time, a few seconds after…</p>',
-        );
-        const r = await api('/preview', { method: 'POST', body: JSON.stringify(payload()) });
-        const url = r.url.replace(/\/$/, '') + previewPath();
-        if (tab) tab.location.replace(url);
-        else window.location.assign(url);
+        sendTo(tab, await demoPreviewUrl(tab));
         return;
       }
-      if (!state.lastPr) {
+      if (!state.pending) {
         if (tab) tab.close();
         return alertBox(
-          'Save first',
-          'On staging the preview is built from your saved changes: save, and Cloudflare builds this page within a few minutes.',
+          'Nothing proposed yet',
+          'On staging a preview is built from a proposed change: press Preview & publish, and the preview opens when Cloudflare has built it.',
         );
       }
       btn.textContent = 'Waiting for Cloudflare…';
-      show(
-        '<p style="font:16px/1.5 system-ui;padding:24px">Cloudflare is building your saved changes. This page will open the preview as soon as it is ready — usually two to three minutes.</p>',
-      );
-      for (let i = 0; i < 40; i += 1) {
-        const r = await api(`/preview-url/${state.lastPr}`);
-        if (r.url) {
-          const url = r.url.replace(/\/$/, '') + previewPath();
-          if (tab) tab.location.replace(url);
-          else window.location.assign(url);
-          return;
-        }
-        await new Promise((ok) => setTimeout(ok, 15000));
+      const url = await cloudflarePreviewUrl(state.pending.number, tab);
+      if (url) sendTo(tab, url);
+      else {
+        if (tab) tab.close();
+        alertBox(
+          'Preview not ready',
+          `Cloudflare has not posted a preview for pull request #${state.pending.number} yet.`,
+        );
       }
-      if (tab) tab.close();
-      alertBox(
-        'Preview not ready',
-        `Cloudflare has not posted a preview for pull request #${state.lastPr} yet. Check the pull request on GitHub.`,
-      );
     } catch (e) {
       if (tab) tab.close();
       alertBox('Preview failed', e.problems ? e.problems.join('\n') : e.message);
@@ -1350,6 +1536,59 @@
       btn.disabled = false;
       btn.textContent = 'Preview this page ↗';
     }
+  }
+
+  function decisionDialog({
+    title,
+    text,
+    previewUrl,
+    acceptLabel,
+    onAccept,
+    rejectLabel,
+    onReject,
+  }) {
+    const note = el('p', { class: 'signin-error', role: 'alert' });
+    $('#result-body').replaceChildren(
+      el('h2', {}, title),
+      el('p', {}, text),
+      previewUrl
+        ? el(
+            'p',
+            {},
+            el(
+              'a',
+              { href: previewUrl, target: '_blank', rel: 'noopener noreferrer' },
+              'Open the preview again ↗',
+            ),
+          )
+        : null,
+      el(
+        'div',
+        { class: 'signin-form' },
+        el('button', { class: 'btn', type: 'button', onclick: () => onAccept(note) }, acceptLabel),
+        el(
+          'button',
+          { class: 'btn btn-ghost', type: 'button', onclick: () => onReject(note) },
+          rejectLabel,
+        ),
+      ),
+      note,
+    );
+    $('#result-close').hidden = true;
+    $('#result').showModal();
+  }
+  function closeDialog() {
+    $('#result').close();
+    $('#result-close').hidden = false;
+    $('#result-close').textContent = 'Close';
+    $('#result-close').onclick = () => $('#result').close();
+  }
+  function doneDialog(title, lines) {
+    $('#result-close').hidden = false;
+    $('#result-body').replaceChildren(el('h2', {}, title), ...lines.map((l) => el('p', {}, l)));
+    $('#result-close').textContent = 'Close';
+    $('#result-close').onclick = () => $('#result').close();
+    if (!$('#result').open) $('#result').showModal();
   }
 
   /* ---------- sign-in ----------
@@ -1458,85 +1697,104 @@
     $('#result').showModal();
   }
 
-  /* ---------- save ---------- */
-  async function save() {
+  /* ---------- Preview & publish ---------- */
+  async function publish() {
     const btn = $('#save');
+    if (!$('#message').value.trim()) {
+      $('#message').focus();
+      return alertBox('Say what changed', 'One line, for the log and the commit.');
+    }
     btn.disabled = true;
-    btn.textContent = 'Saving…';
+    const tab = openTab();
     try {
-      const result = await api('/save', {
-        method: 'POST',
-        body: JSON.stringify(payload()),
+      if (state.demo) {
+        btn.textContent = 'Building preview…';
+        const previewUrl = await demoPreviewUrl(tab);
+        sendTo(tab, previewUrl);
+        decisionDialog({
+          title: 'Does the preview look right?',
+          text: 'The page opened in a new tab exactly as the site will show it. Accept to save these changes; keep editing to change them first. Nothing is saved until you accept.',
+          previewUrl,
+          acceptLabel: 'Accept & save',
+          onAccept: async (note) => {
+            try {
+              const result = await api('/save', {
+                method: 'POST',
+                body: JSON.stringify({
+                  ...payload(),
+                  accepted: { at: new Date().toISOString(), previewUrl },
+                }),
+              });
+              doneDialog('Saved', [
+                `Saved to the project files (${result.added} photograph(s) added, ${result.removed} deleted), accepted by ${state.email}.`,
+                'Logged in CONTENT-LOG.md. The changes are now in git: commit and push to publish.',
+              ]);
+              await load();
+            } catch (e) {
+              note.textContent = e.problems ? e.problems.join(' · ') : e.message;
+            }
+          },
+          rejectLabel: 'Keep editing',
+          onReject: () => closeDialog(),
+        });
+        return;
+      }
+      // Staging: propose as a pull request, let Cloudflare build it, then decide.
+      btn.textContent = 'Proposing…';
+      const proposed = await api('/save', { method: 'POST', body: JSON.stringify(payload()) });
+      state.pending = { number: proposed.number, branch: proposed.branch };
+      btn.textContent = 'Waiting for Cloudflare…';
+      const previewUrl = await cloudflarePreviewUrl(proposed.number, tab);
+      if (previewUrl) sendTo(tab, previewUrl);
+      else if (tab) tab.close();
+      decisionDialog({
+        title: previewUrl ? 'Does the preview look right?' : 'Preview not ready yet',
+        text: previewUrl
+          ? `Pull request #${proposed.number} is proposed and the preview opened in a new tab. Accept to publish it to staging; reject to discard it.`
+          : `Pull request #${proposed.number} is proposed but Cloudflare has not posted its preview yet. You can accept once you have checked it on GitHub, or reject.`,
+        previewUrl,
+        acceptLabel: 'Accept & publish',
+        onAccept: async (note) => {
+          try {
+            const r = await api(`/accept/${proposed.number}`, {
+              method: 'POST',
+              body: JSON.stringify({ previewUrl }),
+            });
+            state.pending = null;
+            doneDialog('Accepted', [
+              `Accepted by ${r.email} at ${r.at}, recorded on pull request #${proposed.number}.`,
+              r.merged
+                ? 'Merged. Staging rebuilds in three or four minutes.'
+                : 'It merges itself as soon as the checks pass; staging rebuilds after that.',
+            ]);
+            await load();
+          } catch (e) {
+            note.textContent = e.message;
+          }
+        },
+        rejectLabel: 'Reject',
+        onReject: async (note) => {
+          try {
+            const r = await api(`/reject/${proposed.number}`, {
+              method: 'POST',
+              body: JSON.stringify({ branch: proposed.branch }),
+            });
+            state.pending = null;
+            doneDialog('Rejected', [
+              `Rejected by ${r.email} at ${r.at}. Pull request #${proposed.number} is closed and nothing was published.`,
+              'Your edits are still here to change and propose again.',
+            ]);
+          } catch (e) {
+            note.textContent = e.message;
+          }
+        },
       });
-      if (result.number) state.lastPr = result.number;
-      $('#result-body').replaceChildren(
-        ...[
-          el('h2', {}, 'Saved'),
-          result.demo
-            ? el(
-                'p',
-                {},
-                `Demo mode: written to ${result.folder} in the project folder (${result.added} image(s) added, ${result.removed} marked for removal). Nothing was committed.`,
-              )
-            : el(
-                'p',
-                {},
-                'Your changes are in ',
-                el(
-                  'a',
-                  { href: result.url, target: '_blank', rel: 'noopener noreferrer' },
-                  `pull request #${result.number}`,
-                ),
-                '.',
-              ),
-          result.demo
-            ? el(
-                'p',
-                {},
-                'Preview this page shows the site exactly as it will look with these changes.',
-              )
-            : el(
-                'p',
-                {},
-                result.autoMerge
-                  ? 'The checks are running. When they pass it merges itself and staging rebuilds — allow three or four minutes.'
-                  : 'Auto-merge is not enabled on the repository, so merge it on GitHub once the checks pass. Staging rebuilds after the merge.',
-              ),
-          result.demo
-            ? el(
-                'button',
-                { class: 'btn', type: 'button', onclick: previewCurrent },
-                'Preview this page ↗',
-              )
-            : el(
-                'p',
-                {},
-                'Preview this page (top right) opens the page as it will look once Cloudflare has built this pull request — usually two to three minutes.',
-              ),
-        ].filter(Boolean),
-      );
-      $('#result-close').textContent = 'Close';
-      $('#result-close').onclick = () => $('#result').close();
-      $('#result').showModal();
-      await load();
     } catch (e) {
-      $('#result-body').replaceChildren(
-        el('h2', {}, 'Not saved'),
-        el('p', {}, e.message),
-        e.problems
-          ? el(
-              'ul',
-              {},
-              e.problems.map((m) => el('li', {}, m)),
-            )
-          : null,
-      );
-      $('#result-close').textContent = 'Close';
-      $('#result-close').onclick = () => $('#result').close();
-      $('#result').showModal();
+      if (tab) tab.close();
+      doneDialog('Not published', [e.message, ...(e.problems || [])]);
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Save & publish to staging';
+      btn.textContent = 'Preview & publish';
     }
   }
 
@@ -1572,7 +1830,7 @@
   $('#tab-home').addEventListener('click', () => showTab('home'));
   $('#tab-projects').addEventListener('click', () => showTab('projects'));
   $('#new-project').addEventListener('click', newProjectAnywhere);
-  $('#save').addEventListener('click', save);
+  $('#save').addEventListener('click', publish);
   $('#discard').addEventListener('click', () =>
     confirmBox('Discard all unsaved changes?', 'Everything since the last save is lost.', load),
   );

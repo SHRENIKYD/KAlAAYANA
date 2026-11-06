@@ -2,7 +2,7 @@
 // content admin under /admin/api/. Every admin request must carry the Access
 // JWT for an allow-listed email; the Worker then commits content changes to
 // GitHub and opens a pull request into the base branch.
-import { client, treeEntries, commitAndOpenPr } from './github.js';
+import { client, treeEntries, commitAndOpenPr, acceptPr, rejectPr } from './github.js';
 import { verifyAccessJwt } from './access.js';
 import { validate, orphans, imageType, MAX_IMAGE_BYTES } from './validate.js';
 
@@ -146,13 +146,34 @@ async function handleApi(request, env) {
     );
 
     const nextSite = { ...site, sections: payload.sections, home: payload.home };
-    const entries = treeEntries({
-      projectsJson: JSON.stringify(payload.projects, null, 2) + '\n',
-      siteJson: JSON.stringify(nextSite, null, 2) + '\n',
-      uploads: uploadShas,
-      banners: bannerShas,
-      deletions,
-    });
+    const at = new Date().toISOString();
+    let log = '';
+    try {
+      log = await gh.file('CONTENT-LOG.md', base).then((r) => r.text());
+    } catch {
+      log = '# Content log\n\nOne line per change made through the content admin.\n\n';
+    }
+    const logLine = `- ${at} · ${email} · "${String(payload.message || 'Content update')
+      .trim()
+      .slice(
+        0,
+        72,
+      )}" · ${Object.keys(uploads).length} photograph(s) added, ${deletions.length} deleted, ${Object.keys(banners).length} banner(s) added · proposed; acceptance is recorded on the pull request\n`;
+    const entries = [
+      ...treeEntries({
+        projectsJson: JSON.stringify(payload.projects, null, 2) + '\n',
+        siteJson: JSON.stringify(nextSite, null, 2) + '\n',
+        uploads: uploadShas,
+        banners: bannerShas,
+        deletions,
+      }),
+      {
+        path: 'CONTENT-LOG.md',
+        mode: '100644',
+        type: 'blob',
+        content: log.replace(/\n*$/, '\n') + logLine,
+      },
+    ];
     const stamp = new Date()
       .toISOString()
       .replace(/[-:]/g, '')
@@ -179,6 +200,25 @@ async function handleApi(request, env) {
         body,
       });
       return json(result);
+    } catch (e) {
+      return json({ error: e.message }, 502);
+    }
+  }
+  const decide = route.match(/^\/(accept|reject)\/(\d+)$/);
+  if (request.method === 'POST' && decide) {
+    let body = {};
+    try {
+      body = await request.json();
+    } catch {
+      body = {};
+    }
+    const at = new Date().toISOString();
+    try {
+      const result =
+        decide[1] === 'accept'
+          ? await acceptPr(gh, Number(decide[2]), { email, at, previewUrl: body.previewUrl })
+          : await rejectPr(gh, Number(decide[2]), body.branch, { email, at });
+      return json({ ...result, email, at });
     } catch (e) {
       return json({ error: e.message }, 502);
     }

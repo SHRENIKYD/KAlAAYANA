@@ -41,11 +41,12 @@ type **Secret**, name `GITHUB_TOKEN`, paste the token. Deploy.
 
 Or from a machine with Wrangler logged in: `npx wrangler secret put GITHUB_TOKEN`.
 
-### 4. Let saves merge themselves (optional)
+### 4. Let accepted changes merge once checks pass (recommended)
 
 GitHub → repository Settings → General → Pull Requests → tick
-**Allow auto-merge**. Each save then merges on its own once CI passes. Without
-it the admin shows the pull request link and you merge it by hand.
+**Allow auto-merge**. When an editor accepts a preview while CI is still
+running, the pull request then merges on its own as soon as CI passes.
+Without it, acceptance while CI is running asks you to merge on GitHub.
 
 ## Using it
 
@@ -68,15 +69,22 @@ Open `https://<staging host>/admin/`, sign in through Access. Two tabs:
   work's text and banner (choose any project photograph with _Use an
   existing photograph_, or upload) and its framing; _Delete work_ removes
   its page and its homepage tile.
-- **Save & publish to staging** validates everything the way CI does, then
-  commits. Problems are listed and nothing is saved until they are fixed.
-  A saved change shows on staging three or four minutes after the pull
-  request merges.
+- **Preview & publish** never saves blind. It builds the page as the site
+  will show it, opens it, and asks you to decide:
+  - locally: **Accept & save** writes the files and adds a line to
+    `CONTENT-LOG.md` — time, who, what changed, the preview accepted — which
+    goes into git with the change; **Keep editing** saves nothing.
+  - on staging: the change is proposed as a pull request that does not merge
+    on its own; Cloudflare builds it; **Accept & publish** records your
+    email and the time on the pull request and merges it (staging rebuilds
+    in three or four minutes); **Reject** closes it and deletes its branch.
+    `CONTENT-LOG.md` carries the proposal line; the commit carries the
+    author and time; the pull request carries the decision.
+    Problems found by validation are listed and nothing is saved until they
+    are fixed.
 
-**Seeing the result.** After a save, Cloudflare builds the pull request's
-branch and posts its preview URL as a comment on the PR within a few minutes:
-that is the site exactly as it will look. In the local demo, **Preview site**
-in the save dialog runs the real build with your saved changes and opens it.
+**Looking without deciding.** _Preview this page_ in the top bar opens the
+page being edited as the site will show it, without saving anything.
 
 **Who can sign in.** Cloudflare Access shows the sign-in page (one-time code
 by email, or Google) and only lets through the emails in its policy; the
@@ -95,8 +103,10 @@ npm run admin:demo
 ```
 
 opens the admin at http://localhost:8788/admin/ against your working tree.
-Saves are validated exactly as on staging, then written to `.admin-demo/`
-instead of committed. Works on Windows without Git Bash.
+Saves are validated exactly as on staging, then written straight into the
+project files (`src/data/*.json`, `src/images/`), so they persist and show
+up in `git status`: commit and push them to publish. Works on Windows
+without Git Bash.
 
 ## Local development against the real Worker
 

@@ -78,6 +78,10 @@ export function validate(payload, existingProjectFiles, existingBannerFiles) {
       if (img.from === 'projects') homeRefs.add(img.file);
     }
     if (!String(img.alt ?? '').trim()) bad.push(`${where} image needs alt text`);
+    if (img.fit != null && !['cover', 'contain'].includes(img.fit))
+      bad.push(`${where} fit must be cover or contain`);
+    if (img.background != null && !/^#[0-9a-f]{6}$/i.test(String(img.background)))
+      bad.push(`${where} background must be a hex colour like #29251f`);
     if (img.focus != null && !FOCUS.test(String(img.focus)))
       bad.push(`${where} image focus must look like 50% 40%`);
   });

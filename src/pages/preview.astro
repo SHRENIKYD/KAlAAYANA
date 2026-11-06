@@ -15,6 +15,13 @@ import ClientMarquee from '../components/ClientMarquee.astro';
 
 // Story paragraphs are authored in site.json with emphasis only. Anything else
 // is dropped before it reaches set:html, so content edits cannot add script.
+// A tile either crops its photograph to fill (the default) or shows it whole
+// on a background sampled from the photograph's own edges.
+const tileStyle = (image: { focus?: string; fit?: string; background?: string }) =>
+  image.fit === 'contain'
+    ? `object-fit: contain; object-position: 50% 50%; background: ${image.background || '#29251f'}`
+    : `object-position: ${image.focus || '50% 48%'}`;
+
 const story = site.story.map((paragraph) =>
   paragraph.replace(/<(?!\/?(?:strong|em|b|i)\s*>)[^>]*>/gi, ''),
 );
@@ -186,7 +193,7 @@ const story = site.story.map((paragraph) =>
                 sizes="(max-width: 760px) 90vw, (min-width: 1024px) 45vw, 90vw"
                 quality={95}
                 loading="lazy"
-                style={`object-position: ${work.image.focus || '50% 48%'}`}
+                style={tileStyle(work.image)}
               />
               <div class="collection-feature-copy">
                 <span>
