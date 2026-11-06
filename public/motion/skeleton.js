@@ -16,10 +16,12 @@
       var p = document.querySelector('.pskel');
       if (p && p.parentNode) p.parentNode.removeChild(p);
     };
-    /* A page that was ready at once never shows the skeleton: no flash. */
-    if (Date.now() - started < 150) return remove();
-    root.classList.add('skel-done');
-    setTimeout(remove, 280);
+    /* Shown for at least 600 ms so the shape registers, then fades. */
+    var wait = Math.max(0, 600 - (Date.now() - started));
+    setTimeout(function () {
+      root.classList.add('skel-done');
+      setTimeout(remove, 280);
+    }, wait);
   }
   if (root.classList.contains('skel-wait')) {
     var reduced =
