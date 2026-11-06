@@ -33,6 +33,8 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ### Changed
 
+- Shree Manjunatha temple cover and gallery use a straightened image with level
+  tiers and a vertical central axis (from #69); the original is retained.
 - Story paragraphs from `site.json` keep emphasis tags only before rendering.
 - The studio map embed sends only the origin as referrer.
 
