@@ -60,6 +60,21 @@ running, the content pull request then merges on its own as soon as CI
 passes. Without it, acceptance while CI is running asks you to merge on
 GitHub.
 
+### 5. Let the Worker keep the Access policy in step with the Users tab
+
+Who may sign in at all is the Access application's Allow policy, and the
+Worker rewrites that policy's Include list to the editors' emails on every
+invitation, role change or removal. It needs a Cloudflare API token:
+
+Cloudflare dashboard → My Profile → API Tokens → Create Token → Create
+Custom Token: Permissions **Account · Access: Apps and Policies · Edit**,
+Account Resources **Include · this account**, no client IP filter. Store it
+as a Worker secret named `CF_API_TOKEN` (same place as `GITHUB_TOKEN`).
+`CF_ACCOUNT_ID` is a plain variable in `wrangler.jsonc`.
+
+Without the token the Users tab still works, but each invitation must also
+be added to the Access policy by hand; the log line says so.
+
 ## Roles and invitations
 
 Who may sign in, and as what, is `admin/users.json` in the repository, so

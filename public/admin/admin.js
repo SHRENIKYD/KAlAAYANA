@@ -492,9 +492,12 @@
     try {
       const r = await api('/users', { method: 'POST', body: JSON.stringify(body) });
       if (Array.isArray(r.users)) state.users = r.users;
-      state.usersPending = r.pr
-        ? `Recorded in pull request #${r.pr}; it takes effect once that merges.`
-        : '';
+      state.usersPending = [
+        r.pr ? `Recorded in pull request #${r.pr}; it takes effect once that merges.` : '',
+        r.access || '',
+      ]
+        .filter(Boolean)
+        .join(' ');
       renderUsers();
     } catch (e) {
       note.textContent = e.message;
@@ -544,7 +547,7 @@
         { class: 'muted' },
         state.demo
           ? 'Locally: the person signs in with this email on the sign-in page.'
-          : 'They sign in at the staging address with this email; Cloudflare Access emails them a one-time code. Their email must also be allowed by the Access policy.',
+          : 'They sign in at the staging address with this email; Cloudflare Access emails them a one-time code. The Access policy is updated to match this list.',
       ),
       note,
     );

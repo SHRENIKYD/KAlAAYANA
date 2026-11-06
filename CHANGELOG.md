@@ -46,6 +46,12 @@ is a holding page. `1.0.0` marks the launch of the full site.
   site-wide policy still blocks it everywhere else.
 - The preview link read from the Cloudflare deployment comment no longer
   carries a trailing quote.
+- Inviting, re-roling or removing an editor also rewrites the Cloudflare
+  Access Allow policy to the editors' emails, so the Users tab alone decides
+  who can sign in (needs the `CF_API_TOKEN` Worker secret).
+- The admin shows a progress line during requests, skeleton placeholders
+  while loading, opens the Log and Users tabs at once, carries the studio
+  mark in its header, and its dialogs close on Escape or the corner cross.
 
 ## [1.2.17] - Unreleased
 

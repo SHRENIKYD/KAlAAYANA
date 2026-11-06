@@ -12,6 +12,7 @@ import {
 } from '../worker/validate.js';
 import { makeEntry, parseLog, isAppendOnly, decodePhoto } from '../worker/logbook.js';
 import { treeEntries, commitAndOpenPr, acceptPr, rejectPr, client } from '../worker/github.js';
+import { syncAccessPolicy } from '../worker/policy.js';
 
 const sections = {
   landmarks: {
@@ -457,4 +458,66 @@ test('log entries are structured, photographs named by time and account, and the
   assert.equal(decodePhoto(null), null);
   assert.throws(() => decodePhoto(btoa('<svg/>')), /JPEG/);
   assert.equal(decodePhoto(btoa(String.fromCharCode(0xff, 0xd8, 0xff, 0xe0, 1, 2))).length, 6);
+});
+
+test('the Access Allow policy is rewritten to exactly the editors', async () => {
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    calls.push({ url, method: init.method, body: init.body && JSON.parse(init.body) });
+    const ok = (result) => new Response(JSON.stringify({ success: true, result }), { status: 200 });
+    if (url.endsWith('/access/apps?per_page=100'))
+      return ok([
+        { id: 'other', domain: 'elsewhere.example.com', policies: [] },
+        {
+          id: 'app1',
+          domain: 'kalaayana.example.workers.dev/admin',
+          policies: [
+            { id: 'deny', decision: 'deny', include: [] },
+            {
+              id: 'pol1',
+              uid: 'pol1',
+              reusable: true,
+              name: 'Editors',
+              decision: 'allow',
+              include: [{ email: { email: 'old@example.com' } }],
+              exclude: [],
+              require: [],
+              session_duration: '1h',
+              created_at: 'x',
+            },
+          ],
+        },
+      ]);
+    if (url.endsWith('/access/policies/pol1') && init.method === 'PUT') return ok({ id: 'pol1' });
+    return new Response(JSON.stringify({ success: false, errors: [{ message: 'nope' }] }), {
+      status: 404,
+    });
+  };
+  const r = await syncAccessPolicy({
+    token: 't',
+    accountId: 'acc',
+    hostname: 'KALAAYANA.example.workers.dev',
+    emails: ['A@example.com', 'b@example.com', 'a@example.com'],
+    fetchImpl,
+  });
+  assert.deepEqual(r, { app: 'app1', policy: 'pol1', emails: ['a@example.com', 'b@example.com'] });
+  const put = calls.find((c) => c.method === 'PUT');
+  assert.equal(put.url, 'https://api.cloudflare.com/client/v4/accounts/acc/access/policies/pol1');
+  assert.deepEqual(put.body.include, [
+    { email: { email: 'a@example.com' } },
+    { email: { email: 'b@example.com' } },
+  ]);
+  assert.equal(put.body.session_duration, '1h');
+  assert.equal(put.body.id, undefined);
+  assert.equal(put.body.created_at, undefined);
+  await assert.rejects(
+    syncAccessPolicy({
+      token: 't',
+      accountId: 'acc',
+      hostname: 'nowhere.test',
+      emails: [],
+      fetchImpl,
+    }),
+    /No Access application/,
+  );
 });
