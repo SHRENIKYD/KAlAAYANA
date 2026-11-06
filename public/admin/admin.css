@@ -464,53 +464,87 @@ h3 {
   gap: 14px;
 }
 
-/* ---------- focus point: click the photograph where the subject is ---------- */
+/* ---------- framing: drag the crop frame over the photograph ---------- */
 .focus {
   display: grid;
   gap: 10px;
 }
-.focus-stage {
-  position: relative;
-  width: 100%;
-  max-width: 420px;
-  background: #e6e0d6;
-  cursor: crosshair;
-  user-select: none;
-}
-.focus-stage img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.focus-dot {
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  background: var(--gold);
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 1px #0006;
-  pointer-events: none;
-}
-.focus-crops {
+.frame-bar {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
   flex-wrap: wrap;
 }
-.focus-crop {
-  display: grid;
-  gap: 4px;
-  font-size: 0.7rem;
+.frame-tabs {
+  display: inline-flex;
+  border: 1px solid var(--line);
+}
+.frame-tabs button {
+  all: unset;
+  cursor: pointer;
+  padding: 6px 14px;
+  font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--muted);
 }
-.focus-crop img {
-  display: block;
-  object-fit: cover;
+.frame-tabs button[aria-selected='true'] {
+  background: var(--black);
+  color: #f5f1ea;
+}
+.frame-tabs button:focus-visible {
+  outline: 2px solid var(--black);
+  outline-offset: -2px;
+}
+.frame-stage {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
   background: #e6e0d6;
-  width: 160px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  overflow: hidden;
+}
+.frame-stage.dragging {
+  cursor: grabbing;
+}
+.frame-stage:focus-visible {
+  outline: 2px solid var(--black);
+  outline-offset: 3px;
+}
+.frame-stage img {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+}
+.frame-shade {
+  position: absolute;
+  inset: 0;
+  background: #1a1816a8;
+  pointer-events: none;
+}
+.frame {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #0008;
+  pointer-events: none;
+  display: grid;
+  place-items: end start;
+}
+.frame-hint {
+  margin: 8px;
+  padding: 4px 8px;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  background: #1a1816b3;
+}
+.frame-stage.dragging .frame-hint {
+  opacity: 0;
 }
 .focus-value {
   font-variant-numeric: tabular-nums;

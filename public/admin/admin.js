@@ -498,36 +498,144 @@
     renderSections();
   }
 
-  /* ---------- focus point ----------
-     Click the photograph where the subject is. The crops on the right show how
-     the site will frame it at the given aspect ratios. */
+  /* ---------- framing ----------
+     The photograph is shown whole, with the crop the site will use drawn over
+     it. Drag the frame to the part that should show. One frame per layout
+     (desktop, phone); the position is saved as the image's focus point. */
   function focusPicker({ src, get, set, crops }) {
-    const img = el('img', { src, alt: '' });
-    const dot = el('div', { class: 'focus-dot' });
-    const stage = el('div', { class: 'focus-stage' }, img, dot);
+    const img = el('img', { src, alt: '', draggable: 'false' });
+    const frame = el(
+      'div',
+      { class: 'frame' },
+      el('span', { class: 'frame-hint' }, 'Drag to reposition'),
+    );
+    const shade = el('div', { class: 'frame-shade' });
+    const stage = el('div', { class: 'frame-stage' }, img, shade, frame);
+    const tabs = el('div', { class: 'frame-tabs', role: 'tablist' });
     const value = el('span', { class: 'focus-value' });
-    const cropImgs = crops.map(([label, ratio]) => {
-      const c = el('img', { src, alt: '' });
-      c.style.aspectRatio = ratio;
-      return [c, el('div', { class: 'focus-crop' }, c, el('span', {}, label))];
-    });
-    const paint = () => {
-      const f = get() || '50% 50%';
-      const [x, y] = f.split(' ');
-      dot.style.left = x;
-      dot.style.top = y;
-      value.textContent = `Focus ${f}`;
-      for (const [c] of cropImgs) c.style.objectPosition = f;
+    let active = 0;
+    let natural = null;
+
+    const ratioOf = (r) => {
+      const [w, h] = String(r)
+        .split('/')
+        .map((n) => parseFloat(n));
+      return w / h;
     };
-    stage.addEventListener('click', (e) => {
-      const r = img.getBoundingClientRect();
-      const x = Math.round(Math.min(100, Math.max(0, ((e.clientX - r.left) / r.width) * 100)));
-      const y = Math.round(Math.min(100, Math.max(0, ((e.clientY - r.top) / r.height) * 100)));
+    const parse = () => {
+      const [x, y] = (get() || '50% 50%').split(' ').map((v) => parseFloat(v));
+      return { x: Number.isFinite(x) ? x : 50, y: Number.isFinite(y) ? y : 50 };
+    };
+    // The cover crop spans the full width or the full height of the photo;
+    // only the other axis moves. Geometry in displayed pixels.
+    const geometry = () => {
+      const W = img.clientWidth;
+      const H = img.clientHeight;
+      const r = ratioOf(crops[active][1]);
+      const fw = Math.min(W, H * r);
+      const fh = fw / r;
+      const f = parse();
+      return { W, H, fw, fh, left: ((W - fw) * f.x) / 100, top: ((H - fh) * f.y) / 100 };
+    };
+    const paint = () => {
+      if (!img.clientWidth) return;
+      const g = geometry();
+      frame.style.width = `${g.fw}px`;
+      frame.style.height = `${g.fh}px`;
+      frame.style.left = `${g.left}px`;
+      frame.style.top = `${g.top}px`;
+      shade.style.clipPath = `polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 ${g.top}px, ${g.left}px ${g.top}px, ${g.left}px ${g.top + g.fh}px, ${g.left + g.fw}px ${g.top + g.fh}px, ${g.left + g.fw}px ${g.top}px, 0 ${g.top}px)`;
+      value.textContent = `Position ${get() || '50% 50%'}`;
+    };
+    const commit = (left, top) => {
+      const g = geometry();
+      const x =
+        g.W - g.fw > 1
+          ? Math.round((Math.min(Math.max(left, 0), g.W - g.fw) / (g.W - g.fw)) * 100)
+          : 50;
+      const y =
+        g.H - g.fh > 1
+          ? Math.round((Math.min(Math.max(top, 0), g.H - g.fh) / (g.H - g.fh)) * 100)
+          : 50;
       set(`${x}% ${y}%`);
+      paint();
+    };
+
+    let drag = null;
+    const down = (e) => {
+      if (!img.clientWidth) return;
+      const g = geometry();
+      const r = stage.getBoundingClientRect();
+      const px = e.clientX - r.left;
+      const py = e.clientY - r.top;
+      const inside = px >= g.left && px <= g.left + g.fw && py >= g.top && py <= g.top + g.fh;
+      // Grab the frame where it is, or jump it to the click and grab its centre.
+      drag = inside ? { dx: px - g.left, dy: py - g.top } : { dx: g.fw / 2, dy: g.fh / 2 };
+      stage.setPointerCapture(e.pointerId);
+      stage.classList.add('dragging');
+      commit(px - drag.dx, py - drag.dy);
+      e.preventDefault();
+    };
+    const move = (e) => {
+      if (!drag) return;
+      const r = stage.getBoundingClientRect();
+      commit(e.clientX - r.left - drag.dx, e.clientY - r.top - drag.dy);
+    };
+    const up = () => {
+      if (!drag) return;
+      drag = null;
+      stage.classList.remove('dragging');
+      markDirty();
+    };
+    stage.addEventListener('pointerdown', down);
+    stage.addEventListener('pointermove', move);
+    stage.addEventListener('pointerup', up);
+    stage.addEventListener('pointercancel', up);
+    // Keyboard: arrows nudge the frame.
+    stage.tabIndex = 0;
+    stage.setAttribute('role', 'slider');
+    stage.setAttribute('aria-label', 'Framing: drag the frame, or use the arrow keys');
+    stage.addEventListener('keydown', (e) => {
+      const f = parse();
+      const step = e.shiftKey ? 10 : 2;
+      const map = {
+        ArrowLeft: [-step, 0],
+        ArrowRight: [step, 0],
+        ArrowUp: [0, -step],
+        ArrowDown: [0, step],
+      };
+      if (!map[e.key]) return;
+      e.preventDefault();
+      set(
+        `${Math.min(100, Math.max(0, f.x + map[e.key][0]))}% ${Math.min(100, Math.max(0, f.y + map[e.key][1]))}%`,
+      );
       paint();
       markDirty();
     });
-    paint();
+
+    crops.forEach(([label], i) => {
+      const t = el(
+        'button',
+        { type: 'button', role: 'tab', 'aria-selected': String(i === active) },
+        label,
+      );
+      t.addEventListener('click', () => {
+        active = i;
+        [...tabs.children].forEach((c, j) => c.setAttribute('aria-selected', String(j === active)));
+        paint();
+      });
+      tabs.append(t);
+    });
+    const reset = el('button', { class: 'btn btn-ghost btn-sm', type: 'button' }, 'Centre');
+    reset.addEventListener('click', () => {
+      set('50% 50%');
+      paint();
+      markDirty();
+    });
+
+    img.addEventListener('load', paint);
+    if (img.complete) queueMicrotask(paint);
+    new ResizeObserver(paint).observe(stage);
     return el(
       'div',
       { class: 'f' },
@@ -535,10 +643,13 @@
       el(
         'div',
         { class: 'focus' },
+        el('div', { class: 'frame-bar' }, tabs, reset, value),
         stage,
-        el('div', { class: 'focus-crops' }, ...cropImgs.map(([, box]) => box)),
-        value,
-        el('small', {}, 'Click the photograph where the subject is. The crops follow.'),
+        el(
+          'small',
+          {},
+          'What is inside the frame is what the site shows. Drag it to the part of the photograph that matters.',
+        ),
       ),
     );
   }
