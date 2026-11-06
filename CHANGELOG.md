@@ -66,6 +66,9 @@ is a holding page. `1.0.0` marks the launch of the full site.
   account, and an account that requires one cannot sign in without a camera.
   The mark in the admin header stays in the admin. Drop-downs wear the
   admin's look.
+- Admin: the sign-in photograph must show a face, checked in the browser by
+  a small detector served from the admin itself; the first-load skeleton takes
+  the shape of the tab being opened.
 - Admin: a refresh keeps the tab and open work; sign-out returns to the admin
   sign-in; the sign-in photograph is required and never black; missing fields
   are listed and focused before a preview; the users table updates at once;

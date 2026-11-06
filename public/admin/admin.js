@@ -1050,6 +1050,53 @@
   /* ---------- who is using this account ----------
      Accounts can be shared, so every session states a name and, when the
      device has a camera, takes a photograph. Both go to the log. */
+  /* The sign-in photograph must show a face. pico (MIT) runs a small
+     cascade on the captured frame, entirely in the browser from the admin's
+     own files; nothing leaves the device before the photograph is accepted. */
+  let faceFinder = null;
+  async function loadFaceFinder() {
+    if (faceFinder) return faceFinder;
+    faceFinder = (async () => {
+      if (!window.pico) {
+        await new Promise((ok, fail) => {
+          const sc = el('script', { src: '/admin/vendor/pico.js' });
+          sc.onload = ok;
+          sc.onerror = () => fail(new Error('face check script'));
+          document.head.append(sc);
+        });
+      }
+      const res = await fetch('/admin/vendor/facefinder');
+      if (!res.ok) throw new Error('face check model');
+      return window.pico.unpack_cascade(new Int8Array(await res.arrayBuffer()));
+    })();
+    faceFinder.catch(() => {
+      faceFinder = null;
+    });
+    return faceFinder;
+  }
+  async function faceIn(canvas) {
+    const classify = await loadFaceFinder();
+    const ctx2d = canvas.getContext('2d');
+    const { data, width, height } = ctx2d.getImageData(0, 0, canvas.width, canvas.height);
+    const gray = new Uint8Array(width * height);
+    for (let i = 0; i < gray.length; i += 1)
+      gray[i] = (2 * data[i * 4] + 7 * data[i * 4 + 1] + data[i * 4 + 2]) / 10;
+    const dets = window.pico.cluster_detections(
+      window.pico.run_cascade(
+        { pixels: gray, nrows: height, ncols: width, ldim: width },
+        classify,
+        {
+          shiftfactor: 0.1,
+          minsize: Math.round(Math.min(width, height) * 0.18),
+          maxsize: 1000,
+          scalefactor: 1.1,
+        },
+      ),
+      0.2,
+    );
+    return dets.some((d) => d[3] >= 8);
+  }
+
   function askWhoIsHere() {
     return new Promise((resolve) => {
       const name = el('input', {
@@ -1090,6 +1137,7 @@
             audio: false,
           });
           video.srcObject = stream;
+          loadFaceFinder().catch(() => {});
           take.disabled = true;
           video.addEventListener(
             'playing',
@@ -1137,12 +1185,28 @@
           return;
         }
         note.textContent = '';
-        photo = canvas.toDataURL('image/jpeg', 0.8);
-        shot.src = photo;
-        shot.hidden = false;
-        video.hidden = true;
-        take.hidden = true;
-        retake.hidden = false;
+        take.disabled = true;
+        take.classList.add('is-busy');
+        faceIn(canvas)
+          .then((ok) => {
+            if (!ok) {
+              note.textContent = 'No face in the frame. Look at the camera and try again.';
+              return;
+            }
+            photo = canvas.toDataURL('image/jpeg', 0.8);
+            shot.src = photo;
+            shot.hidden = false;
+            video.hidden = true;
+            take.hidden = true;
+            retake.hidden = false;
+          })
+          .catch(() => {
+            note.textContent = 'The face check could not load. Reload the page and try again.';
+          })
+          .finally(() => {
+            take.disabled = false;
+            take.classList.remove('is-busy');
+          });
       });
       retake.addEventListener('click', () => {
         photo = null;
@@ -3450,7 +3514,11 @@ p{margin:0 0 22px;color:#6d665c}
 
   /* ---------- boot ---------- */
   /* ---------- skeleton while the content loads ---------- */
+  /* The first-load skeleton takes the shape of the tab in the address. */
   function skeleton() {
+    readPlace();
+    const tab = state.tab;
+    for (const t of TABS) document.body.classList.toggle(`tab-${t}`, tab === t);
     const line = (w) => el('span', { class: 'skel skel-line', style: `width:${w}` });
     const card = (h) =>
       el(
@@ -3460,20 +3528,68 @@ p{margin:0 0 22px;color:#6d665c}
         line('70%'),
         line('40%'),
       );
-    $('#sections').replaceChildren(
-      ...[72, 58, 64, 48, 66].map((w) =>
-        el('div', { class: 'skel-row' }, line(`${w}%`), line('14px')),
-      ),
-    );
+    const row = (cols) => el('div', { class: 'skel-trow' }, ...cols.map((w) => line(w)));
+    const head = [line('120px'), el('span', { class: 'skel skel-title' }), line('60%')];
+    let body;
+    if (tab === 'home')
+      body = [
+        ...head,
+        el(
+          'div',
+          { class: 'skel-works' },
+          ...[1, 2, 3, 4, 5].map(() =>
+            el(
+              'div',
+              { class: 'skel-work' },
+              el('span', { class: 'skel skel-sq' }),
+              el('span', { class: 'skel-lines' }, line('40%'), line('28%')),
+            ),
+          ),
+        ),
+      ];
+    else if (tab === 'users')
+      body = [
+        ...head,
+        el(
+          'div',
+          { class: 'skel-table' },
+          ...[1, 2, 3].map(() => row(['34%', '18%', '18%', '22%'])),
+        ),
+        el('span', { class: 'skel skel-title', style: 'width:200px;height:28px;margin-top:36px' }),
+        row(['40%', '40%']),
+      ];
+    else if (tab === 'log')
+      body = [
+        ...head,
+        row(['14%', '14%', '14%', '14%', '14%']),
+        el(
+          'div',
+          { class: 'skel-table' },
+          ...[1, 2, 3, 4, 5, 6].map(() => row(['16%', '10%', '26%', '40%'])),
+        ),
+      ];
+    else if (tab === 'insights')
+      body = [
+        ...head,
+        el(
+          'div',
+          { class: 'tiles' },
+          ...[0, 1, 2, 3].map(() =>
+            el('div', { class: 'tile' }, line('40%'), el('span', { class: 'skel skel-title' })),
+          ),
+        ),
+        el('span', { class: 'skel', style: 'display:block;height:260px' }),
+      ];
+    else {
+      $('#sections').replaceChildren(
+        ...[72, 58, 64, 48, 66].map((w) =>
+          el('div', { class: 'skel-row' }, line(`${w}%`), line('14px')),
+        ),
+      );
+      body = [...head, el('div', { class: 'grid' }, ...[260, 180, 220, 300, 200, 240].map(card))];
+    }
     $('#main').replaceChildren(
-      el(
-        'div',
-        { class: 'skel-page', 'aria-hidden': 'true' },
-        line('120px'),
-        el('span', { class: 'skel skel-title' }),
-        line('60%'),
-        el('div', { class: 'grid' }, ...[260, 180, 220, 300, 200, 240].map(card)),
-      ),
+      el('div', { class: 'skel-page', 'aria-hidden': 'true' }, ...body),
       el('p', { class: 'sr-only', role: 'status' }, 'Loading…'),
     );
   }
