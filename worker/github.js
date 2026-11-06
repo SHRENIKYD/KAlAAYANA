@@ -69,6 +69,57 @@ export function treeEntries({
   ];
 }
 
+/** Cloudflare's preview hostname for a branch: lowercase, non-alphanumerics to -, 63 at most. */
+export function branchAlias(branch) {
+  return String(branch)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 63)
+    .replace(/-+$/, '');
+}
+
+/** One commit on a fresh branch and nothing else: no pull request until the editor accepts. */
+export async function commitToBranch(gh, { base, branch, message, author, entries }) {
+  const head = await gh.call('GET', `/git/ref/heads/${base}`);
+  const baseSha = head.object.sha;
+  const baseCommit = await gh.call('GET', `/git/commits/${baseSha}`);
+  const tree = await gh.call('POST', '/git/trees', {
+    base_tree: baseCommit.tree.sha,
+    tree: entries,
+  });
+  const commit = await gh.call('POST', '/git/commits', {
+    message,
+    tree: tree.sha,
+    parents: [baseSha],
+    author,
+    committer: author,
+  });
+  await gh.call('POST', '/git/refs', { ref: `refs/heads/${branch}`, sha: commit.sha });
+  return { branch, commit: commit.sha };
+}
+
+/**
+ * The editor accepted the preview of a branch: open the pull request now,
+ * record who and when on it, and merge (or arm auto-merge while checks run).
+ */
+export async function acceptBranch(gh, { base, branch, title, body, email, at, previewUrl }) {
+  const pr = await gh.call('POST', '/pulls', { title, head: branch, base, body });
+  const r = await acceptPr(gh, pr.number, { email, at, previewUrl });
+  return { number: pr.number, url: pr.html_url, ...r };
+}
+
+/** The editor rejected the preview of a branch: drop the branch, nothing else exists. */
+export async function rejectBranch(gh, branch) {
+  if (!/^content\/[a-z0-9]+$/.test(branch)) throw new Error('Not a content branch');
+  try {
+    await gh.call('DELETE', `/git/refs/heads/${branch}`);
+  } catch {
+    /* already gone */
+  }
+  return { closed: true };
+}
+
 export async function commitAndOpenPr(gh, { base, branch, message, author, entries, title, body }) {
   const head = await gh.call('GET', `/git/ref/heads/${base}`);
   const baseSha = head.object.sha;

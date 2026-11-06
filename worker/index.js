@@ -2,7 +2,14 @@
 // content admin under /admin/api/. Every admin request must carry the Access
 // JWT for an allow-listed email; the Worker then commits content changes to
 // GitHub and opens a pull request into the base branch.
-import { client, treeEntries, commitAndOpenPr, acceptPr, rejectPr } from './github.js';
+import {
+  client,
+  treeEntries,
+  commitToBranch,
+  acceptBranch,
+  rejectBranch,
+  branchAlias,
+} from './github.js';
 import { syncAccessPolicy } from './policy.js';
 import { fetchInsights } from './insights.js';
 import { verifyAccessJwt } from './access.js';
@@ -10,6 +17,8 @@ import { makeEntry, parseLog, decodePhoto } from './logbook.js';
 import {
   validate,
   orphans,
+  photoRequiredFor,
+  PERMANENT_SUPERADMIN,
   imageType,
   MAX_IMAGE_BYTES,
   parseUsers,
@@ -240,6 +249,8 @@ async function handleApi(request, env) {
       email,
       sessionEnds,
       role,
+      photoRequired: photoRequiredFor(users, email),
+      canSetPhoto: email === PERMANENT_SUPERADMIN,
       users: superadmin ? users : undefined,
       log,
       decisions,
@@ -290,14 +301,25 @@ async function handleApi(request, env) {
 
   // Cloudflare builds every pull request's branch and comments its preview URL
   // on the PR. The admin polls this until the comment exists.
-  const previewFor = route.match(/^\/preview-url\/(\d+)$/);
-  if (request.method === 'GET' && previewFor) {
-    const comments = await gh.call('GET', `/issues/${previewFor[1]}/comments?per_page=50`);
-    const found = comments
-      .map((c) => c.body || '')
-      .join('\n')
-      .match(/https:\/\/[\w.-]+\.workers\.dev[^\s)>"']*/);
-    return json({ url: found ? found[0] : null });
+  // Cloudflare builds every pushed branch and serves it at a branch alias;
+  // the preview is ready when that alias reports the proposed commit.
+  if (request.method === 'GET' && route === '/preview-ready') {
+    const branch = url.searchParams.get('branch') || '';
+    const commit = url.searchParams.get('commit') || '';
+    if (!/^content\/[a-z0-9]+$/.test(branch) || !/^[0-9a-f]{7,40}$/.test(commit))
+      return json({ error: 'Bad branch or commit' }, 400);
+    const previewHost = `${branchAlias(branch)}-${url.hostname}`;
+    try {
+      const res = await fetch(`https://${previewHost}/version.json`, {
+        headers: { accept: 'application/json' },
+        cf: { cacheTtl: 0 },
+      });
+      const v = res.ok ? await res.json() : null;
+      const ready = Boolean(v && String(v.commit || '').startsWith(commit.slice(0, 7)));
+      return json({ ready, url: ready ? `https://${previewHost}` : null });
+    } catch {
+      return json({ ready: false, url: null });
+    }
   }
 
   if (request.method === 'POST' && route === '/save') {
@@ -392,27 +414,19 @@ async function handleApi(request, env) {
       `- ${Object.keys(uploads).length} image(s) added, ${deletions.length} removed, ${Object.keys(banners).length} banner(s) added`,
     ].join('\n');
     try {
-      const result = await commitAndOpenPr(gh, {
+      const result = await commitToBranch(gh, {
         base,
         branch: `content/${stamp}`,
         message: `content: ${summary}\n\n${body}`,
         author,
         entries,
-        title: `Content: ${summary}`,
-        body,
       });
       try {
-        await logCommit(
-          gh,
-          base,
-          [saveItem],
-          `log: proposed #${result.number ?? ''}`.trim(),
-          author,
-        );
+        await logCommit(gh, base, [saveItem], `log: proposed ${result.branch}`, author);
       } catch {
-        /* the proposal is the pull request itself */
+        /* the proposal is the branch itself */
       }
-      return json(result);
+      return json({ ...result, title: `Content: ${summary}`, body });
     } catch (e) {
       return json({ error: e.message }, 502);
     }
@@ -429,7 +443,7 @@ async function handleApi(request, env) {
     try {
       next = applyUserChange(users, body, email);
     } catch (e) {
-      return json({ error: e.message }, 422);
+      return json({ error: e.message }, body.action === 'photo' ? 403 : 422);
     }
     // Access decides who may sign in at all; keep its Allow list equal to
     // the editors' emails. A failure here is recorded, not fatal: the user
@@ -451,7 +465,7 @@ async function handleApi(request, env) {
     const item = logItem({
       category: 'admin',
       action: `users: ${body.action}`,
-      details: `${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''} · ${access}`,
+      details: `${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}${body.photo ? ` · photograph ${body.photo}` : ''} · ${access}`,
     });
     try {
       const r = await commitToBase(gh, base, {
@@ -492,6 +506,14 @@ async function handleApi(request, env) {
     } catch (e) {
       return json({ error: e.message }, 422);
     }
+    if (!photoBytes && photoRequiredFor(users, email))
+      return json(
+        {
+          error:
+            'A photograph is required to sign in with this account. Use a device with a camera.',
+        },
+        422,
+      );
     const item = makeEntry({
       category: 'session',
       email,
@@ -544,7 +566,10 @@ async function handleApi(request, env) {
     });
   }
 
-  const decide = route.match(/^\/(accept|reject)\/(\d+)$/);
+  // Accept opens the pull request and merges it; reject drops the branch.
+  // Either way the decision is logged, and a branch already decided on
+  // (gone) cannot be decided twice.
+  const decide = route.match(/^\/(accept|reject)$/);
   if (request.method === 'POST' && decide) {
     let body = {};
     try {
@@ -552,36 +577,40 @@ async function handleApi(request, env) {
     } catch {
       body = {};
     }
+    const branch = String(body.branch || '');
+    if (!/^content\/[a-z0-9]+$/.test(branch)) return json({ error: 'Not a content branch' }, 400);
     const at = new Date().toISOString();
     try {
-      const pr = await gh.call('GET', `/pulls/${decide[2]}`);
-      if (pr.merged_at || pr.state !== 'open')
-        return json(
-          {
-            error: `Pull request #${decide[2]} was already ${pr.merged_at ? 'accepted' : 'rejected'}.`,
-          },
-          409,
-        );
+      try {
+        await gh.call('GET', `/git/ref/heads/${branch}`);
+      } catch {
+        return json({ error: 'This proposal was already accepted or rejected.' }, 409);
+      }
+      const who = name ? `${name} (${email})` : email;
       const result =
         decide[1] === 'accept'
-          ? await acceptPr(gh, Number(decide[2]), {
-              email: name ? `${name} (${email})` : email,
+          ? await acceptBranch(gh, {
+              base,
+              branch,
+              title: String(body.title || 'Content update').slice(0, 120),
+              body: `${String(body.body || '')}\n\nAccepted by ${who} at ${at}.`,
+              email: who,
               at,
               previewUrl: body.previewUrl,
             })
-          : await rejectPr(gh, Number(decide[2]), body.branch, {
-              email: name ? `${name} (${email})` : email,
-              at,
-            });
+          : await rejectBranch(gh, branch);
       const item = logItem({
         category: 'content',
         action: decide[1] === 'accept' ? 'accepted' : 'rejected',
-        details: `pull request #${decide[2]}${body.previewUrl ? ` after previewing ${body.previewUrl}` : ''}`,
+        details:
+          decide[1] === 'accept'
+            ? `pull request #${result.number} from ${branch}${body.previewUrl ? ` after previewing ${body.previewUrl}` : ''}`
+            : `${branch}${body.previewUrl ? ` after previewing ${body.previewUrl}` : ''}`,
       });
       try {
-        await logCommit(gh, base, [item], `log: ${item.entry.action} #${decide[2]}`, author);
+        await logCommit(gh, base, [item], `log: ${item.entry.action} ${branch}`, author);
       } catch {
-        /* the decision is already on the pull request */
+        /* the decision is on the pull request or in the dropped branch */
       }
       return json({ ...result, email, name, at });
     } catch (e) {

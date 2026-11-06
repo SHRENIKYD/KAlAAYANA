@@ -209,6 +209,7 @@
     visits: { label: 'Visits', color: '#a8781a' },
     views: { label: 'Page views', color: '#2a6fa8' },
   };
+  const PERMANENT_SUPERADMIN_EMAIL = 'contact@kalaayanastudios.com';
   const svgNS = 'http://www.w3.org/2000/svg';
   const svg = (tag, attrs = {}, ...children) => {
     const node = document.createElementNS(svgNS, tag);
@@ -1008,7 +1009,20 @@
         } catch {
           cam.hidden = true;
           take.hidden = true;
-          camNote.textContent = 'No camera available on this device; your name alone is logged.';
+          if (state.photoRequired) {
+            camNote.textContent =
+              'This account must be photographed at sign-in and this device has no camera. Open the admin on a phone or a laptop with a camera.';
+            go.disabled = true;
+            go.hidden = true;
+            form.append(
+              el(
+                'button',
+                { class: 'btn btn-ghost', type: 'button', onclick: () => signOut('manual') },
+                'Sign out',
+              ),
+            );
+          } else
+            camNote.textContent = 'No camera available on this device; your name alone is logged.';
         }
       })();
       take.addEventListener('click', () => {
@@ -1137,6 +1151,8 @@
     if (body.action === 'remove') state.users = before.filter((u) => u.email !== email);
     else if (body.action === 'role')
       state.users = before.map((u) => (u.email === email ? { ...u, role: body.role } : u));
+    else if (body.action === 'photo')
+      state.users = before.map((u) => (u.email === email ? { ...u, photo: body.photo } : u));
     else if (body.action === 'invite')
       state.users = [
         ...before,
@@ -1251,6 +1267,7 @@
             {},
             el('th', {}, 'Email'),
             el('th', {}, 'Role'),
+            state.canSetPhoto ? el('th', {}, 'Photo at sign-in') : null,
             el('th', {}, 'Invited'),
             el('th', {}, ''),
           ),
@@ -1272,6 +1289,28 @@
             sel.addEventListener('change', () =>
               changeUser({ action: 'role', email: u.email, role: sel.value }),
             );
+            let photoSel = null;
+            if (state.canSetPhoto) {
+              if (u.email === PERMANENT_SUPERADMIN_EMAIL)
+                photoSel = el('span', { class: 'muted' }, 'Always');
+              else {
+                photoSel = el(
+                  'select',
+                  { disabled: busy ? '' : null },
+                  ...[
+                    ['required', 'Required'],
+                    ['optional', 'Optional'],
+                  ].map(([v, label]) => {
+                    const o = el('option', { value: v }, label);
+                    if ((u.photo || 'required') === v) o.selected = true;
+                    return o;
+                  }),
+                );
+                photoSel.addEventListener('change', () =>
+                  changeUser({ action: 'photo', email: u.email, photo: photoSel.value }),
+                );
+              }
+            }
             return el(
               'tr',
               {},
@@ -1282,6 +1321,7 @@
                 u.email === state.email ? el('small', { class: 'muted' }, ' (you)') : null,
               ),
               el('td', {}, sel),
+              state.canSetPhoto ? el('td', {}, photoSel) : null,
               el(
                 'td',
                 {},
@@ -2914,15 +2954,16 @@ p{margin:0 0 22px;color:#6d665c}
     const r = await api('/preview', { method: 'POST', body: JSON.stringify(payload()) });
     return r.url.replace(/\/$/, '') + previewPath();
   }
-  async function cloudflarePreviewUrl(number, tab) {
+  async function cloudflarePreviewUrl(pending, tab) {
     waiting(
       tab,
       'Your proposed change is being built. The preview opens here as soon as it is ready, usually within two to three minutes.',
     );
+    const q = `branch=${encodeURIComponent(pending.branch)}&commit=${encodeURIComponent(pending.commit)}`;
     for (let i = 0; i < 40; i += 1) {
-      const r = await api(`/preview-url/${number}`);
-      if (r.url) return r.url.replace(/\/$/, '') + previewPath();
-      await sleep(15000);
+      const r = await api(`/preview-ready?${q}`);
+      if (r.ready && r.url) return r.url.replace(/\/$/, '') + previewPath();
+      await sleep(10000);
     }
     return null;
   }
@@ -2950,13 +2991,13 @@ p{margin:0 0 22px;color:#6d665c}
         );
       }
       btn.textContent = 'Waiting for Cloudflare…';
-      const url = await cloudflarePreviewUrl(state.pending.number, tab);
+      const url = await cloudflarePreviewUrl(state.pending, tab);
       if (url) sendTo(tab, url);
       else {
         if (tab) tab.close();
         alertBox(
           'Preview not ready',
-          `Cloudflare has not posted a preview for pull request #${state.pending.number} yet.`,
+          'Cloudflare has not finished building the preview of your proposal yet.',
         );
       }
     } catch (e) {
@@ -3246,30 +3287,37 @@ p{margin:0 0 22px;color:#6d665c}
         });
         return;
       }
-      // Staging: propose as a pull request, let Cloudflare build it, then decide.
+      // Staging: the edit goes to a branch (no pull request yet), Cloudflare
+      // builds it, the editor looks, and only Accept opens and merges a pull
+      // request. Reject drops the branch and nothing else ever existed.
       btn.textContent = 'Proposing…';
       const proposed = await api('/save', { method: 'POST', body: JSON.stringify(payload()) });
-      state.pending = { number: proposed.number, branch: proposed.branch };
+      state.pending = proposed;
       btn.textContent = 'Waiting for Cloudflare…';
-      const previewUrl = await cloudflarePreviewUrl(proposed.number, tab);
+      const previewUrl = await cloudflarePreviewUrl(proposed, tab);
       if (previewUrl) sendTo(tab, previewUrl);
       else if (tab) tab.close();
       decisionDialog({
         title: previewUrl ? 'Does the preview look right?' : 'Preview not ready yet',
         text: previewUrl
-          ? `Pull request #${proposed.number} is proposed and the preview opened in a new tab. Accept to publish it to staging; reject to discard it.`
-          : `Pull request #${proposed.number} is proposed but Cloudflare has not posted its preview yet. You can accept once you have checked it on GitHub, or reject.`,
+          ? 'The preview opened in a new tab exactly as staging will show it. Accept to publish it; reject to discard it. Nothing is recorded until you accept.'
+          : 'Cloudflare has not finished building the preview. Keep editing and try again in a minute, or reject to discard the proposal.',
         previewUrl,
         acceptLabel: 'Accept & publish',
         onAccept: async (note) => {
           try {
-            const r = await api(`/accept/${proposed.number}`, {
+            const r = await api('/accept', {
               method: 'POST',
-              body: JSON.stringify({ previewUrl }),
+              body: JSON.stringify({
+                branch: proposed.branch,
+                title: proposed.title,
+                body: proposed.body,
+                previewUrl,
+              }),
             });
             state.pending = null;
             doneDialog('Accepted', [
-              `Accepted by ${r.email} at ${r.at}, recorded on pull request #${proposed.number}.`,
+              `Accepted by ${r.email} at ${r.at}, recorded on pull request #${r.number}.`,
               r.merged
                 ? 'Merged. Staging rebuilds in three or four minutes.'
                 : 'It merges itself as soon as the checks pass; staging rebuilds after that.',
@@ -3282,13 +3330,13 @@ p{margin:0 0 22px;color:#6d665c}
         rejectLabel: 'Reject',
         onReject: async (note) => {
           try {
-            const r = await api(`/reject/${proposed.number}`, {
+            const r = await api('/reject', {
               method: 'POST',
-              body: JSON.stringify({ branch: proposed.branch }),
+              body: JSON.stringify({ branch: proposed.branch, previewUrl }),
             });
             state.pending = null;
             doneDialog('Rejected', [
-              `Rejected by ${r.email} at ${r.at}. Pull request #${proposed.number} is closed and nothing was published.`,
+              `Rejected by ${r.email} at ${r.at}. The proposal is discarded and nothing was published.`,
               'Your edits are still here to change and propose again.',
             ]);
           } catch (e) {
@@ -3343,6 +3391,8 @@ p{margin:0 0 22px;color:#6d665c}
       base: data.base,
       demo: Boolean(data.demo),
       role: data.role || 'admin',
+      photoRequired: data.photoRequired !== false,
+      canSetPhoto: Boolean(data.canSetPhoto),
       users: data.users || [],
       log: data.log || '',
       decisions: data.decisions || [],
@@ -3367,7 +3417,7 @@ p{margin:0 0 22px;color:#6d665c}
     if (data.role !== 'superadmin' && ['home', 'log', 'users'].includes(state.tab))
       state.tab = 'projects';
     $('#base-note').textContent =
-      `Editing the ${data.base} branch. Saves open a pull request; staging updates once it merges.`;
+      `Editing the ${data.base} branch. Nothing is recorded until you preview and accept; accepting opens and merges a pull request, and staging updates after that.`;
     $('#message').value = '';
     markDirty();
     showTab(state.tab);

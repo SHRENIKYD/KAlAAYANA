@@ -183,11 +183,31 @@ export function restrictForAdmin(base, payload) {
 }
 
 /** Applies one users change; returns the new list or throws with a readable message. */
-export function applyUserChange(users, { action, email, role }, by) {
+export const PHOTO_MODES = ['required', 'optional'];
+
+/** Whether this editor must be photographed at sign-in. The studio account always is. */
+export function photoRequiredFor(users, email) {
+  const target = String(email || '').toLowerCase();
+  if (target === PERMANENT_SUPERADMIN) return true;
+  return users.find((u) => u.email === target)?.photo !== 'optional';
+}
+
+export function applyUserChange(users, { action, email, role, photo }, by) {
   const target = String(email || '').toLowerCase();
   if (!EMAIL.test(target)) throw new Error('Enter a valid email address');
   const list = users.map((u) => ({ ...u }));
   const i = list.findIndex((u) => u.email === target);
+  if (action === 'photo') {
+    // Only the studio account decides who may sign in without a photograph.
+    if (by !== PERMANENT_SUPERADMIN)
+      throw new Error(`Only ${PERMANENT_SUPERADMIN} can change who needs a photograph`);
+    if (target === PERMANENT_SUPERADMIN)
+      throw new Error(`${PERMANENT_SUPERADMIN} is always photographed at sign-in`);
+    if (!PHOTO_MODES.includes(photo)) throw new Error('Choose required or optional');
+    if (i < 0) throw new Error(`${target} has no access`);
+    list[i].photo = photo;
+    return list;
+  }
   if (target === PERMANENT_SUPERADMIN && action !== 'invite')
     throw new Error(`${PERMANENT_SUPERADMIN} is always a superadmin and cannot be changed`);
   if (action === 'invite') {
