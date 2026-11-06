@@ -3175,12 +3175,20 @@
     onAccept,
     rejectLabel,
     onReject,
+    keepLabel,
+    onKeep,
   }) {
     const note = el('p', { class: 'signin-error', role: 'alert' });
     const accept = el('button', { class: 'btn', type: 'button' }, acceptLabel);
     const reject = el('button', { class: 'btn btn-ghost', type: 'button' }, rejectLabel);
-    accept.addEventListener('click', decide(accept, [reject], onAccept, note));
-    reject.addEventListener('click', decide(reject, [accept], onReject, note));
+    const keep = keepLabel
+      ? el('button', { class: 'btn btn-ghost', type: 'button' }, keepLabel)
+      : null;
+    const all = [accept, reject, keep].filter(Boolean);
+    const rest = (b) => all.filter((x) => x !== b);
+    accept.addEventListener('click', decide(accept, rest(accept), onAccept, note));
+    reject.addEventListener('click', decide(reject, rest(reject), onReject, note));
+    if (keep) keep.addEventListener('click', decide(keep, rest(keep), onKeep, note));
     $('#result-body').replaceChildren(
       el('h2', {}, title),
       el('p', {}, text),
@@ -3195,7 +3203,7 @@
             ),
           )
         : null,
-      el('div', { class: 'signin-form' }, accept, reject),
+      el('div', { class: 'signin-form' }, accept, keep, reject),
       note,
     );
     $('#result-close').hidden = true;
@@ -3580,7 +3588,11 @@
       // builds it, the editor looks, and only Accept opens and merges a pull
       // request. Reject drops the branch and nothing else ever existed.
       btn.textContent = 'Proposing…';
-      const proposed = await api('/save', { method: 'POST', body: JSON.stringify(payload()) });
+      // After Keep editing, the same proposal is updated rather than a new one made.
+      const proposed = await api('/save', {
+        method: 'POST',
+        body: JSON.stringify({ ...payload(), branch: state.pending?.branch }),
+      });
       state.pending = proposed;
       btn.textContent = 'Waiting for Cloudflare…';
       const previewUrl = await cloudflarePreviewUrl(proposed, tab);
@@ -3589,7 +3601,7 @@
       decisionDialog({
         title: previewUrl ? 'Does the preview look right?' : 'Preview not ready yet',
         text: previewUrl
-          ? 'The preview opened in a new tab exactly as staging will show it. Accept to publish it; reject to discard it. Nothing is recorded until you accept.'
+          ? 'The preview opened in a new tab exactly as staging will show it. Accept to publish it, keep editing to change it and preview again, or reject to discard it. Nothing is published until you accept.'
           : 'Cloudflare has not finished building the preview. Keep editing and try again in a minute, or reject to discard the proposal.',
         previewUrl,
         acceptLabel: 'Accept & publish',
@@ -3612,6 +3624,8 @@
             note.textContent = e.message;
           }
         },
+        keepLabel: 'Keep editing',
+        onKeep: () => closeDialog(),
         rejectLabel: 'Reject',
         onReject: async (note) => {
           try {

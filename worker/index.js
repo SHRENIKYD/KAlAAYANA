@@ -428,15 +428,23 @@ async function handleApi(request, env) {
       `- ${Object.keys(uploads).length} image(s) added, ${deletions.length} removed, ${Object.keys(banners).length} banner(s) added`,
     ].join('\n');
     try {
+      const again = /^content\/[a-z0-9]+$/.test(String(payload.branch || ''));
       const result = await commitToBranch(gh, {
         base,
-        branch: `content/${stamp}`,
+        branch: again ? payload.branch : `content/${stamp}`,
+        replace: again,
         message: `content: ${summary}\n\n${body}`,
         author,
         entries,
       });
       try {
-        await logCommit(gh, base, [saveItem], `log: proposed ${result.branch}`, author);
+        await logCommit(
+          gh,
+          base,
+          [saveItem],
+          `log: ${result.updated ? 'updated' : 'proposed'} ${result.branch}`,
+          author,
+        );
       } catch {
         /* the proposal is the branch itself */
       }
