@@ -11,6 +11,7 @@ import { Image } from 'astro:assets';
 import { photo, photoWidths, homeImage } from '../lib/photos';
 import PolicyLinks from '../components/PolicyLinks.astro';
 import ArtistCarousel from '../components/ArtistCarousel.astro';
+import ClientMarquee from '../components/ClientMarquee.astro';
 
 // Story paragraphs are authored in site.json with emphasis only. Anything else
 // is dropped before it reaches set:html, so content edits cannot add script.
@@ -244,6 +245,7 @@ const story = site.story.map((paragraph) =>
         </div>
       </section>
       <ArtistCarousel />
+      <ClientMarquee />
       <section class="contact-studio" id="contact" aria-labelledby="contact-title">
         <div class="contact-shell">
           <div class="contact-heading">

@@ -1,13 +1,13 @@
 /* While a page loads (html.skel-wait), the page is its own skeleton: the
    layout is the real one, the words are hidden and skeleton.js draws a bar
    over every line of them, and each photograph shimmers in its own frame
-   until its bytes arrive. Logos are left alone. */
+   until its bytes arrive. Logos and the client marquee are left alone. */
 html.skel-wait body * {
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
   text-shadow: none !important;
 }
-html.skel img:not(.is-loaded):not(.logo):not(.menu-logo) {
+html.skel img:not(.is-loaded):not(.logo):not(.menu-logo):not(.client-item img) {
   background-color: rgba(128, 120, 108, 0.12);
   background-image: linear-gradient(
     90deg,
