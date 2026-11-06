@@ -580,6 +580,30 @@ async function handleApi(request, env) {
     });
   }
 
+  // After an accept: has the pull request merged, and does the staging build
+  // this Worker is serving already contain that merge? The deployed commit is
+  // read from this Worker's own version.json; GitHub compares the two.
+  const published = route.match(/^\/published\/(\d+)$/);
+  if (request.method === 'GET' && published) {
+    try {
+      const pr = await gh.call('GET', `/pulls/${published[1]}`);
+      if (pr.state === 'closed' && !pr.merged_at) return json({ state: 'closed' });
+      if (!pr.merged_at || !pr.merge_commit_sha) return json({ state: 'merging' });
+      const res = await env.ASSETS.fetch(new Request(`${url.origin}/version.json`));
+      const live = res.ok ? await res.json() : {};
+      const deployed = String(live.commit || '');
+      if (!/^[0-9a-f]{7,40}$/.test(deployed)) return json({ state: 'building' });
+      if (deployed === pr.merge_commit_sha) return json({ state: 'live', commit: deployed });
+      const cmp = await gh.call('GET', `/compare/${pr.merge_commit_sha}...${deployed}`);
+      return json({
+        state: ['identical', 'ahead'].includes(cmp.status) ? 'live' : 'building',
+        commit: deployed,
+      });
+    } catch (e) {
+      return json({ state: 'unknown', error: e.message });
+    }
+  }
+
   // Accept opens the pull request and merges it; reject drops the branch.
   // Either way the decision is logged, and a branch already decided on
   // (gone) cannot be decided twice.

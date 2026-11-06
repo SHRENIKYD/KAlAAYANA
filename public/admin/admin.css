@@ -1164,6 +1164,61 @@ select.dd-native {
   background: var(--bg);
   outline: none;
 }
+.dialog-x:disabled,
+#result-close:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+.pub-bar {
+  height: 3px;
+  margin: 18px 0 10px;
+  background: #e6e0d6;
+  overflow: hidden;
+  border-radius: 2px;
+}
+.pub-bar i {
+  display: block;
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, #b08d3f, #d6b35a, #b08d3f);
+  animation: busy-line 1.3s ease-in-out infinite;
+}
+.pub-bar.done i {
+  width: 100%;
+  animation: none;
+  background: var(--gold);
+}
+.pub-bar.stopped i {
+  width: 100%;
+  animation: none;
+  background: var(--line);
+}
+.pub-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+.pub-status {
+  margin: 0;
+}
+.pub-clock {
+  flex: none;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.pub-link {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  margin: 18px 0 0;
+}
+.pub-link small {
+  word-break: break-all;
+}
 .dialog-x[hidden] {
   display: none;
 }

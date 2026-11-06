@@ -3212,6 +3212,103 @@
     $('#result-close').textContent = 'Close';
     $('#result-close').onclick = () => $('#result').close();
   }
+  /* After Accept: the dialog stays, with a clock and a moving bar, while the
+     pull request merges and staging rebuilds; Close and the cross are held
+     until the page is live (or something needs attention), then a link
+     opens the published page. */
+  function publishingDialog(r, path) {
+    const started = Date.now();
+    const clock = el('span', { class: 'pub-clock' }, '0:00');
+    const status = el(
+      'p',
+      { class: 'pub-status' },
+      r.merged ? 'Merged. Building staging…' : 'Waiting for the checks to pass before it merges…',
+    );
+    const bar = el('div', { class: 'pub-bar', 'aria-hidden': 'true' }, el('i'));
+    const link = el('p', { class: 'pub-link', hidden: '' });
+    const close = $('#result-close');
+    const x = $('#result-x');
+    const lock = (on) => {
+      state.dialogLocked = on;
+      close.disabled = on;
+      x.disabled = on;
+    };
+    $('#result-body').replaceChildren(
+      el('h2', {}, 'Publishing to staging'),
+      el(
+        'p',
+        {},
+        `Accepted by ${r.name ? `${r.name} (${r.email})` : r.email} on ${when(r.at)}, recorded on pull request #${r.number}.`,
+      ),
+      bar,
+      el('div', { class: 'pub-row' }, status, clock),
+      link,
+    );
+    close.hidden = false;
+    close.textContent = 'Close';
+    close.onclick = () => closeDialog();
+    x.hidden = false;
+    lock(true);
+    if (!$('#result').open) $('#result').showModal();
+    const tick = setInterval(() => {
+      const s = Math.floor((Date.now() - started) / 1000);
+      clock.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    }, 1000);
+    const finish = (text, url, ok) => {
+      clearInterval(tick);
+      clearTimeout(poll);
+      status.textContent = text;
+      bar.classList.add(ok ? 'done' : 'stopped');
+      if (url) {
+        link.replaceChildren(
+          el(
+            'a',
+            { class: 'btn', href: url, target: '_blank', rel: 'noopener' },
+            ok ? 'Open the published page ↗' : 'Open staging ↗',
+          ),
+          el('small', { class: 'muted' }, url),
+        );
+        link.hidden = false;
+      }
+      lock(false);
+    };
+    const url = `${window.location.origin}${path}`;
+    let poll = null;
+    const check = async () => {
+      if (Date.now() - started > 10 * 60000)
+        return finish(
+          'Still building after ten minutes. It will appear on staging when the build finishes.',
+          url,
+          false,
+        );
+      try {
+        const p = await api(`/published/${r.number}`);
+        if (p.state === 'live') {
+          const s = Math.round((Date.now() - started) / 1000);
+          return finish(
+            `Live on staging, ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} after accepting.`,
+            url,
+            true,
+          );
+        }
+        if (p.state === 'closed')
+          return finish(
+            'The pull request was closed without merging, so nothing was published.',
+            null,
+            false,
+          );
+        status.textContent =
+          p.state === 'merging'
+            ? 'Waiting for the checks to pass before it merges…'
+            : 'Merged. Building staging…';
+      } catch {
+        /* a missed poll is retried */
+      }
+      poll = setTimeout(check, 8000);
+    };
+    poll = setTimeout(check, 4000);
+  }
+
   function doneDialog(title, lines) {
     $('#result-close').hidden = false;
     $('#result-close').disabled = false;
@@ -3460,12 +3557,8 @@
               }),
             });
             state.pending = null;
-            doneDialog('Accepted', [
-              `Accepted by ${r.email} on ${when(r.at)}, recorded on pull request #${r.number}.`,
-              r.merged
-                ? 'Merged. Staging rebuilds in three or four minutes.'
-                : 'It merges itself as soon as the checks pass; staging rebuilds after that.',
-            ]);
+            const livePath = previewPath();
+            publishingDialog(r, livePath);
             await load();
           } catch (e) {
             note.textContent = e.message;
