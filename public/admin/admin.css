@@ -157,6 +157,28 @@ body.busy .bar::after {
     animation: none;
   }
 }
+/* photographs: shimmer until the bytes arrive */
+img.pic {
+  background: linear-gradient(90deg, #e9e3d8 25%, #f3efe7 50%, #e9e3d8 75%);
+  background-size: 200% 100%;
+  animation: skel-shimmer 1.4s ease-in-out infinite;
+  min-height: 120px;
+  transition: opacity 0.25s;
+}
+img.pic.loaded {
+  animation: none;
+  background: #e6e0d6;
+  min-height: 0;
+}
+.work-head img.pic,
+.work-head img.pic.loaded {
+  min-height: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  img.pic {
+    animation: none;
+  }
+}
 .pending-note {
   margin: 10px 0 0;
   color: var(--gold);

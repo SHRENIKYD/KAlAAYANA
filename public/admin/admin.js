@@ -56,6 +56,17 @@
     state.sections[key]?.title ||
     key;
   const imageUrl = (kind, file) => state.previews[file] || `/admin/api/image/${kind}/${file}`;
+  // A photograph that shimmers until its bytes arrive, and is only fetched
+  // when it is near the screen.
+  const pic = (src, attrs = {}) => {
+    const img = el('img', { src, alt: '', loading: 'lazy', decoding: 'async', ...attrs });
+    img.classList.add('pic');
+    const done = () => img.classList.add('loaded');
+    img.addEventListener('load', done, { once: true });
+    img.addEventListener('error', done, { once: true });
+    if (img.complete && img.naturalWidth) done();
+    return img;
+  };
 
   // Who is using the account this session. Kept for the hour in this tab.
   const sessionName = () => {
@@ -725,10 +736,13 @@
 
   function projectCard(p) {
     const node = $('#tpl-project-card').content.firstElementChild.cloneNode(true);
-    const img = $('.card-thumb', node);
+    const slot = $('.card-thumb', node);
     if (p.images[0]) {
-      img.src = imageUrl('projects', p.images[0].file);
-      img.alt = p.images[0].alt;
+      const img = pic(imageUrl('projects', p.images[0].file), {
+        class: 'card-thumb',
+        alt: p.images[0].alt,
+      });
+      slot.replaceWith(img);
     }
     $('.card-title', node).textContent = p.title;
     $('.card-meta', node).textContent =
@@ -826,7 +840,7 @@
           el(
             'div',
             { class: `image photo${img.file in state.uploads ? ' new' : ''}` },
-            el('img', { src: imageUrl('projects', img.file), alt: '' }),
+            pic(imageUrl('projects', img.file)),
             el(
               'div',
               {},
@@ -1146,7 +1160,7 @@
     const swatchPreview = el(
       'div',
       { class: 'fit-preview' },
-      el('img', { src: imageUrl(w.image.from, w.image.file), alt: '' }),
+      pic(imageUrl(w.image.from, w.image.file)),
     );
     swatchPreview.style.background = w.image.background || '#29251f';
     const colour = el('input', {
@@ -1440,7 +1454,7 @@
                   render();
                 },
               },
-              el('img', { src: imageUrl(w.image.from, w.image.file), alt: '' }),
+              pic(imageUrl(w.image.from, w.image.file)),
               el('span', { class: 'work-head-num' }, String(i + 1).padStart(2, '0')),
               el(
                 'span',
@@ -1461,7 +1475,7 @@
               ),
               el('span', { class: 'work-head-chevron', 'aria-hidden': 'true' }, '⌄'),
             ),
-            el('img', { src: imageUrl(w.image.from, w.image.file), alt: '' }),
+            pic(imageUrl(w.image.from, w.image.file)),
             el(
               'div',
               { class: 'form work-form' },
@@ -1736,7 +1750,7 @@
               {
                 class: `image${s.banner in state.banners || s.banner in state.bannerCopies ? ' new' : ''}`,
               },
-              el('img', { src: bannerSrc(), alt: '' }),
+              pic(bannerSrc()),
               el(
                 'div',
                 {},

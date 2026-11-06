@@ -257,7 +257,7 @@ async function handleApi(request, env) {
     return new Response(res.body, {
       headers: {
         'content-type': image[2].endsWith('.png') ? 'image/png' : 'image/jpeg',
-        'cache-control': 'private, max-age=300',
+        'cache-control': 'private, max-age=1800',
       },
     });
   }
