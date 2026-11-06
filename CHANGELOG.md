@@ -10,6 +10,8 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.19] - 2026-11-06
+
 ### Changed
 
 - Admin roles: contact@kalaayanastudios.com is the fixed **Master** account,
@@ -17,11 +19,9 @@ is a holding page. `1.0.0` marks the launch of the full site.
   decides who else must be photographed. Superadmins have every other right;
   admins are unchanged. The Users table shows the master's role as fixed and
   offers no Remove for it.
-
-## [1.2.19] - 2026-11-06
-
-### Changed
-
+- Staging releases publish themselves: when develop's version changes, a
+  workflow tags and publishes each untagged version as a GitHub pre-release
+  from its changelog section.
 - Every public page is its own loading skeleton: the real layout is drawn at
   once with a grey bar over each line of text and a shimmer in each
   photograph's frame, so the loading state matches the page exactly. Text is
