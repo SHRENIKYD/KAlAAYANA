@@ -11,12 +11,6 @@
       "role": "superadmin",
       "invitedBy": null,
       "invitedAt": "2026-11-06T06:00:00Z"
-    },
-    {
-      "email": "shrenikcsd@gmail.com",
-      "role": "admin",
-      "invitedBy": "shrenikyd@gmail.com",
-      "invitedAt": "2026-11-06T09:09:06.125Z"
     }
   ]
 }
