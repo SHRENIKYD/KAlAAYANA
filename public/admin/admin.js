@@ -25,6 +25,9 @@
     bannerCopies: {},
     previews: {},
     current: null,
+    editing: null,
+    demo: false,
+    lastPr: null,
     tab: 'projects',
     view: 'section',
     dirty: false,
@@ -45,6 +48,12 @@
       .normalize('NFKD')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
+  // A work's name is what the homepage calls it; the section page has its own
+  // headline. Lists in the admin use the name.
+  const workName = (key) =>
+    (state.home?.works || []).find((w) => w.section === key)?.title ||
+    state.sections[key]?.title ||
+    key;
   const imageUrl = (kind, file) => state.previews[file] || `/admin/api/image/${kind}/${file}`;
 
   async function api(path, init) {
@@ -110,7 +119,7 @@
             'aria-current': String(state.view === 'section' && state.current === key),
             onclick: () => openSection(key),
           },
-          el('span', {}, s.title),
+          el('span', {}, workName(key)),
           el('b', {}, String(state.projects.filter((p) => p.group === key).length)),
         ),
       ),
@@ -120,6 +129,7 @@
   /* ---------- section view ---------- */
   function openSection(key) {
     state.view = 'section';
+    state.editing = key;
     state.current = key;
     const s = state.sections[key];
     const items = state.projects.filter((p) => p.group === key);
@@ -132,8 +142,8 @@
           'div',
           {},
           el('p', { class: 'eyebrow' }, s.eyebrow),
-          el('h1', {}, s.title),
-          el('p', { class: 'muted' }, s.lede),
+          el('h1', {}, workName(key)),
+          el('p', { class: 'muted' }, `${s.title} — ${s.lede}`),
         ),
         el(
           'div',
@@ -247,6 +257,7 @@
   function editProject(ref, isNew = false) {
     const p = typeof ref === 'string' ? state.projects.find((x) => x.slug === ref) : ref;
     state.view = 'project';
+    state.editing = p;
     state.current = p.group;
     let slugLocked = !isNew;
     let slugField;
@@ -369,7 +380,7 @@
         el(
           'div',
           {},
-          el('p', { class: 'eyebrow' }, state.sections[p.group].title),
+          el('p', { class: 'eyebrow' }, workName(p.group)),
           el('h1', {}, isNew ? 'New project' : p.title),
         ),
         el(
@@ -466,7 +477,7 @@
                 'select',
                 {},
                 ...Object.entries(state.sections).map(([k, s]) => {
-                  const o = el('option', { value: k }, s.title);
+                  const o = el('option', { value: k }, workName(k));
                   if (k === p.group) o.selected = true;
                   return o;
                 }),
@@ -677,7 +688,7 @@
         choices.push({
           from: 'sections',
           file: sec.banner,
-          label: `${sec.title} banner — ${sec.banner}`,
+          label: `${workName(key)} banner — ${sec.banner}`,
           alt: sec.bannerAlt,
         });
     return choices;
@@ -732,7 +743,7 @@
                 (() => {
                   const sel = el('select', {});
                   const options = [
-                    ...Object.entries(state.sections).map(([k, sec]) => [`/${k}/`, sec.title]),
+                    ...Object.entries(state.sections).map(([k]) => [`/${k}/`, workName(k)]),
                     ['/collectables/', 'Collectables'],
                   ];
                   if (!options.some(([h]) => h === w.href)) options.push([w.href, w.href]);
@@ -815,14 +826,11 @@
                 ],
               }),
               dropZone(
-                'Drop a new photograph for this feature',
+                'Drop a new photograph for this work',
                 async (files) => {
                   if (!files[0]) return;
                   const ext = files[0].type === 'image/png' ? 'png' : 'jpg';
-                  const name = nextImageName(
-                    `home-${slugify(w.title || 'feature') || 'feature'}`,
-                    ext,
-                  );
+                  const name = nextImageName(`home-${slugify(w.title || 'work') || 'work'}`, ext);
                   await stageUpload(files[0], name, state.uploads);
                   w.image = { from: 'projects', file: name, alt: w.image.alt };
                   render();
@@ -947,6 +955,7 @@
         bannerFocus: '50% 50%',
       });
     state.view = 'section-edit';
+    state.editing = key;
     state.current = key;
     const bannerBox = el('div', { class: 'images' });
     const bannerSrc = () =>
@@ -1066,14 +1075,18 @@
             },
             'Small label above the title.',
           ),
-          field('Title', {
-            value: s.title,
-            required: true,
-            oninput: (v) => {
-              s.title = v;
-              markDirty();
+          field(
+            'Page headline',
+            {
+              value: s.title,
+              required: true,
+              oninput: (v) => {
+                s.title = v;
+                markDirty();
+              },
             },
-          }),
+            `Shown at the top of /${key}/. The work's name on the homepage is edited in the Homepage tab.`,
+          ),
         ),
         field(
           'Lede',
@@ -1146,7 +1159,7 @@
     const sel = el(
       'select',
       { id: 'np-section' },
-      ...keys.map((k) => el('option', { value: k }, state.sections[k].title)),
+      ...keys.map((k) => el('option', { value: k }, workName(k))),
     );
     $('#result-body').replaceChildren(
       el('h2', {}, 'New project'),
@@ -1261,42 +1274,81 @@
     dlg.showModal();
   }
 
-  /* ---------- demo preview build ---------- */
-  async function buildPreview() {
-    const body = $('#result-body');
-    body.replaceChildren(
-      el('h2', {}, 'Building preview'),
-      el('p', {}, 'Running the real site build with your saved changes…'),
-    );
-    $('#result-close').hidden = true;
+  /* ---------- preview this page ----------
+     The page being edited, as the site will show it. In the demo the real
+     site is built from the current edits, saved or not. On staging a save
+     is needed first: Cloudflare builds the pull request's branch and posts
+     the URL on it, which the Worker reads back. */
+  function previewPath() {
+    if (state.view === 'home') return '/#works';
+    if (state.view === 'project' && state.editing?.slug)
+      return `/${state.editing.group}/${state.editing.slug}/`;
+    if ((state.view === 'section' || state.view === 'section-edit') && state.editing)
+      return `/${state.editing}/`;
+    return '/';
+  }
+  function payload() {
+    return {
+      projects: state.projects,
+      sections: state.sections,
+      home: state.home,
+      uploads: state.uploads,
+      banners: state.banners,
+      bannerCopies: state.bannerCopies,
+      message: $('#message').value,
+    };
+  }
+  async function previewCurrent() {
+    const btn = $('#preview-btn');
+    const tab = window.open('', '_blank');
+    const show = (html) => {
+      if (tab) tab.document.write(html);
+    };
+    btn.disabled = true;
     try {
-      const r = await api('/preview', { method: 'POST' });
-      body.replaceChildren(
-        el('h2', {}, 'Preview ready'),
-        el(
-          'p',
-          {},
-          el(
-            'a',
-            { href: r.url, target: '_blank', rel: 'noopener noreferrer' },
-            'Open the preview site ↗',
-          ),
-        ),
-        el(
-          'p',
-          { class: 'muted' },
-          `Built in ${r.seconds}s from the saved changes. Close this to keep editing.`,
-        ),
-      );
-      const bar = $('#preview-link');
-      if (bar) {
-        bar.href = r.url;
-        bar.hidden = false;
+      if (state.demo) {
+        btn.textContent = 'Building preview…';
+        show(
+          '<p style="font:16px/1.5 system-ui;padding:24px">Building the site with your current edits — about a minute the first time, a few seconds after…</p>',
+        );
+        const r = await api('/preview', { method: 'POST', body: JSON.stringify(payload()) });
+        const url = r.url.replace(/\/$/, '') + previewPath();
+        if (tab) tab.location.replace(url);
+        else window.location.assign(url);
+        return;
       }
+      if (!state.lastPr) {
+        if (tab) tab.close();
+        return alertBox(
+          'Save first',
+          'On staging the preview is built from your saved changes: save, and Cloudflare builds this page within a few minutes.',
+        );
+      }
+      btn.textContent = 'Waiting for Cloudflare…';
+      show(
+        '<p style="font:16px/1.5 system-ui;padding:24px">Cloudflare is building your saved changes. This page will open the preview as soon as it is ready — usually two to three minutes.</p>',
+      );
+      for (let i = 0; i < 40; i += 1) {
+        const r = await api(`/preview-url/${state.lastPr}`);
+        if (r.url) {
+          const url = r.url.replace(/\/$/, '') + previewPath();
+          if (tab) tab.location.replace(url);
+          else window.location.assign(url);
+          return;
+        }
+        await new Promise((ok) => setTimeout(ok, 15000));
+      }
+      if (tab) tab.close();
+      alertBox(
+        'Preview not ready',
+        `Cloudflare has not posted a preview for pull request #${state.lastPr} yet. Check the pull request on GitHub.`,
+      );
     } catch (e) {
-      body.replaceChildren(el('h2', {}, 'Preview failed'), el('pre', {}, e.message));
+      if (tab) tab.close();
+      alertBox('Preview failed', e.problems ? e.problems.join('\n') : e.message);
     } finally {
-      $('#result-close').hidden = false;
+      btn.disabled = false;
+      btn.textContent = 'Preview this page ↗';
     }
   }
 
@@ -1414,16 +1466,9 @@
     try {
       const result = await api('/save', {
         method: 'POST',
-        body: JSON.stringify({
-          projects: state.projects,
-          sections: state.sections,
-          home: state.home,
-          uploads: state.uploads,
-          banners: state.banners,
-          bannerCopies: state.bannerCopies,
-          message: $('#message').value,
-        }),
+        body: JSON.stringify(payload()),
       });
+      if (result.number) state.lastPr = result.number;
       $('#result-body').replaceChildren(
         ...[
           el('h2', {}, 'Saved'),
@@ -1448,7 +1493,7 @@
             ? el(
                 'p',
                 {},
-                'To see exactly how the site looks with these changes, build a preview — it takes about a minute.',
+                'Preview this page shows the site exactly as it will look with these changes.',
               )
             : el(
                 'p',
@@ -1458,11 +1503,15 @@
                   : 'Auto-merge is not enabled on the repository, so merge it on GitHub once the checks pass. Staging rebuilds after the merge.',
               ),
           result.demo
-            ? el('button', { class: 'btn', type: 'button', onclick: buildPreview }, 'Preview site')
+            ? el(
+                'button',
+                { class: 'btn', type: 'button', onclick: previewCurrent },
+                'Preview this page ↗',
+              )
             : el(
                 'p',
                 {},
-                'Preview: Cloudflare builds this pull request\u2019s branch and posts the preview link as a comment on it within a few minutes. That is the site exactly as it will look.',
+                'Preview this page (top right) opens the page as it will look once Cloudflare has built this pull request — usually two to three minutes.',
               ),
         ].filter(Boolean),
       );
@@ -1497,6 +1546,7 @@
     Object.assign(state, {
       email: data.email,
       base: data.base,
+      demo: Boolean(data.demo),
       projects: data.projects,
       sections: data.sections,
       home: data.home || { works: [] },
@@ -1518,6 +1568,7 @@
   }
 
   $('#new-section').addEventListener('click', newWork);
+  $('#preview-btn').addEventListener('click', previewCurrent);
   $('#tab-home').addEventListener('click', () => showTab('home'));
   $('#tab-projects').addEventListener('click', () => showTab('projects'));
   $('#new-project').addEventListener('click', newProjectAnywhere);

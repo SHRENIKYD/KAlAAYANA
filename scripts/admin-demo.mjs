@@ -64,6 +64,44 @@ function decode(map) {
   return outMap;
 }
 
+function materialize(dir, payload, uploads, banners, projectFiles) {
+  const site = {
+    ...readJson('src/data/site.json'),
+    sections: payload.sections,
+    home: payload.home,
+  };
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(path.join(dir, 'images/projects'), { recursive: true });
+  fs.mkdirSync(path.join(dir, 'images/sections'), { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, 'projects.json'),
+    JSON.stringify(payload.projects, null, 2) + '\n',
+  );
+  fs.writeFileSync(path.join(dir, 'site.json'), JSON.stringify(site, null, 2) + '\n');
+  for (const [f, b] of Object.entries(uploads))
+    fs.writeFileSync(path.join(dir, 'images/projects', f), b);
+  for (const [f, source] of Object.entries(payload.bannerCopies || {}))
+    fs.copyFileSync(
+      uploads[source]
+        ? path.join(dir, 'images/projects', source)
+        : path.join('src/images/projects', source),
+      path.join(dir, 'images/sections', f),
+    );
+  for (const [f, b] of Object.entries(banners))
+    fs.writeFileSync(path.join(dir, 'images/sections', f), b);
+  const deletions = orphans(
+    readJson('src/data/projects.json'),
+    payload.projects,
+    projectFiles,
+    payload.home.works.filter((w) => w.image.from === 'projects').map((w) => w.image.file),
+  );
+  fs.writeFileSync(
+    path.join(dir, 'DELETIONS.txt'),
+    deletions.join('\n') + (deletions.length ? '\n' : ''),
+  );
+  return deletions;
+}
+
 http
   .createServer(async (req, res) => {
     const url = new URL(req.url, 'http://x');
@@ -94,6 +132,7 @@ http
       const site = readJson('src/data/site.json');
       return json(res, {
         email: signedIn(req),
+        demo: true,
         base: 'local working tree (demo)',
         projects: readJson('src/data/projects.json'),
         sections: site.sections,
@@ -111,7 +150,11 @@ http
       res.writeHead(200, { 'content-type': types[path.extname(p)] });
       return fs.createReadStream(p).pipe(res);
     }
-    if (req.method === 'POST' && url.pathname === '/admin/api/save') {
+    if (
+      req.method === 'POST' &&
+      (url.pathname === '/admin/api/save' || url.pathname === '/admin/api/preview')
+    ) {
+      const isPreview = url.pathname.endsWith('/preview');
       let body = '';
       for await (const chunk of req) body += chunk;
       let payload;
@@ -130,60 +173,27 @@ http
         return json(res, { error: e.message }, 400);
       }
       const problems = validate({ ...payload, uploads, banners }, projectFiles, bannerFiles);
-      if (problems.length) return json(res, { error: 'Not saved', problems }, 422);
-      const site = {
-        ...readJson('src/data/site.json'),
-        sections: payload.sections,
-        home: payload.home,
-      };
-      fs.rmSync(out, { recursive: true, force: true });
-      fs.mkdirSync(path.join(out, 'images/projects'), { recursive: true });
-      fs.mkdirSync(path.join(out, 'images/sections'), { recursive: true });
-      fs.writeFileSync(
-        path.join(out, 'projects.json'),
-        JSON.stringify(payload.projects, null, 2) + '\n',
-      );
-      fs.writeFileSync(path.join(out, 'site.json'), JSON.stringify(site, null, 2) + '\n');
-      for (const [f, b] of Object.entries(uploads))
-        fs.writeFileSync(path.join(out, 'images/projects', f), b);
-      for (const [f, source] of Object.entries(payload.bannerCopies || {}))
-        fs.copyFileSync(
-          uploads[source]
-            ? path.join(out, 'images/projects', source)
-            : path.join('src/images/projects', source),
-          path.join(out, 'images/sections', f),
+      if (problems.length)
+        return json(res, { error: isPreview ? 'Cannot preview yet' : 'Not saved', problems }, 422);
+      const target = isPreview ? path.join(previewRoot, 'input') : out;
+      const deletions = materialize(target, payload, uploads, banners, projectFiles);
+      if (!isPreview) {
+        console.log(
+          `saved → ${out} (${Object.keys(uploads).length} image(s) added, ${deletions.length} to delete) — "${payload.message || ''}"`,
         );
-      for (const [f, b] of Object.entries(banners))
-        fs.writeFileSync(path.join(out, 'images/sections', f), b);
-      const deletions = orphans(
-        readJson('src/data/projects.json'),
-        payload.projects,
-        projectFiles,
-        payload.home.works.filter((w) => w.image.from === 'projects').map((w) => w.image.file),
-      );
-      fs.writeFileSync(
-        path.join(out, 'DELETIONS.txt'),
-        deletions.join('\n') + (deletions.length ? '\n' : ''),
-      );
-      console.log(
-        `saved → ${out} (${Object.keys(uploads).length} image(s) added, ${deletions.length} to delete) — "${payload.message || ''}"`,
-      );
-      return json(res, {
-        demo: true,
-        folder: '.admin-demo/',
-        added: Object.keys(uploads).length,
-        removed: deletions.length,
-      });
-    }
-    if (req.method === 'POST' && url.pathname === '/admin/api/preview') {
-      // Build the real site from a copy of the project with the saved changes
-      // applied, so the preview is exactly what a deploy would be.
-      if (!fs.existsSync(path.join(out, 'projects.json')))
-        return json(res, { error: 'Save first, then preview.' }, 400);
+        return json(res, {
+          demo: true,
+          folder: '.admin-demo/',
+          added: Object.keys(uploads).length,
+          removed: deletions.length,
+        });
+      }
+      // Preview: build the real site from a copy of the project with these
+      // edits applied, so the page is exactly what a deploy would show.
       const started = Date.now();
       try {
         const site = path.join(previewRoot, 'site');
-        fs.rmSync(previewRoot, { recursive: true, force: true });
+        fs.rmSync(site, { recursive: true, force: true });
         fs.mkdirSync(site, { recursive: true });
         for (const item of [
           'src',
@@ -196,18 +206,18 @@ http
         ])
           if (fs.existsSync(item)) fs.cpSync(item, path.join(site, item), { recursive: true });
         fs.symlinkSync(path.resolve('node_modules'), path.join(site, 'node_modules'), 'junction');
-        fs.copyFileSync(path.join(out, 'projects.json'), path.join(site, 'src/data/projects.json'));
-        fs.copyFileSync(path.join(out, 'site.json'), path.join(site, 'src/data/site.json'));
+        fs.copyFileSync(
+          path.join(target, 'projects.json'),
+          path.join(site, 'src/data/projects.json'),
+        );
+        fs.copyFileSync(path.join(target, 'site.json'), path.join(site, 'src/data/site.json'));
         for (const kind of ['projects', 'sections'])
-          for (const f of fs.readdirSync(path.join(out, 'images', kind)))
+          for (const f of fs.readdirSync(path.join(target, 'images', kind)))
             fs.copyFileSync(
-              path.join(out, 'images', kind, f),
+              path.join(target, 'images', kind, f),
               path.join(site, 'src/images', kind, f),
             );
-        for (const f of fs
-          .readFileSync(path.join(out, 'DELETIONS.txt'), 'utf8')
-          .split('\n')
-          .filter(Boolean))
+        for (const f of deletions)
           fs.rmSync(path.join(site, 'src/images/projects', f), { force: true });
         // LIVE so the preview shows the launched site at /, like production after release.
         fs.writeFileSync(path.join(site, 'LIVE'), '');
@@ -215,7 +225,10 @@ http
           const child = spawn(
             process.execPath,
             [path.resolve('node_modules/astro/bin/astro.mjs'), 'build'],
-            { cwd: site, stdio: ['ignore', 'pipe', 'pipe'] },
+            {
+              cwd: site,
+              stdio: ['ignore', 'pipe', 'pipe'],
+            },
           );
           let log = '';
           child.stdout.on('data', (d) => (log += d));
@@ -233,13 +246,9 @@ http
           }
         }
         previewReady = true;
-        console.log(
-          `preview built in ${Math.round((Date.now() - started) / 1000)}s → http://localhost:${port}/admin/preview/`,
-        );
-        return json(res, {
-          url: `/admin/preview/`,
-          seconds: Math.round((Date.now() - started) / 1000),
-        });
+        const seconds = Math.round((Date.now() - started) / 1000);
+        console.log(`preview built in ${seconds}s → http://localhost:${port}/admin/preview/`);
+        return json(res, { url: '/admin/preview/', seconds });
       } catch (e) {
         return json(res, { error: e.message }, 500);
       }

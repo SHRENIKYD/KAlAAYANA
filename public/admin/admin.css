@@ -105,6 +105,9 @@ body.tab-home .side {
 body.tab-home .shell {
   grid-template-columns: 1fr;
 }
+body.signin #preview-btn {
+  display: none;
+}
 body.signin .tabs {
   display: none;
 }

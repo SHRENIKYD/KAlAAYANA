@@ -83,6 +83,18 @@ async function handleApi(request, env) {
     });
   }
 
+  // Cloudflare builds every pull request's branch and comments its preview URL
+  // on the PR. The admin polls this until the comment exists.
+  const previewFor = route.match(/^\/preview-url\/(\d+)$/);
+  if (request.method === 'GET' && previewFor) {
+    const comments = await gh.call('GET', `/issues/${previewFor[1]}/comments?per_page=50`);
+    const found = comments
+      .map((c) => c.body || '')
+      .join('\n')
+      .match(/https:\/\/[\w.-]+\.workers\.dev[^\s)>"]*/);
+    return json({ url: found ? found[0] : null });
+  }
+
   if (request.method === 'POST' && route === '/save') {
     let payload;
     try {
