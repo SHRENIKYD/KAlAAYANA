@@ -144,6 +144,8 @@ export function orphans(before, after, existingProjectFiles, keep = []) {
 }
 
 export const ROLES = ['superadmin', 'admin'];
+/** The studio's own address: always a superadmin, whatever the file says. */
+export const PERMANENT_SUPERADMIN = 'contact@kalaayanastudios.com';
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Reads admin/users.json; returns [] when it is missing or malformed. */
@@ -161,7 +163,9 @@ export function parseUsers(text) {
 }
 
 export function roleOf(users, email) {
-  return users.find((u) => u.email === String(email || '').toLowerCase())?.role || null;
+  const target = String(email || '').toLowerCase();
+  if (target === PERMANENT_SUPERADMIN) return 'superadmin';
+  return users.find((u) => u.email === target)?.role || null;
 }
 
 /** What an admin (not superadmin) may change: projects added or updated, nothing else. */
@@ -184,6 +188,8 @@ export function applyUserChange(users, { action, email, role }, by) {
   if (!EMAIL.test(target)) throw new Error('Enter a valid email address');
   const list = users.map((u) => ({ ...u }));
   const i = list.findIndex((u) => u.email === target);
+  if (target === PERMANENT_SUPERADMIN && action !== 'invite')
+    throw new Error(`${PERMANENT_SUPERADMIN} is always a superadmin and cannot be changed`);
   if (action === 'invite') {
     if (!ROLES.includes(role)) throw new Error('Choose a role');
     if (i >= 0) throw new Error(`${target} already has access`);

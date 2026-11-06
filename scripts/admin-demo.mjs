@@ -16,6 +16,7 @@ import {
   restrictForAdmin,
   applyUserChange,
 } from '../worker/validate.js';
+import { makeEntry, parseLog, decodePhoto } from '../worker/logbook.js';
 import { spawn } from 'node:child_process';
 
 const port = Number(process.argv[2] || 8788);
@@ -37,6 +38,23 @@ const session = (req) => {
   return { email, ends };
 };
 const signedIn = (req) => session(req)?.email || null;
+const nameOf = (req) =>
+  String(req.headers['x-admin-name'] || '')
+    .replace(/[\r\n\t]+/g, ' ')
+    .trim()
+    .slice(0, 60);
+// Append to logs/admin-log.jsonl, CONTENT-LOG.md and logs/photos/. Never rewrites.
+function appendLog(items) {
+  fs.mkdirSync('logs/photos', { recursive: true });
+  const mdPath = 'CONTENT-LOG.md';
+  const md = fs.existsSync(mdPath)
+    ? fs.readFileSync(mdPath, 'utf8').replace(/\n*$/, '\n')
+    : '# Content log\n\nOne line per change made through the content admin.\n\n';
+  fs.writeFileSync(mdPath, md + items.map((i) => i.md).join(''));
+  fs.appendFileSync('logs/admin-log.jsonl', items.map((i) => i.json).join(''));
+  for (const i of items)
+    if (i.photoPath && i.photoBytes) fs.writeFileSync(i.photoPath, i.photoBytes);
+}
 const walk = (d) =>
   fs.readdirSync(d).flatMap((f) => {
     const p = path.join(d, f);
@@ -166,9 +184,11 @@ http
         role,
         users: superadmin ? users() : undefined,
         log:
-          superadmin && fs.existsSync('CONTENT-LOG.md')
-            ? fs.readFileSync('CONTENT-LOG.md', 'utf8')
-            : null,
+          superadmin && fs.existsSync('logs/admin-log.jsonl')
+            ? parseLog(fs.readFileSync('logs/admin-log.jsonl', 'utf8'))
+            : superadmin
+              ? []
+              : null,
         decisions: superadmin ? [] : null,
         demo: true,
         base: 'local working tree (demo)',
@@ -239,21 +259,20 @@ http
           for (const f of fs.readdirSync(path.join(out, 'images', kind)))
             fs.copyFileSync(path.join(out, 'images', kind, f), path.join('src/images', kind, f));
         for (const f of deletions) fs.rmSync(path.join('src/images/projects', f), { force: true });
-        const who = signedIn(req);
-        const logPath = 'CONTENT-LOG.md';
-        const head = fs.existsSync(logPath)
-          ? fs.readFileSync(logPath, 'utf8').replace(/\n*$/, '\n')
-          : '# Content log\n\nOne line per change made through the content admin.\n\n';
-        fs.writeFileSync(
-          logPath,
-          head +
-            `- ${new Date().toISOString()} · ${who} · "${String(payload.message || 'Content update')
+        appendLog([
+          makeEntry({
+            category: 'content',
+            email: signedIn(req),
+            name: nameOf(req),
+            action: 'accepted and saved',
+            details: `"${String(payload.message || 'Content update')
               .trim()
               .slice(
                 0,
                 72,
-              )}" · ${Object.keys(uploads).length} photograph(s) added, ${deletions.length} deleted · previewed ${payload.accepted.previewUrl || ''} and accepted at ${payload.accepted.at}\n`,
-        );
+              )}" · ${Object.keys(uploads).length} photograph(s) added, ${deletions.length} deleted · previewed ${payload.accepted.previewUrl || ''} and accepted at ${payload.accepted.at}`,
+          }),
+        ]);
         console.log(
           `saved → src/ (${Object.keys(uploads).length} image(s) added, ${deletions.length} deleted) — "${payload.message || ''}"`,
         );
@@ -348,16 +367,77 @@ http
         return json(res, { error: e.message }, 422);
       }
       fs.writeFileSync(usersFile, JSON.stringify({ users: next }, null, 2) + '\n');
-      const logPath = 'CONTENT-LOG.md';
-      const head = fs.existsSync(logPath)
-        ? fs.readFileSync(logPath, 'utf8').replace(/\n*$/, '\n')
-        : '# Content log\n\nOne line per change made through the content admin.\n\n';
-      fs.writeFileSync(
-        logPath,
-        head +
-          `- ${new Date().toISOString()} · ${me} · users: ${body.action} ${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}\n`,
-      );
+      appendLog([
+        makeEntry({
+          category: 'admin',
+          email: me,
+          name: nameOf(req),
+          action: `users: ${body.action}`,
+          details: `${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}`,
+        }),
+      ]);
       return json(res, { users: next });
+    }
+    if (req.method === 'POST' && url.pathname === '/admin/api/session') {
+      let raw = '';
+      for await (const chunk of req) raw += chunk;
+      let body = {};
+      try {
+        body = JSON.parse(raw);
+      } catch {
+        return json(res, { error: 'Body must be JSON' }, 400);
+      }
+      const who = String(body.name || '')
+        .trim()
+        .slice(0, 60);
+      if (!who) return json(res, { error: 'Enter your name' }, 422);
+      let photoBytes = null;
+      try {
+        photoBytes = decodePhoto(body.photo);
+      } catch (e) {
+        return json(res, { error: e.message }, 422);
+      }
+      const item = makeEntry({
+        category: 'session',
+        email: signedIn(req),
+        name: who,
+        action: 'signed in',
+        details: photoBytes ? 'with photograph' : 'no camera',
+        photo: Boolean(photoBytes),
+      });
+      item.photoBytes = photoBytes;
+      appendLog([item]);
+      return json(res, { ok: true, name: who });
+    }
+    if (req.method === 'POST' && url.pathname === '/admin/api/log') {
+      let raw = '';
+      for await (const chunk of req) raw += chunk;
+      let body = {};
+      try {
+        body = JSON.parse(raw);
+      } catch {
+        return json(res, { error: 'Body must be JSON' }, 400);
+      }
+      if (body.category !== 'error')
+        return json(res, { error: 'Only error entries can be logged directly' }, 422);
+      appendLog([
+        makeEntry({
+          category: 'error',
+          email: signedIn(req),
+          name: nameOf(req),
+          action: String(body.action || 'admin page error').slice(0, 80),
+          details: body.details,
+        }),
+      ]);
+      return json(res, { ok: true });
+    }
+    const photo = url.pathname.match(/^\/admin\/api\/photo\/(logs\/photos\/[a-zA-Z0-9.-]+\.jpg)$/);
+    if (photo) {
+      if (roleOf(users(), signedIn(req)) !== 'superadmin')
+        return json(res, { error: 'Only a superadmin can see the log' }, 403);
+      if (!fs.existsSync(photo[1])) return json(res, { error: 'missing' }, 404);
+      res.writeHead(200, { 'content-type': 'image/jpeg' });
+      return fs.createReadStream(photo[1]).pipe(res);
     }
     if (url.pathname.startsWith('/admin/preview/')) {
       if (!previewReady) {
@@ -400,6 +480,6 @@ http
   })
   .listen(port, '127.0.0.1', () =>
     console.log(
-      `content admin demo: http://localhost:${port}/admin/  (accepted saves write to src/ and CONTENT-LOG.md; commit and push to publish)`,
+      `content admin demo: http://localhost:${port}/admin/  (accepted saves write to src/ and logs/; commit and push to publish)`,
     ),
   );

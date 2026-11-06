@@ -4,6 +4,7 @@
 // GitHub and opens a pull request into the base branch.
 import { client, treeEntries, commitAndOpenPr, acceptPr, rejectPr } from './github.js';
 import { verifyAccessJwt } from './access.js';
+import { makeEntry, parseLog, decodePhoto } from './logbook.js';
 import {
   validate,
   orphans,
@@ -71,6 +72,88 @@ function decodeUploads(map) {
   return out;
 }
 
+// Reads a file from the base branch, '' when it does not exist yet.
+const textOr = (gh, path, base, fallback = '') =>
+  gh
+    .file(path, base)
+    .then((r) => r.text())
+    .catch(() => fallback);
+
+// Tree entries that append log items to logs/admin-log.jsonl and
+// CONTENT-LOG.md and add their photographs. Existing lines are never touched.
+async function logTreeEntries(gh, base, items) {
+  const [jsonl, md] = await Promise.all([
+    textOr(gh, 'logs/admin-log.jsonl', base),
+    textOr(
+      gh,
+      'CONTENT-LOG.md',
+      base,
+      '# Content log\n\nOne line per change made through the content admin.\n\n',
+    ),
+  ]);
+  const entries = [
+    {
+      path: 'logs/admin-log.jsonl',
+      mode: '100644',
+      type: 'blob',
+      content: jsonl.replace(/\n*$/, jsonl ? '\n' : '') + items.map((i) => i.json).join(''),
+    },
+    {
+      path: 'CONTENT-LOG.md',
+      mode: '100644',
+      type: 'blob',
+      content: md.replace(/\n*$/, '\n') + items.map((i) => i.md).join(''),
+    },
+  ];
+  for (const i of items)
+    if (i.photoPath && i.photoBytes) {
+      const b64 = btoa(String.fromCharCode(...i.photoBytes));
+      const blob = await gh.call('POST', '/git/blobs', { content: b64, encoding: 'base64' });
+      entries.push({ path: i.photoPath, mode: '100644', type: 'blob', sha: blob.sha });
+    }
+  return entries;
+}
+
+// One commit on the base branch; if the branch refuses direct commits, the
+// same commit goes up as a pull request that merges itself when it can.
+async function commitToBase(gh, base, { entries, message, author }) {
+  const head = await gh.call('GET', `/git/ref/heads/${base}`);
+  const baseCommit = await gh.call('GET', `/git/commits/${head.object.sha}`);
+  const tree = await gh.call('POST', '/git/trees', {
+    base_tree: baseCommit.tree.sha,
+    tree: entries,
+  });
+  const commit = await gh.call('POST', '/git/commits', {
+    message,
+    tree: tree.sha,
+    parents: [head.object.sha],
+    author,
+    committer: author,
+  });
+  try {
+    await gh.call('PATCH', `/git/refs/heads/${base}`, { sha: commit.sha });
+    return { commit: commit.sha };
+  } catch {
+    const branch = `log/${commit.sha.slice(0, 10)}`;
+    await gh.call('POST', '/git/refs', { ref: `refs/heads/${branch}`, sha: commit.sha });
+    const pr = await gh.call('POST', '/pulls', {
+      title: message.split('\n')[0],
+      head: branch,
+      base,
+      body: message,
+    });
+    try {
+      await gh.graphql(
+        'mutation($id: ID!) { enablePullRequestAutoMerge(input: {pullRequestId: $id, mergeMethod: MERGE}) { clientMutationId } }',
+        { id: pr.node_id },
+      );
+    } catch {
+      /* merged by hand */
+    }
+    return { commit: commit.sha, pr: pr.number };
+  }
+}
+
 async function handleApi(request, env) {
   const url = new URL(request.url);
   const route = url.pathname.replace(/^\/admin\/api/, '');
@@ -90,6 +173,12 @@ async function handleApi(request, env) {
   const role = roleOf(users, email);
   if (!role) return json({ error: `${email} is not an admin`, email }, 403);
   const superadmin = role === 'superadmin';
+  const name = String(request.headers.get('x-admin-name') || '')
+    .replace(/[\r\n\t]+/g, ' ')
+    .trim()
+    .slice(0, 60);
+  const author = { name: name || email.split('@')[0], email };
+  const logItem = (fields) => makeEntry({ email, name, ...fields });
 
   if (request.method === 'GET' && route === '/content') {
     const [projects, site, projectFiles, bannerFiles] = await Promise.all([
@@ -101,10 +190,7 @@ async function handleApi(request, env) {
     let log = null;
     let decisions = null;
     if (superadmin) {
-      log = await gh
-        .file('CONTENT-LOG.md', base)
-        .then((r) => r.text())
-        .catch(() => '');
+      log = parseLog(await textOr(gh, 'logs/admin-log.jsonl', base));
       const prs = await gh.call('GET', '/pulls?state=all&sort=created&direction=desc&per_page=30');
       decisions = prs
         .filter((pr) => pr.head?.ref?.startsWith('content/'))
@@ -215,19 +301,16 @@ async function handleApi(request, env) {
     );
 
     const nextSite = { ...site, sections: payload.sections, home: payload.home };
-    const at = new Date().toISOString();
-    let log = '';
-    try {
-      log = await gh.file('CONTENT-LOG.md', base).then((r) => r.text());
-    } catch {
-      log = '# Content log\n\nOne line per change made through the content admin.\n\n';
-    }
-    const logLine = `- ${at} · ${email} · "${String(payload.message || 'Content update')
-      .trim()
-      .slice(
-        0,
-        72,
-      )}" · ${Object.keys(uploads).length} photograph(s) added, ${deletions.length} deleted, ${Object.keys(banners).length} banner(s) added · proposed; acceptance is recorded on the pull request\n`;
+    const saveItem = logItem({
+      category: 'content',
+      action: 'proposed',
+      details: `"${String(payload.message || 'Content update')
+        .trim()
+        .slice(
+          0,
+          72,
+        )}" · ${Object.keys(uploads).length} photograph(s) added, ${deletions.length} deleted, ${Object.keys(banners).length} banner(s) added`,
+    });
     const entries = [
       ...treeEntries({
         projectsJson: JSON.stringify(payload.projects, null, 2) + '\n',
@@ -236,12 +319,7 @@ async function handleApi(request, env) {
         banners: bannerShas,
         deletions,
       }),
-      {
-        path: 'CONTENT-LOG.md',
-        mode: '100644',
-        type: 'blob',
-        content: log.replace(/\n*$/, '\n') + logLine,
-      },
+      ...(await logTreeEntries(gh, base, [saveItem])),
     ];
     const stamp = new Date()
       .toISOString()
@@ -251,9 +329,8 @@ async function handleApi(request, env) {
     const summary = String(payload.message || 'Content update')
       .trim()
       .slice(0, 72);
-    const author = { name: email.split('@')[0], email };
     const body = [
-      `Saved from the content admin by ${email}.`,
+      `Saved from the content admin by ${name ? `${name} (${email})` : email}.`,
       '',
       `- ${payload.projects.length} project(s), ${Object.keys(payload.sections).length} section(s)`,
       `- ${Object.keys(uploads).length} image(s) added, ${deletions.length} removed, ${Object.keys(banners).length} banner(s) added`,
@@ -287,38 +364,105 @@ async function handleApi(request, env) {
     } catch (e) {
       return json({ error: e.message }, 422);
     }
-    const head = await gh.call('GET', `/git/ref/heads/${base}`);
-    const baseCommit = await gh.call('GET', `/git/commits/${head.object.sha}`);
-    const tree = await gh.call('POST', '/git/trees', {
-      base_tree: baseCommit.tree.sha,
-      tree: [
-        {
-          path: 'admin/users.json',
-          mode: '100644',
-          type: 'blob',
-          content: JSON.stringify({ users: next }, null, 2) + '\n',
-        },
-      ],
-    });
-    const author = { name: email.split('@')[0], email };
-    const commit = await gh.call('POST', '/git/commits', {
-      message: `admin: ${body.action} ${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}\n\nBy ${email} from the content admin.`,
-      tree: tree.sha,
-      parents: [head.object.sha],
-      author,
-      committer: author,
+    const item = logItem({
+      category: 'admin',
+      action: `users: ${body.action}`,
+      details: `${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}`,
     });
     try {
-      await gh.call('PATCH', `/git/refs/heads/${base}`, { sha: commit.sha });
+      const r = await commitToBase(gh, base, {
+        entries: [
+          {
+            path: 'admin/users.json',
+            mode: '100644',
+            type: 'blob',
+            content: JSON.stringify({ users: next }, null, 2) + '\n',
+          },
+          ...(await logTreeEntries(gh, base, [item])),
+        ],
+        message: `admin: ${body.action} ${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}\n\nBy ${name ? `${name} (${email})` : email} from the content admin.`,
+        author,
+      });
+      return json({ users: next, ...r });
     } catch (e) {
-      return json(
-        {
-          error: `${base} does not accept direct commits; change admin/users.json through a pull request. (${e.message})`,
-        },
-        502,
-      );
+      return json({ error: e.message }, 502);
     }
-    return json({ users: next, commit: commit.sha });
+  }
+
+  // Who is using this account: name, and a photograph when the device has a
+  // camera. Logged, with the photograph, in a commit nothing can take back.
+  if (request.method === 'POST' && route === '/session') {
+    let body = {};
+    try {
+      body = await request.json();
+    } catch {
+      return json({ error: 'Body must be JSON' }, 400);
+    }
+    const who = String(body.name || '')
+      .trim()
+      .slice(0, 60);
+    if (!who) return json({ error: 'Enter your name' }, 422);
+    let photoBytes = null;
+    try {
+      photoBytes = decodePhoto(body.photo);
+    } catch (e) {
+      return json({ error: e.message }, 422);
+    }
+    const item = makeEntry({
+      category: 'session',
+      email,
+      name: who,
+      action: 'signed in',
+      details: photoBytes ? 'with photograph' : 'no camera',
+      photo: Boolean(photoBytes),
+    });
+    item.photoBytes = photoBytes;
+    try {
+      const r = await commitToBase(gh, base, {
+        entries: await logTreeEntries(gh, base, [item]),
+        message: `log: ${who} signed in as ${email}`,
+        author: { name: who, email },
+      });
+      return json({ ok: true, name: who, ...r });
+    } catch (e) {
+      return json({ error: e.message }, 502);
+    }
+  }
+
+  // Errors the admin page reports, and anything else worth a line.
+  if (request.method === 'POST' && route === '/log') {
+    let body = {};
+    try {
+      body = await request.json();
+    } catch {
+      return json({ error: 'Body must be JSON' }, 400);
+    }
+    if (body.category !== 'error')
+      return json({ error: 'Only error entries can be logged directly' }, 422);
+    const item = logItem({
+      category: 'error',
+      action: String(body.action || 'admin page error').slice(0, 80),
+      details: body.details,
+    });
+    try {
+      const r = await commitToBase(gh, base, {
+        entries: await logTreeEntries(gh, base, [item]),
+        message: `log: error — ${item.entry.action}`,
+        author,
+      });
+      return json({ ok: true, ...r });
+    } catch (e) {
+      return json({ error: e.message }, 502);
+    }
+  }
+
+  const photo = route.match(/^\/photo\/(logs\/photos\/[a-zA-Z0-9.-]+\.jpg)$/);
+  if (request.method === 'GET' && photo) {
+    if (!superadmin) return json({ error: 'Only a superadmin can see the log' }, 403);
+    const r = await gh.file(photo[1], base);
+    return new Response(r.body, {
+      headers: { 'content-type': 'image/jpeg', 'cache-control': 'private, max-age=3600' },
+    });
   }
 
   const decide = route.match(/^\/(accept|reject)\/(\d+)$/);
@@ -333,9 +477,30 @@ async function handleApi(request, env) {
     try {
       const result =
         decide[1] === 'accept'
-          ? await acceptPr(gh, Number(decide[2]), { email, at, previewUrl: body.previewUrl })
-          : await rejectPr(gh, Number(decide[2]), body.branch, { email, at });
-      return json({ ...result, email, at });
+          ? await acceptPr(gh, Number(decide[2]), {
+              email: name ? `${name} (${email})` : email,
+              at,
+              previewUrl: body.previewUrl,
+            })
+          : await rejectPr(gh, Number(decide[2]), body.branch, {
+              email: name ? `${name} (${email})` : email,
+              at,
+            });
+      const item = logItem({
+        category: 'content',
+        action: decide[1] === 'accept' ? 'accepted' : 'rejected',
+        details: `pull request #${decide[2]}${body.previewUrl ? ` after previewing ${body.previewUrl}` : ''}`,
+      });
+      try {
+        await commitToBase(gh, base, {
+          entries: await logTreeEntries(gh, base, [item]),
+          message: `log: ${item.entry.action} #${decide[2]}`,
+          author,
+        });
+      } catch {
+        /* the decision is already on the pull request */
+      }
+      return json({ ...result, email, name, at });
     } catch (e) {
       return json({ error: e.message }, 502);
     }

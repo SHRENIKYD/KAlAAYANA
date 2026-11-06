@@ -139,6 +139,41 @@ if users is not None:
         if u.get('role') not in ('superadmin', 'admin'):
             bad('admin/users.json has an unknown role for %s: %r' % (u.get('email'), u.get('role')))
 
+# 5a2. The admin log is append-only. Compared with the base branch when CI
+#      provides one: every existing line stays, in order, and no photograph
+#      under logs/photos/ disappears. The branch rules forbid force pushes, so
+#      together nothing written to the log can be taken back.
+import subprocess
+base_ref = os.environ.get('BASE_REF')
+def base_file(path):
+    if not base_ref:
+        return None
+    r = subprocess.run(['git', 'show', 'origin/%s:%s' % (base_ref, path)], capture_output=True)
+    return r.stdout.decode('utf-8', 'replace') if r.returncode == 0 else None
+for path in ('logs/admin-log.jsonl', 'CONTENT-LOG.md'):
+    before = base_file(path)
+    now = open(path, encoding='utf-8').read() if os.path.exists(path) else None
+    if before is not None:
+        if now is None:
+            bad('%s was deleted — the admin log is append-only' % path)
+        elif not now.startswith(before.rstrip('\n') + ('\n' if before.rstrip('\n') else '')):
+            bad('%s changed or lost existing lines — the admin log is append-only' % path)
+if os.path.exists('logs/admin-log.jsonl'):
+    for n, line in enumerate(open('logs/admin-log.jsonl', encoding='utf-8'), 1):
+        if not line.strip():
+            continue
+        try:
+            e = json.loads(line)
+            assert e['category'] in ('content', 'admin', 'session', 'error') and e['at'] and e['email']
+        except Exception:
+            bad('logs/admin-log.jsonl line %d is not a valid entry' % n)
+if base_ref:
+    r = subprocess.run(['git', 'ls-tree', '--name-only', 'origin/%s' % base_ref, 'logs/photos/'], capture_output=True)
+    if r.returncode == 0:
+        for photo in r.stdout.decode().split():
+            if not os.path.exists(photo):
+                bad('%s was removed — sign-in photographs are never deleted' % photo)
+
 # 5b. Homepage features are data too: every entry needs its text and a real image.
 try:
     works = json.load(open('src/data/site.json', encoding='utf-8')).get('home', {}).get('works', [])

@@ -57,10 +57,22 @@
     key;
   const imageUrl = (kind, file) => state.previews[file] || `/admin/api/image/${kind}/${file}`;
 
+  // Who is using the account this session. Kept for the hour in this tab.
+  const sessionName = () => {
+    try {
+      return sessionStorage.getItem('admin-name') || '';
+    } catch {
+      return '';
+    }
+  };
   async function api(path, init) {
     const res = await fetch(`/admin/api${path}`, {
       ...init,
-      headers: { 'content-type': 'application/json', ...(init?.headers || {}) },
+      headers: {
+        'content-type': 'application/json',
+        ...(sessionName() ? { 'x-admin-name': sessionName() } : {}),
+        ...(init?.headers || {}),
+      },
     });
     const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
     if (!res.ok) {
@@ -126,12 +138,111 @@
   async function showLog() {
     state.view = 'log';
     await refreshAdminData();
-    const lines = (state.log || '')
-      .split('\n')
-      .filter((l) => l.startsWith('- '))
-      .map((l) => l.slice(2))
-      .reverse();
+    const all = (Array.isArray(state.log) ? state.log : []).slice().reverse();
+    const filters =
+      state.logFilters ||
+      (state.logFilters = { from: '', to: '', user: '', category: 'all', text: '' });
     const main = $('#main');
+    const list = el('div', { class: 'log-block' });
+    const count = el('p', { class: 'muted' });
+
+    const apply = () => {
+      const from = filters.from ? new Date(filters.from + 'T00:00:00') : null;
+      const to = filters.to ? new Date(filters.to + 'T23:59:59.999') : null;
+      const user = filters.user.trim().toLowerCase();
+      const text = filters.text.trim().toLowerCase();
+      const rows = all.filter((e) => {
+        const at = new Date(e.at);
+        if (from && at < from) return false;
+        if (to && at > to) return false;
+        if (filters.category !== 'all' && e.category !== filters.category) return false;
+        if (user && !`${e.name || ''} ${e.email}`.toLowerCase().includes(user)) return false;
+        if (text && !`${e.action} ${e.details || ''}`.toLowerCase().includes(text)) return false;
+        return true;
+      });
+      count.textContent = `${rows.length} of ${all.length} entries`;
+      list.replaceChildren(
+        rows.length
+          ? el(
+              'ol',
+              { class: 'log-list' },
+              ...rows.map((e) =>
+                el(
+                  'li',
+                  { class: `log-${e.category}` },
+                  el('time', {}, e.at.replace('T', ' ').slice(0, 19)),
+                  el('span', { class: `pill pill-${e.category}` }, e.category),
+                  el('b', {}, e.name ? `${e.name} (${e.email})` : e.email),
+                  el('span', {}, `${e.action}${e.details ? ` · ${e.details}` : ''}`),
+                  e.photo
+                    ? el(
+                        'a',
+                        {
+                          class: 'log-photo',
+                          href: `/admin/api/photo/${e.photo}`,
+                          target: '_blank',
+                          rel: 'noopener noreferrer',
+                        },
+                        el('img', {
+                          src: `/admin/api/photo/${e.photo}`,
+                          alt: `Photograph of ${e.name || e.email} at sign-in`,
+                        }),
+                      )
+                    : null,
+                ),
+              ),
+            )
+          : el('p', { class: 'muted' }, 'Nothing matches.'),
+      );
+    };
+    const f = (label, input) => el('div', { class: 'f' }, el('label', {}, label), input);
+    const date = (key) => {
+      const i = el('input', { type: 'date', value: filters[key] });
+      i.addEventListener('input', () => {
+        filters[key] = i.value;
+        apply();
+      });
+      return i;
+    };
+    const user = el('input', { type: 'search', value: filters.user, placeholder: 'name or email' });
+    user.addEventListener('input', () => {
+      filters.user = user.value;
+      apply();
+    });
+    const cat = el(
+      'select',
+      {},
+      ...[
+        ['all', 'All'],
+        ['content', 'Site content'],
+        ['admin', 'Admin (users)'],
+        ['session', 'Sign-ins'],
+        ['error', 'Errors'],
+      ].map(([v, l]) => {
+        const o = el('option', { value: v }, l);
+        if (v === filters.category) o.selected = true;
+        return o;
+      }),
+    );
+    cat.addEventListener('change', () => {
+      filters.category = cat.value;
+      apply();
+    });
+    const text = el('input', {
+      type: 'search',
+      value: filters.text,
+      placeholder: 'action or details',
+    });
+    text.addEventListener('input', () => {
+      filters.text = text.value;
+      apply();
+    });
+    const clear = el('button', { class: 'btn btn-ghost btn-sm', type: 'button' }, 'Clear');
+    clear.addEventListener('click', () => {
+      Object.assign(filters, { from: '', to: '', user: '', category: 'all', text: '' });
+      showLog();
+    });
+
     main.replaceChildren(
       el(
         'div',
@@ -144,81 +255,209 @@
           el(
             'p',
             { class: 'muted' },
-            'Every change made through the admin: who, when, what. Newest first.',
+            'Every sign-in, change and error, with who and when. Entries can only be added, never removed.',
           ),
         ),
       ),
-      state.decisions?.length
-        ? el(
-            'div',
-            { class: 'log-block' },
-            el('h2', {}, 'Proposed changes on staging'),
-            el(
-              'table',
-              { class: 'log-table' },
+      el(
+        'div',
+        { class: 'log-filters' },
+        f('From', date('from')),
+        f('To', date('to')),
+        f('User', user),
+        f('Type', cat),
+        f('Search', text),
+        el('div', { class: 'f log-filters-tools' }, clear, count),
+      ),
+      list,
+      ...[
+        state.decisions?.length
+          ? el(
+              'div',
+              { class: 'log-block' },
+              el('h2', {}, 'Proposed changes on staging'),
               el(
-                'thead',
-                {},
+                'table',
+                { class: 'log-table' },
                 el(
-                  'tr',
+                  'thead',
                   {},
-                  el('th', {}, '#'),
-                  el('th', {}, 'Change'),
-                  el('th', {}, 'Proposed'),
-                  el('th', {}, 'State'),
-                  el('th', {}, 'Decided'),
-                ),
-              ),
-              el(
-                'tbody',
-                {},
-                ...state.decisions.map((d) =>
                   el(
                     'tr',
                     {},
+                    el('th', {}, '#'),
+                    el('th', {}, 'Change'),
+                    el('th', {}, 'Proposed'),
+                    el('th', {}, 'State'),
+                    el('th', {}, 'Decided'),
+                  ),
+                ),
+                el(
+                  'tbody',
+                  {},
+                  ...state.decisions.map((d) =>
                     el(
-                      'td',
+                      'tr',
                       {},
                       el(
-                        'a',
-                        { href: d.url, target: '_blank', rel: 'noopener noreferrer' },
-                        `#${d.number}`,
+                        'td',
+                        {},
+                        el(
+                          'a',
+                          { href: d.url, target: '_blank', rel: 'noopener noreferrer' },
+                          `#${d.number}`,
+                        ),
                       ),
+                      el('td', {}, d.title),
+                      el('td', {}, d.at?.replace('T', ' ').slice(0, 16) || ''),
+                      el('td', {}, el('span', { class: `pill pill-${d.state}` }, d.state)),
+                      el('td', {}, d.decidedAt?.replace('T', ' ').slice(0, 16) || '—'),
                     ),
-                    el('td', {}, d.title),
-                    el('td', {}, d.at?.replace('T', ' ').slice(0, 16) || ''),
-                    el('td', {}, el('span', { class: `pill pill-${d.state}` }, d.state)),
-                    el('td', {}, d.decidedAt?.replace('T', ' ').slice(0, 16) || '—'),
                   ),
                 ),
               ),
-            ),
-          )
-        : null,
-      el(
-        'div',
-        { class: 'log-block' },
-        el('h2', {}, 'Content log'),
-        lines.length
-          ? el(
-              'ol',
-              { class: 'log-list' },
-              ...lines.map((l) => {
-                const [at, who, ...rest] = l.split(' · ');
-                return el(
-                  'li',
-                  {},
-                  el('time', {}, at.replace('T', ' ').slice(0, 19)),
-                  el('b', {}, who),
-                  el('span', {}, rest.join(' · ')),
-                );
-              }),
             )
-          : el('p', { class: 'muted' }, 'Nothing logged yet.'),
-      ),
+          : null,
+      ].filter(Boolean),
     );
+    apply();
     renderSections();
   }
+
+  /* ---------- who is using this account ----------
+     Accounts can be shared, so every session states a name and, when the
+     device has a camera, takes a photograph. Both go to the log. */
+  function askWhoIsHere() {
+    return new Promise((resolve) => {
+      const name = el('input', {
+        type: 'text',
+        id: 'who-name',
+        placeholder: 'Your name',
+        autocomplete: 'name',
+        maxlength: '60',
+        required: '',
+      });
+      const note = el('p', { class: 'signin-error', role: 'alert' });
+      const video = el('video', { autoplay: '', playsinline: '', muted: '' });
+      const canvas = el('canvas', { hidden: '' });
+      const shot = el('img', { alt: 'Your photograph', hidden: '' });
+      const cam = el('div', { class: 'cam' }, video, shot, canvas);
+      const take = el(
+        'button',
+        { class: 'btn btn-ghost btn-sm', type: 'button' },
+        'Take photograph',
+      );
+      const retake = el(
+        'button',
+        { class: 'btn btn-ghost btn-sm', type: 'button', hidden: '' },
+        'Retake',
+      );
+      const camNote = el('small', { class: 'muted' }, 'Starting the camera…');
+      let stream = null;
+      let photo = null;
+      const stop = () => {
+        if (stream) stream.getTracks().forEach((t) => t.stop());
+        stream = null;
+      };
+      (async () => {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 640, height: 480, facingMode: 'user' },
+            audio: false,
+          });
+          video.srcObject = stream;
+          camNote.textContent = 'A photograph is kept in the log with your name.';
+        } catch {
+          cam.hidden = true;
+          take.hidden = true;
+          camNote.textContent = 'No camera available on this device; your name alone is logged.';
+        }
+      })();
+      take.addEventListener('click', () => {
+        if (!stream) return;
+        canvas.width = 320;
+        canvas.height = Math.round((320 * (video.videoHeight || 480)) / (video.videoWidth || 640));
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        photo = canvas.toDataURL('image/jpeg', 0.8);
+        shot.src = photo;
+        shot.hidden = false;
+        video.hidden = true;
+        take.hidden = true;
+        retake.hidden = false;
+      });
+      retake.addEventListener('click', () => {
+        photo = null;
+        shot.hidden = true;
+        video.hidden = false;
+        take.hidden = false;
+        retake.hidden = true;
+      });
+      const form = el(
+        'form',
+        { class: 'signin-form' },
+        el('div', { class: 'f' }, el('label', { for: 'who-name' }, 'Name'), name),
+        cam,
+        el('div', { class: 'cam-tools' }, take, retake, camNote),
+        el('button', { class: 'btn', type: 'submit' }, 'Continue'),
+        note,
+      );
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const who = name.value.trim();
+        if (!who) return (note.textContent = 'Enter your name.');
+        if (stream && !photo) {
+          take.click();
+        }
+        try {
+          await api('/session', { method: 'POST', body: JSON.stringify({ name: who, photo }) });
+          try {
+            sessionStorage.setItem('admin-name', who);
+          } catch {
+            /* no storage: the name is still on this request's log line */
+          }
+          stop();
+          closeDialog();
+          resolve();
+        } catch (x) {
+          note.textContent = x.message;
+        }
+      });
+      $('#result-body').replaceChildren(
+        el('h2', {}, 'Who is using this account?'),
+        el(
+          'p',
+          { class: 'muted' },
+          `Signed in as ${state.email}. Your name goes on everything you do this session.`,
+        ),
+        form,
+      );
+      $('#result-close').hidden = true;
+      $('#result').showModal();
+      $('#result').addEventListener('cancel', (e) => e.preventDefault(), { once: true });
+      name.focus();
+    });
+  }
+
+  /* ---------- errors go to the log ---------- */
+  let errorsReported = 0;
+  function reportError(action, details) {
+    if (errorsReported >= 5 || !state.email) return;
+    errorsReported += 1;
+    api('/log', {
+      method: 'POST',
+      body: JSON.stringify({
+        category: 'error',
+        action,
+        details: String(details || '').slice(0, 600),
+      }),
+    }).catch(() => {});
+  }
+  window.addEventListener('error', (e) =>
+    reportError('admin page error', `${e.message} @ ${e.filename}:${e.lineno}`),
+  );
+  window.addEventListener('unhandledrejection', (e) =>
+    reportError('admin page error', e.reason?.message || String(e.reason)),
+  );
 
   /* ---------- users (superadmin) ---------- */
   async function changeUser(body, note) {
@@ -1980,6 +2219,11 @@
   }
   async function signOut(reason) {
     stopSessionClock();
+    try {
+      sessionStorage.removeItem('admin-name');
+    } catch {
+      /* nothing stored */
+    }
     if (state.demo) {
       try {
         await api('/logout', { method: 'POST' });
@@ -2164,6 +2408,10 @@
     state.original = snapshot();
     $('#who').textContent = `${data.email} · ${data.role || 'admin'}`;
     if (data.sessionEnds) startSessionClock(Number(data.sessionEnds));
+    if (!sessionName()) {
+      await askWhoIsHere();
+      $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
+    } else $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
     document.body.classList.toggle('role-admin', data.role !== 'superadmin');
     document.body.classList.toggle('role-superadmin', data.role === 'superadmin');
     if (data.role !== 'superadmin' && ['home', 'log', 'users'].includes(state.tab))

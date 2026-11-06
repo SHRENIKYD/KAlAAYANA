@@ -78,6 +78,31 @@ set the policy to allow a group or domain the Worker then narrows. If
 `admin/users.json` is missing, `ADMIN_EMAILS` in `wrangler.jsonc` acts as
 the superadmin list so the first superadmin can invite the rest.
 
+## The log — who did what, and it cannot be taken back
+
+Every sign-in, content change, users change and error is a line in
+`logs/admin-log.jsonl` (one JSON object per line) with a matching human
+line in `CONTENT-LOG.md`, both committed to the repository. `scripts/check.py`
+fails any change that removes or alters an existing line or deletes a
+sign-in photograph, and the branch rules forbid force pushes, so the log
+can only grow.
+
+**Shared accounts.** `contact@kalaayanastudios.com` is always a superadmin —
+it cannot be removed or demoted — and may be used by several people. So
+after every sign-in the admin asks _who is using this account_: the name
+is required, and if the device has a camera a photograph is taken (skipped
+automatically when there is none). Both are logged, and the name is
+attached to everything done in that session ("Accepted by Priya
+(contact@…)").
+
+**Filtering** (Log tab, superadmins): by date range, user (name or email),
+type — site content, admin (users), sign-ins, errors — and free text.
+Sign-in photographs show as thumbnails and open full size.
+
+On staging each log entry is a commit on `develop`; because the branch
+requires pull requests, the Worker opens a tiny PR that merges itself once
+CI passes, so an entry appears there within a minute or two.
+
 ## Using it
 
 Open `https://<staging host>/admin/`, sign in through Access. Two tabs:

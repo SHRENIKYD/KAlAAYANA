@@ -8,7 +8,9 @@ import {
   roleOf,
   restrictForAdmin,
   applyUserChange,
+  PERMANENT_SUPERADMIN,
 } from '../worker/validate.js';
+import { makeEntry, parseLog, isAppendOnly, decodePhoto } from '../worker/logbook.js';
 import { treeEntries, commitAndOpenPr, acceptPr, rejectPr, client } from '../worker/github.js';
 
 const sections = {
@@ -402,4 +404,57 @@ test('inviting, changing and removing users keeps at least one superadmin', () =
     applyUserChange(promoted, { action: 'remove', email: 'boss@x.com' }, 'new@x.com').length,
     1,
   );
+});
+
+test('contact@ is always a superadmin and cannot be removed or demoted', () => {
+  assert.equal(roleOf([], PERMANENT_SUPERADMIN), 'superadmin');
+  const users = [
+    { email: PERMANENT_SUPERADMIN, role: 'superadmin' },
+    { email: 'b@x.com', role: 'superadmin' },
+  ];
+  assert.throws(
+    () => applyUserChange(users, { action: 'remove', email: PERMANENT_SUPERADMIN }, 'b@x.com'),
+    /always a superadmin/,
+  );
+  assert.throws(
+    () =>
+      applyUserChange(
+        users,
+        { action: 'role', email: PERMANENT_SUPERADMIN, role: 'admin' },
+        'b@x.com',
+      ),
+    /always a superadmin/,
+  );
+});
+
+test('log entries are structured, photographs named by time and account, and the log only grows', () => {
+  const at = new Date('2026-11-06T06:30:00.000Z');
+  const item = makeEntry(
+    {
+      category: 'session',
+      email: 'Contact@Kalaayanastudios.com',
+      name: 'Priya',
+      action: 'signed in',
+      details: 'with photograph',
+      photo: true,
+    },
+    at,
+  );
+  assert.equal(
+    item.photoPath,
+    'logs/photos/2026-11-06T06-30-00-000Z-contact-kalaayanastudios-com.jpg',
+  );
+  assert.deepEqual(parseLog(item.json)[0], item.entry);
+  assert.ok(
+    item.md.startsWith(
+      '- 2026-11-06T06:30:00.000Z · Priya (contact@kalaayanastudios.com) · [session] signed in',
+    ),
+  );
+  assert.throws(() => makeEntry({ category: 'other', email: 'a@b' }), /Unknown log category/);
+  assert.ok(isAppendOnly('a\nb\n', 'a\nb\nc\n'));
+  assert.ok(!isAppendOnly('a\nb\n', 'a\nc\n'));
+  assert.ok(!isAppendOnly('a\nb\n', 'a\n'));
+  assert.equal(decodePhoto(null), null);
+  assert.throws(() => decodePhoto(btoa('<svg/>')), /JPEG/);
+  assert.equal(decodePhoto(btoa(String.fromCharCode(0xff, 0xd8, 0xff, 0xe0, 1, 2))).length, 6);
 });

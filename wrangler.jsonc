@@ -20,8 +20,8 @@
   "vars": {
     "GITHUB_REPO": "SHRENIKYD/KAlAAYANA",
     "GITHUB_BASE": "develop",
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUD": "",
-    "ADMIN_EMAILS": "",
+    "ACCESS_TEAM_DOMAIN": "young-sound-82de.cloudflareaccess.com",
+    "ACCESS_AUD": "6bf9d0b1ec98cb5586267f48f2de0497186b1a369b2c2d670da2bdfaf44da8b6",
+    "ADMIN_EMAILS": "contact@kalaayanastudios.com",
   },
 }
