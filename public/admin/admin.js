@@ -419,8 +419,16 @@
             audio: false,
           });
           video.srcObject = stream;
-          camNote.textContent =
-            'Take a photograph to continue; it is kept in the log with your name.';
+          take.disabled = true;
+          video.addEventListener(
+            'playing',
+            () => {
+              take.disabled = false;
+              camNote.textContent =
+                'Take a photograph to continue; it is kept in the log with your name.';
+            },
+            { once: true },
+          );
         } catch {
           cam.hidden = true;
           take.hidden = true;
@@ -428,10 +436,23 @@
         }
       })();
       take.addEventListener('click', () => {
-        if (!stream) return;
+        if (!stream || video.readyState < 2) {
+          note.textContent = 'The camera is still starting; try again in a moment.';
+          return;
+        }
         canvas.width = 320;
         canvas.height = Math.round((320 * (video.videoHeight || 480)) / (video.videoWidth || 640));
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        const ctx2d = canvas.getContext('2d');
+        ctx2d.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // A frame the camera has not exposed yet is black: refuse it.
+        const px = ctx2d.getImageData(0, 0, canvas.width, canvas.height).data;
+        let sum = 0;
+        for (let i = 0; i < px.length; i += 16) sum += px[i] + px[i + 1] + px[i + 2];
+        if (sum / ((px.length / 16) * 3) < 8) {
+          note.textContent = 'That frame came out black. Give the camera a second and try again.';
+          return;
+        }
+        note.textContent = '';
         photo = canvas.toDataURL('image/jpeg', 0.8);
         shot.src = photo;
         shot.hidden = false;
@@ -2215,12 +2236,97 @@
     };
   }
   const openTab = () => window.open('', '_blank');
+  let waitTimer = null;
   const sendTo = (tab, url) => {
+    clearInterval(waitTimer);
+    waitTimer = null;
     if (tab) tab.location.replace(url);
     else window.location.assign(url);
   };
+  // The tab that will show the preview, while it is being built: the mark,
+  // a moving bar, the time so far, and a line of what the studio might be up
+  // to, drawn from a shuffled list so no line comes round twice in a row.
+  const WAIT_LINES = [
+    'Preparing the clay…',
+    'Mixing the colours…',
+    'Sharpening the chisels…',
+    'Warming the kiln…',
+    'Polishing the bronze…',
+    'Measuring twice…',
+    'Setting the stones…',
+    'Hanging the frames…',
+    'Dusting the gallery…',
+    'Lighting the lamps…',
+    'Rolling out the carpet…',
+    'Tuning the scaffolding…',
+    'Sweeping the workshop floor…',
+    'Sketching the outline…',
+    'Carving the details…',
+    'Letting the plaster set…',
+  ];
   const waiting = (tab, text) => {
-    if (tab) tab.document.write(`<p style="font:16px/1.5 system-ui;padding:24px">${text}</p>`);
+    if (!tab) return;
+    clearInterval(waitTimer);
+    const origin = window.location.origin;
+    tab.document.open();
+    tab.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Building the preview</title>
+<style>
+html,body{height:100%;margin:0}
+body{display:grid;place-items:center;background:#f5f1ea;color:#1a1816;font:300 16px/1.6 "DM Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.card{width:min(440px,calc(100% - 48px));text-align:center}
+.mark{width:120px;aspect-ratio:2856/1479;margin:0 auto 28px;background:#1a1816;-webkit-mask:url(${origin}/assets/img/logo.svg) no-repeat center/contain;mask:url(${origin}/assets/img/logo.svg) no-repeat center/contain}
+h1{font:400 1.6rem/1.2 Georgia,serif;margin:0 0 10px}
+p{margin:0 0 22px;color:#6d665c}
+.bar{height:3px;background:#e6e0d6;overflow:hidden;border-radius:2px}
+.bar i{display:block;height:100%;width:40%;background:linear-gradient(90deg,#b08d3f,#d6b35a,#b08d3f);animation:slide 1.3s ease-in-out infinite}
+@keyframes slide{from{transform:translateX(-120%)}to{transform:translateX(300%)}}
+.line{margin:18px 0 6px;min-height:1.6em;color:#1a1816;transition:opacity .3s}
+.time{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#a99c7d;font-variant-numeric:tabular-nums}
+@media(prefers-reduced-motion:reduce){.bar i{animation:none;width:100%}}
+</style></head><body><div class="card"><div class="mark"></div>
+<h1>Building the preview</h1><p id="text"></p>
+<div class="bar"><i></i></div><div class="line" id="line"></div><div class="time" id="time">0:00</div>
+</div></body></html>`);
+    tab.document.close();
+    const doc = tab.document;
+    doc.getElementById('text').textContent = text;
+    const started = Date.now();
+    let queue = [];
+    let last = '';
+    const next = () => {
+      if (!queue.length) {
+        queue = WAIT_LINES.slice();
+        for (let i = queue.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [queue[i], queue[j]] = [queue[j], queue[i]];
+        }
+        if (queue[0] === last) queue.push(queue.shift());
+      }
+      last = queue.shift();
+      return last;
+    };
+    const line = doc.getElementById('line');
+    const time = doc.getElementById('time');
+    line.textContent = next();
+    let ticks = 0;
+    waitTimer = setInterval(() => {
+      if (tab.closed || !tab.document.getElementById('time')) {
+        clearInterval(waitTimer);
+        waitTimer = null;
+        return;
+      }
+      const s = Math.floor((Date.now() - started) / 1000);
+      time.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+      ticks += 1;
+      if (ticks % 3 === 0) {
+        line.style.opacity = '0';
+        setTimeout(() => {
+          line.textContent = next();
+          line.style.opacity = '1';
+        }, 300);
+      }
+    }, 1000);
   };
   const sleep = (ms) => new Promise((ok) => setTimeout(ok, ms));
 
@@ -2235,7 +2341,7 @@
   async function cloudflarePreviewUrl(number, tab) {
     waiting(
       tab,
-      'Cloudflare is building your proposed change. This page will open the preview as soon as it is ready — usually two to three minutes.',
+      'Your proposed change is being built. The preview opens here as soon as it is ready, usually within two to three minutes.',
     );
     for (let i = 0; i < 40; i += 1) {
       const r = await api(`/preview-url/${number}`);
@@ -2296,6 +2402,10 @@
     onReject,
   }) {
     const note = el('p', { class: 'signin-error', role: 'alert' });
+    const accept = el('button', { class: 'btn', type: 'button' }, acceptLabel);
+    const reject = el('button', { class: 'btn btn-ghost', type: 'button' }, rejectLabel);
+    accept.addEventListener('click', decide(accept, [reject], onAccept, note));
+    reject.addEventListener('click', decide(reject, [accept], onReject, note));
     $('#result-body').replaceChildren(
       el('h2', {}, title),
       el('p', {}, text),
@@ -2310,20 +2420,28 @@
             ),
           )
         : null,
-      el(
-        'div',
-        { class: 'signin-form' },
-        el('button', { class: 'btn', type: 'button', onclick: () => onAccept(note) }, acceptLabel),
-        el(
-          'button',
-          { class: 'btn btn-ghost', type: 'button', onclick: () => onReject(note) },
-          rejectLabel,
-        ),
-      ),
+      el('div', { class: 'signin-form' }, accept, reject),
       note,
     );
     $('#result-close').hidden = true;
     $('#result').showModal();
+  }
+  // A decision button spins and holds the other one until the server answers.
+  function decide(button, others, run, note) {
+    return async () => {
+      if (button.disabled) return;
+      note.textContent = '';
+      button.disabled = true;
+      button.classList.add('is-busy');
+      for (const o of others) o.disabled = true;
+      try {
+        await run(note);
+      } finally {
+        button.disabled = false;
+        button.classList.remove('is-busy');
+        for (const o of others) o.disabled = false;
+      }
+    };
   }
   function closeDialog() {
     state.dialogLocked = false;

@@ -470,7 +470,8 @@ test('the Access Allow policy is rewritten to exactly the editors', async () => 
         { id: 'other', domain: 'elsewhere.example.com', policies: [] },
         {
           id: 'app1',
-          domain: 'kalaayana.example.workers.dev/admin',
+          name: 'Admin',
+          destinations: [{ type: 'public', uri: 'https://kalaayana.example.workers.dev/admin' }],
           policies: [
             { id: 'deny', decision: 'deny', include: [] },
             {
@@ -518,6 +519,6 @@ test('the Access Allow policy is rewritten to exactly the editors', async () => 
       emails: [],
       fetchImpl,
     }),
-    /No Access application/,
+    /No Access application protects nowhere.test; found .*Admin \(kalaayana.example.workers.dev\)/,
   );
 });

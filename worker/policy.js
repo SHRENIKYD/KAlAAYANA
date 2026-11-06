@@ -29,12 +29,22 @@ export async function syncAccessPolicy({ token, accountId, hostname, emails, fet
   }
   const host = hostname.toLowerCase();
   const apps = await call('GET', '/access/apps?per_page=100');
-  const app = apps.find((a) =>
-    [a.domain, ...(a.self_hosted_domains || [])]
-      .filter(Boolean)
-      .some((d) => d.toLowerCase().replace(/\/.*$/, '') === host),
-  );
-  if (!app) throw new Error(`No Access application protects ${host}`);
+  const hostOf = (uri) =>
+    String(uri || '')
+      .toLowerCase()
+      .replace(/^[a-z]+:\/\//, '')
+      .replace(/[/:].*$/, '');
+  const hostsOf = (a) =>
+    [a.domain, ...(a.self_hosted_domains || []), ...(a.destinations || []).map((d) => d.uri)]
+      .map(hostOf)
+      .filter(Boolean);
+  const app = apps.find((a) => hostsOf(a).includes(host));
+  if (!app)
+    throw new Error(
+      `No Access application protects ${host}; found ${apps
+        .map((a) => `${a.name} (${hostsOf(a).join(', ') || a.type || 'no hostname'})`)
+        .join('; ')}`,
+    );
   const policies = app.policies || [];
   const policy = policies.find((p) => p.decision === 'allow');
   if (!policy) throw new Error(`The Access application for ${host} has no Allow policy`);

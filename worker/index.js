@@ -528,6 +528,14 @@ async function handleApi(request, env) {
     }
     const at = new Date().toISOString();
     try {
+      const pr = await gh.call('GET', `/pulls/${decide[2]}`);
+      if (pr.merged_at || pr.state !== 'open')
+        return json(
+          {
+            error: `Pull request #${decide[2]} was already ${pr.merged_at ? 'accepted' : 'rejected'}.`,
+          },
+          409,
+        );
       const result =
         decide[1] === 'accept'
           ? await acceptPr(gh, Number(decide[2]), {
