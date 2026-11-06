@@ -8,7 +8,8 @@ This checklist is a release record, not launch approval.
 - Production main: 611c1347909f9833ff84e39624c6b3de1e82e016.
 - Staging develop: 6f6c3ec988b60ab41dc1d1d90e04af29f1f01413 (PR #66).
 - Latest published staging prerelease: v1.2.16; GitHub Latest: v1.2.12.
-- FREEZE remains 2026-11-07. Production remains unchanged.
+- FREEZE is 2026-11-08T22:00:00+05:30 (22:00 IST Sunday 8 November, 16:30 UTC),
+  set from the studio's stated end time. Production remains unchanged.
 - Candidate workflow guards fail closed until reviewed removal of FREEZE;
   main has not received those guards yet. Account MFA was confirmed by user.
 
