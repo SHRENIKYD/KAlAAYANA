@@ -47,6 +47,9 @@ h3 {
   position: sticky;
   top: 0;
   z-index: 5;
+  /* The travelling loading line stays inside the header; without this it
+     widens the page, and phones and tablets zoom out while it runs. */
+  overflow-x: clip;
   display: flex;
   align-items: center;
   gap: 24px;
@@ -1848,6 +1851,13 @@ body.signin .main {
   body {
     overflow-x: hidden;
   }
+  /* Wide tables scroll sideways inside themselves, not the page. */
+  .log-table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
   .bar {
     flex-wrap: wrap;
     gap: 10px 14px;
@@ -1970,4 +1980,9 @@ body.signin .main {
     max-height: calc(100% - 24px);
     overflow: auto;
   }
+}
+.role-fixed {
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  color: var(--gold);
 }

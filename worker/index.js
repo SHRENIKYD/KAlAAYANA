@@ -20,6 +20,8 @@ import {
   orphans,
   photoRequiredFor,
   PERMANENT_SUPERADMIN,
+  MASTER,
+  hasFullRights,
   imageType,
   MAX_IMAGE_BYTES,
   parseUsers,
@@ -219,7 +221,7 @@ async function handleApi(request, env) {
   const users = await usersOf(gh, base, env);
   const role = roleOf(users, email);
   if (!role) return json({ error: `${email} is not an admin`, email }, 403);
-  const superadmin = role === 'superadmin';
+  const superadmin = hasFullRights(role);
   const name = String(request.headers.get('x-admin-name') || '')
     .replace(/[\r\n\t]+/g, ' ')
     .trim()
@@ -258,7 +260,7 @@ async function handleApi(request, env) {
       sessionEnds,
       role,
       photoRequired: photoRequiredFor(users, email),
-      canSetPhoto: email === PERMANENT_SUPERADMIN,
+      canSetPhoto: role === MASTER,
       users: superadmin ? users : undefined,
       log,
       decisions,

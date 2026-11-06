@@ -17,6 +17,8 @@ import {
   applyUserChange,
   photoRequiredFor,
   PERMANENT_SUPERADMIN,
+  MASTER,
+  hasFullRights,
 } from '../worker/validate.js';
 import { makeEntry, parseLog, decodePhoto } from '../worker/logbook.js';
 import {
@@ -186,13 +188,13 @@ http
       const site = readJson('src/data/site.json');
       const me = signedIn(req);
       const role = roleOf(users(), me);
-      const superadmin = role === 'superadmin';
+      const superadmin = hasFullRights(role);
       return json(res, {
         email: me,
         sessionEnds: session(req).ends,
         role,
         photoRequired: photoRequiredFor(users(), me),
-        canSetPhoto: me === PERMANENT_SUPERADMIN,
+        canSetPhoto: role === MASTER,
         users: superadmin ? users() : undefined,
         log:
           superadmin && fs.existsSync('logs/admin-log.jsonl')
@@ -250,12 +252,12 @@ http
       if (withClients) {
         problems.push(...validateClients(payload.clients, clientLogos, clientFiles));
         if (
-          roleOf(users(), signedIn(req)) !== 'superadmin' &&
+          !hasFullRights(roleOf(users(), signedIn(req))) &&
           !sameClients(readJson(CLIENTS_JSON), payload.clients)
         )
           problems.push('Only a superadmin can change the clients.');
       }
-      if (roleOf(users(), signedIn(req)) !== 'superadmin') {
+      if (!hasFullRights(roleOf(users(), signedIn(req)))) {
         const baseSite = readJson('src/data/site.json');
         problems.push(
           ...restrictForAdmin(
@@ -389,7 +391,7 @@ http
     }
     if (req.method === 'POST' && url.pathname === '/admin/api/users') {
       const me = signedIn(req);
-      if (roleOf(users(), me) !== 'superadmin')
+      if (!hasFullRights(roleOf(users(), me)))
         return json(res, { error: 'Only a superadmin can manage users' }, 403);
       let raw = '';
       for await (const chunk of req) raw += chunk;
@@ -482,7 +484,7 @@ http
     }
     const photo = url.pathname.match(/^\/admin\/api\/photo\/(logs\/photos\/[a-zA-Z0-9.-]+\.jpg)$/);
     if (photo) {
-      if (roleOf(users(), signedIn(req)) !== 'superadmin')
+      if (!hasFullRights(roleOf(users(), signedIn(req))))
         return json(res, { error: 'Only a superadmin can see the log' }, 403);
       if (!fs.existsSync(photo[1])) return json(res, { error: 'missing' }, 404);
       res.writeHead(200, { 'content-type': 'image/jpeg' });

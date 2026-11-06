@@ -1,0 +1,76 @@
+name: Staging release
+
+# When develop's version changes, each version that has no tag yet is
+# published as a GitHub pre-release, oldest first, at the newest commit on
+# develop (first-parent history) that carried it, with its changelog section as
+# the notes. Production releases stay with the production workflow on main.
+on:
+  push:
+    branches: [develop]
+    paths: [VERSION, .github/workflows/staging-release.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Tag and publish pre-releases
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Publish untagged versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REF" != "refs/heads/develop" ]; then
+            echo "Staging releases are published from develop only." >&2
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Walk develop's own history back from its head. The first commit seen
+          # for each version is the last one that carried it. Stop at the first
+          # version that already has a tag: everything before it is published.
+          pending=""
+          seen=" "
+          for c in $(git rev-list --first-parent --max-count=400 "$GITHUB_SHA"); do
+            v="$(git show "$c:VERSION" 2>/dev/null | tr -d '[:space:]' || true)"
+            printf '%s' "$v" | grep -Eq '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.[0-9]{1,2}$' || continue
+            case "$seen" in *" $v "*) continue ;; esac
+            seen="$seen$v "
+            if git rev-parse -q --verify "refs/tags/v$v" >/dev/null; then break; fi
+            pending="$v:$c $pending"
+          done
+          [ -n "$pending" ] || { echo "Every version on develop is already tagged."; exit 0; }
+
+          for item in $pending; do
+            version="${item%%:*}"
+            commit="${item#*:}"
+            tag="v$version"
+            # The version's section from the current changelog, matched literally.
+            notes="$(awk -v tag="## [$version]" '
+              index($0, tag) == 1 {found=1; next}
+              found && index($0, "## [") == 1 {exit}
+              found {print}
+            ' CHANGELOG.md)"
+            [ -n "$notes" ] || notes="Release $tag"
+            printf 'Staging pre-release at commit `%s` on develop. Production is unchanged.\n\n%s\n' \
+              "$commit" "$notes" > /tmp/notes.md
+            git tag -a "$tag" -m "Release $tag (staging)" "$commit"
+            git push origin "$tag"
+            gh release create "$tag" --verify-tag --prerelease --latest=false \
+              --title "$tag (staging)" --notes-file /tmp/notes.md
+            echo "Published $tag at $commit"
+          done

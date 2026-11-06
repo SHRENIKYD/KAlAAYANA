@@ -419,15 +419,15 @@ test('inviting, changing and removing users keeps at least one superadmin', () =
   );
 });
 
-test('contact@ is always a superadmin and cannot be removed or demoted', () => {
-  assert.equal(roleOf([], PERMANENT_SUPERADMIN), 'superadmin');
+test('contact@ is the master account and cannot be removed or demoted', () => {
+  assert.equal(roleOf([], PERMANENT_SUPERADMIN), 'master');
   const users = [
     { email: PERMANENT_SUPERADMIN, role: 'superadmin' },
     { email: 'b@x.com', role: 'superadmin' },
   ];
   assert.throws(
     () => applyUserChange(users, { action: 'remove', email: PERMANENT_SUPERADMIN }, 'b@x.com'),
-    /always a superadmin/,
+    /master account and cannot be changed/,
   );
   assert.throws(
     () =>
@@ -436,7 +436,7 @@ test('contact@ is always a superadmin and cannot be removed or demoted', () => {
         { action: 'role', email: PERMANENT_SUPERADMIN, role: 'admin' },
         'b@x.com',
       ),
-    /always a superadmin/,
+    /master account and cannot be changed/,
   );
 });
 
@@ -608,7 +608,7 @@ test('only the studio account decides who may sign in without a photograph', () 
         { action: 'photo', email: 'a@example.com', photo: 'optional' },
         'a@example.com',
       ),
-    /Only contact@/,
+    /Only the master account/,
   );
   const next = applyUserChange(
     users,

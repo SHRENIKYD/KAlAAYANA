@@ -182,5 +182,11 @@ clear.
 ## Releasing
 
 Handled by CI. On merge to `main` it tags `v$(cat VERSION)` and creates a
-GitHub Release from that version's changelog section. If the tag already
+GitHub Release from that version's changelog section.
+
+Staging releases are handled by `.github/workflows/staging-release.yml`. When
+`VERSION` changes on `develop`, every version that has no tag yet is tagged at
+the last `develop` commit that carried it and published as a pre-release (not
+Latest), from its changelog section. Bump `VERSION` and write the changelog in
+the PR that should become the release. If the tag already
 exists the release step is skipped, so re-running is safe.
