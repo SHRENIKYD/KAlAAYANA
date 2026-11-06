@@ -10,6 +10,32 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.19] - 2026-11-06
+
+### Changed
+
+- Every public page is its own loading skeleton: the real layout is drawn at
+  once with a grey bar over each line of text and a shimmer in each
+  photograph's frame, so the loading state matches the page exactly. Text is
+  never hidden for more than 4 s, even if the skeleton script fails.
+- Admin tab skeletons follow each tab's own layout: buttons, rows, drop-down
+  boxes, the log filters and the invite form.
+- Admin: "Preview this page" appears only once there are edits; a "View site"
+  link sits beside Sign out.
+- Admin: the preview-building page shows a thinking line in the style of
+  Claude Code: a turning star, a word with light passing over it, and the
+  time so far.
+- Admin: after Accept, the dialog shows a running timer and status until
+  staging serves the change, then a link to the published page; Close stays
+  disabled until then, and a page refresh resumes the same progress.
+- Admin: one sign-in per browser: new admin tabs reuse the name and photograph
+  step until the hour ends or the editor signs out.
+- Admin: "Keep editing" after a preview; the next preview updates the same
+  proposal instead of starting a new one.
+- Admin: a Clients tab for superadmins to add, rename, reorder and remove the
+  homepage's "Our clients" logos, with logo upload (JPG or PNG); changes go
+  through the same preview and accept as every other edit.
+
 ## [1.2.18] - 2026-11-06
 
 ### Added
@@ -66,6 +92,14 @@ is a holding page. `1.0.0` marks the launch of the full site.
   account, and an account that requires one cannot sign in without a camera.
   The mark in the admin header stays in the admin. Drop-downs wear the
   admin's look.
+- Admin: the sign-in photograph must show a face, checked in the browser by
+  a small detector served from the admin itself; the first-load skeleton takes
+  the shape of the tab being opened. Every time the admin shows is the
+  studio's local time in 12-hour form, and the log's date filters follow the
+  studio's days. The preview tab shows its loading page the moment it opens,
+  and its studio lines are typed out letter by letter. The preview tab now has
+  its own address, keeps its clock running while the admin tab is in the
+  background, and opens the preview itself once Cloudflare has built it.
 - Admin: a refresh keeps the tab and open work; sign-out returns to the admin
   sign-in; the sign-in photograph is required and never black; missing fields
   are listed and focused before a preview; the users table updates at once;

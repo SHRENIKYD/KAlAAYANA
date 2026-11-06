@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { validateClients, applyClients, sameClients } from '../worker/clients.js';
 import assert from 'node:assert/strict';
 import {
   validate,
@@ -653,4 +654,41 @@ test('a proposal is a branch, not a pull request, until it is accepted', async (
   await rejectBranch(gh, 'content/x');
   assert.ok(calls.includes('DELETE /git/refs/heads/content/x'));
   await assert.rejects(rejectBranch(gh, 'develop'), /Not a content branch/);
+});
+
+test('clients: names, logos and removed logo files', () => {
+  const existing = new Set(['a.png', 'b.jpg', 'spare.png']);
+  assert.deepEqual(
+    validateClients([{ name: 'A', logo: '/assets/clients/a.png' }, { name: 'New' }], {}, existing),
+    [],
+  );
+  assert.deepEqual(validateClients([{ name: 'Named only', logo: null }], {}, existing), []);
+  assert.match(validateClients([{ name: ' ' }], {}, existing)[0], /name of 1 to 80/);
+  assert.match(validateClients([{ name: 'A' }, { name: 'a' }], {}, existing)[0], /listed twice/);
+  assert.match(
+    validateClients([{ name: 'X', logo: '/assets/clients/missing.png' }], {}, existing)[0],
+    /does not exist/,
+  );
+  assert.match(
+    validateClients([{ name: 'X', logo: 'https://evil.example/x.png' }], {}, existing)[0],
+    /must be a file/,
+  );
+  assert.deepEqual(
+    validateClients([{ name: 'N', logo: '/assets/clients/n.png' }], { 'n.png': 'x' }, existing),
+    [],
+  );
+  const before = [
+    { name: 'A', logo: '/assets/clients/a.png' },
+    { name: 'B', logo: '/assets/clients/b.jpg' },
+  ];
+  const r = applyClients(before, [{ name: ' A ', logo: '/assets/clients/a.png' }], existing);
+  assert.deepEqual(r.deletions, ['b.jpg']);
+  assert.deepEqual(JSON.parse(r.json), [{ name: 'A', logo: '/assets/clients/a.png' }]);
+  assert.ok(
+    sameClients(
+      before,
+      before.map((c) => ({ ...c })),
+    ),
+  );
+  assert.ok(!sameClients(before, before.slice(0, 1)));
 });

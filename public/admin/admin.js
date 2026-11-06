@@ -42,6 +42,8 @@
       u: Object.keys(state.uploads),
       b: Object.keys(state.banners),
       c: state.bannerCopies,
+      cl: state.clients,
+      cu: Object.keys(state.clientLogos || {}),
     });
   const slugify = (s) =>
     s
@@ -68,10 +70,16 @@
     return img;
   };
 
-  // Who is using the account this session. Kept for the hour in this tab.
+  // Who is using the account this session. Kept in this browser for the
+  // sign-in's hour, so every admin tab shares it; a different account or an
+  // ended session asks again.
+  const WHO_KEY = 'admin-who';
   const sessionName = () => {
     try {
-      return sessionStorage.getItem('admin-name') || '';
+      const w = JSON.parse(localStorage.getItem(WHO_KEY) || 'null');
+      if (!w || !w.name || !(w.ends > Date.now())) return '';
+      if (state.email && w.email !== state.email) return '';
+      return w.name;
     } catch {
       return '';
     }
@@ -126,6 +134,7 @@
     state.dirty = snapshot() !== state.original;
     const bar = $('#savebar');
     bar.hidden = !state.dirty;
+    $('#preview-btn').hidden = !state.dirty;
     const n = Object.keys(state.uploads).length + Object.keys(state.banners).length;
     $('#pending-summary').textContent = state.dirty
       ? `Unsaved changes${n ? ` · ${n} new image${n > 1 ? 's' : ''}` : ''}`
@@ -227,10 +236,43 @@
   }).observe(document.body, { childList: true, subtree: true });
   document.querySelectorAll('select:not([data-dd])').forEach(enhanceSelect);
 
+  /* ---------- times ----------
+     Every time the admin shows is the studio's local time (UTC+05:30), in
+     12-hour form: "6 Nov 2026, 1:23 pm". Stored times stay in UTC. */
+  const STUDIO_TZ = 'Asia/Kolkata';
+  const STUDIO_OFFSET = '+05:30';
+  const whenFmt = new Intl.DateTimeFormat('en-IN', {
+    timeZone: STUDIO_TZ,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+  const whenFmtSec = new Intl.DateTimeFormat('en-IN', {
+    timeZone: STUDIO_TZ,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true,
+  });
+  function when(iso, seconds = false) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return String(iso);
+    return (seconds ? whenFmtSec : whenFmt)
+      .format(d)
+      .replace(/\s*(am|pm)$/i, (m) => ` ${m.trim().toLowerCase()}`);
+  }
+
   /* ---------- tabs ----------
      The tab, and the open work on the Projects tab, live in the address
      (#projects/murals), so a refresh or the back button lands where you were. */
-  const TABS = ['home', 'projects', 'insights', 'log', 'users'];
+  const TABS = ['home', 'projects', 'clients', 'insights', 'log', 'users'];
   function readPlace() {
     const [tab, key] = location.hash.replace(/^#/, '').split('/');
     if (TABS.includes(tab)) state.tab = tab;
@@ -253,6 +295,7 @@
     else if (tab === 'log') showLog();
     else if (tab === 'users') showUsers();
     else if (tab === 'insights') showInsights();
+    else if (tab === 'clients') editClients();
     else
       openSection(
         state.current && state.sections[state.current]
@@ -870,8 +913,8 @@
     const count = el('p', { class: 'muted' });
 
     const apply = () => {
-      const from = filters.from ? new Date(filters.from + 'T00:00:00') : null;
-      const to = filters.to ? new Date(filters.to + 'T23:59:59.999') : null;
+      const from = filters.from ? new Date(`${filters.from}T00:00:00${STUDIO_OFFSET}`) : null;
+      const to = filters.to ? new Date(`${filters.to}T23:59:59.999${STUDIO_OFFSET}`) : null;
       const user = filters.user.trim().toLowerCase();
       const text = filters.text.trim().toLowerCase();
       const rows = all.filter((e) => {
@@ -893,7 +936,7 @@
                 el(
                   'li',
                   { class: `log-${e.category}` },
-                  el('time', {}, e.at.replace('T', ' ').slice(0, 19)),
+                  el('time', { datetime: e.at }, when(e.at, true)),
                   el('span', { class: `pill pill-${e.category}` }, e.category),
                   el('b', {}, e.name ? `${e.name} (${e.email})` : e.email),
                   el('span', {}, `${e.action}${e.details ? ` · ${e.details}` : ''}`),
@@ -1032,9 +1075,9 @@
                         ),
                       ),
                       el('td', {}, d.title),
-                      el('td', {}, d.at?.replace('T', ' ').slice(0, 16) || ''),
+                      el('td', {}, when(d.at)),
                       el('td', {}, el('span', { class: `pill pill-${d.state}` }, d.state)),
-                      el('td', {}, d.decidedAt?.replace('T', ' ').slice(0, 16) || '—'),
+                      el('td', {}, d.decidedAt ? when(d.decidedAt) : '—'),
                     ),
                   ),
                 ),
@@ -1050,6 +1093,53 @@
   /* ---------- who is using this account ----------
      Accounts can be shared, so every session states a name and, when the
      device has a camera, takes a photograph. Both go to the log. */
+  /* The sign-in photograph must show a face. pico (MIT) runs a small
+     cascade on the captured frame, entirely in the browser from the admin's
+     own files; nothing leaves the device before the photograph is accepted. */
+  let faceFinder = null;
+  async function loadFaceFinder() {
+    if (faceFinder) return faceFinder;
+    faceFinder = (async () => {
+      if (!window.pico) {
+        await new Promise((ok, fail) => {
+          const sc = el('script', { src: '/admin/vendor/pico.js' });
+          sc.onload = ok;
+          sc.onerror = () => fail(new Error('face check script'));
+          document.head.append(sc);
+        });
+      }
+      const res = await fetch('/admin/vendor/facefinder');
+      if (!res.ok) throw new Error('face check model');
+      return window.pico.unpack_cascade(new Int8Array(await res.arrayBuffer()));
+    })();
+    faceFinder.catch(() => {
+      faceFinder = null;
+    });
+    return faceFinder;
+  }
+  async function faceIn(canvas) {
+    const classify = await loadFaceFinder();
+    const ctx2d = canvas.getContext('2d');
+    const { data, width, height } = ctx2d.getImageData(0, 0, canvas.width, canvas.height);
+    const gray = new Uint8Array(width * height);
+    for (let i = 0; i < gray.length; i += 1)
+      gray[i] = (2 * data[i * 4] + 7 * data[i * 4 + 1] + data[i * 4 + 2]) / 10;
+    const dets = window.pico.cluster_detections(
+      window.pico.run_cascade(
+        { pixels: gray, nrows: height, ncols: width, ldim: width },
+        classify,
+        {
+          shiftfactor: 0.1,
+          minsize: Math.round(Math.min(width, height) * 0.18),
+          maxsize: 1000,
+          scalefactor: 1.1,
+        },
+      ),
+      0.2,
+    );
+    return dets.some((d) => d[3] >= 8);
+  }
+
   function askWhoIsHere() {
     return new Promise((resolve) => {
       const name = el('input', {
@@ -1090,6 +1180,7 @@
             audio: false,
           });
           video.srcObject = stream;
+          loadFaceFinder().catch(() => {});
           take.disabled = true;
           video.addEventListener(
             'playing',
@@ -1137,12 +1228,28 @@
           return;
         }
         note.textContent = '';
-        photo = canvas.toDataURL('image/jpeg', 0.8);
-        shot.src = photo;
-        shot.hidden = false;
-        video.hidden = true;
-        take.hidden = true;
-        retake.hidden = false;
+        take.disabled = true;
+        take.classList.add('is-busy');
+        faceIn(canvas)
+          .then((ok) => {
+            if (!ok) {
+              note.textContent = 'No face in the frame. Look at the camera and try again.';
+              return;
+            }
+            photo = canvas.toDataURL('image/jpeg', 0.8);
+            shot.src = photo;
+            shot.hidden = false;
+            video.hidden = true;
+            take.hidden = true;
+            retake.hidden = false;
+          })
+          .catch(() => {
+            note.textContent = 'The face check could not load. Reload the page and try again.';
+          })
+          .finally(() => {
+            take.disabled = false;
+            take.classList.remove('is-busy');
+          });
       });
       retake.addEventListener('click', () => {
         photo = null;
@@ -1182,7 +1289,14 @@
         try {
           await api('/session', { method: 'POST', body: JSON.stringify({ name: who, photo }) });
           try {
-            sessionStorage.setItem('admin-name', who);
+            localStorage.setItem(
+              WHO_KEY,
+              JSON.stringify({
+                name: who,
+                email: state.email,
+                ends: state.sessionEnds || Date.now() + 3600000,
+              }),
+            );
           } catch {
             /* no storage: the name is still on this request's log line */
           }
@@ -1420,7 +1534,7 @@
                 'td',
                 {},
                 u.invitedAt
-                  ? `${u.invitedAt.replace('T', ' ').slice(0, 16)}${u.invitedBy ? ` by ${u.invitedBy}` : ''}`
+                  ? `${when(u.invitedAt)}${u.invitedBy ? ` by ${u.invitedBy}` : ''}`
                   : '—',
               ),
               el(
@@ -2503,6 +2617,164 @@
     renderSections();
   }
 
+  /* ---------- clients ----------
+     The "Our clients" strip on the homepage, in this order. A client is a
+     name and, optionally, a logo; without one the strip shows the name. */
+  function editClients() {
+    state.view = 'clients';
+    state.current = null;
+    writePlace();
+    const list = el('div', { class: 'clients-list' });
+    const logoSrc = (c) => {
+      const f = (c.logo || '').replace('/assets/clients/', '');
+      return state.previews[`client:${f}`] || c.logo;
+    };
+    const pickLogo = (c) => {
+      const input = el('input', { type: 'file', accept: 'image/jpeg,image/png', hidden: '' });
+      input.addEventListener('change', async () => {
+        const file = input.files[0];
+        if (!file) return;
+        const ext = file.type === 'image/png' ? 'png' : 'jpg';
+        const base = slugify(c.name || 'client') || 'client';
+        const taken = new Set([...state.clientFiles, ...Object.keys(state.clientLogos)]);
+        let name = `${base}.${ext}`;
+        for (let n = 2; taken.has(name); n += 1) name = `${base}-${n}.${ext}`;
+        state.clientLogos[name] = await readFile(file);
+        state.previews[`client:${name}`] = URL.createObjectURL(file);
+        c.logo = `/assets/clients/${name}`;
+        markDirty();
+        render();
+      });
+      document.body.appendChild(input);
+      input.click();
+      setTimeout(() => input.remove(), 60000);
+    };
+    const move = (i, d) => {
+      const j = i + d;
+      if (j < 0 || j >= state.clients.length) return;
+      [state.clients[i], state.clients[j]] = [state.clients[j], state.clients[i]];
+      markDirty();
+      render();
+    };
+    const render = () => {
+      list.replaceChildren(
+        ...state.clients.map((c, i) =>
+          el(
+            'div',
+            { class: 'client-row' },
+            el(
+              'div',
+              { class: 'client-logo' },
+              c.logo
+                ? el('img', { src: logoSrc(c), alt: '', loading: 'lazy' })
+                : el('span', {}, 'No logo'),
+            ),
+            el('span', { class: 'client-num' }, String(i + 1).padStart(2, '0')),
+            field('Name', {
+              value: c.name,
+              required: true,
+              placeholder: 'Client or organisation',
+              oninput: (v) => {
+                c.name = v;
+                markDirty();
+              },
+            }),
+            el(
+              'div',
+              { class: 'client-tools' },
+              el(
+                'button',
+                { class: 'btn btn-ghost btn-sm', type: 'button', onclick: () => pickLogo(c) },
+                c.logo ? 'Change logo' : 'Add logo',
+              ),
+              c.logo
+                ? el(
+                    'button',
+                    {
+                      class: 'btn btn-ghost btn-sm',
+                      type: 'button',
+                      onclick: () => {
+                        delete c.logo;
+                        markDirty();
+                        render();
+                      },
+                    },
+                    'Remove logo',
+                  )
+                : null,
+              el(
+                'button',
+                {
+                  class: 'btn btn-ghost btn-sm',
+                  type: 'button',
+                  'aria-label': `Move ${c.name || 'client'} up`,
+                  disabled: i === 0 ? '' : null,
+                  onclick: () => move(i, -1),
+                },
+                '↑',
+              ),
+              el(
+                'button',
+                {
+                  class: 'btn btn-ghost btn-sm',
+                  type: 'button',
+                  'aria-label': `Move ${c.name || 'client'} down`,
+                  disabled: i === state.clients.length - 1 ? '' : null,
+                  onclick: () => move(i, 1),
+                },
+                '↓',
+              ),
+              el(
+                'button',
+                {
+                  class: 'btn btn-danger btn-sm',
+                  type: 'button',
+                  onclick: () => {
+                    state.clients.splice(i, 1);
+                    markDirty();
+                    render();
+                  },
+                },
+                'Remove',
+              ),
+            ),
+          ),
+        ),
+      );
+    };
+    const add = () => {
+      state.clients.push({ name: '' });
+      markDirty();
+      render();
+      const inputs = list.querySelectorAll('.client-row input');
+      inputs[inputs.length - 1]?.focus();
+    };
+    $('#main').replaceChildren(
+      el(
+        'div',
+        { class: 'head' },
+        el(
+          'div',
+          {},
+          el('p', { class: 'eyebrow' }, 'Homepage'),
+          el('h1', {}, 'Clients'),
+          el(
+            'p',
+            { class: 'muted' },
+            'The logos shown under OUR CLIENTS on the homepage, in this order. A client without a logo is shown by name. Logos are JPG or PNG; a square or transparent PNG looks best.',
+          ),
+        ),
+        el(
+          'div',
+          { class: 'actions' },
+          el('button', { class: 'btn', type: 'button', onclick: add }, '+ Add a client'),
+        ),
+      ),
+      list,
+    );
+    render();
+  }
+
   /* ---------- section editor ---------- */
   function editSection(key, isNew = false) {
     const s =
@@ -2847,6 +3119,7 @@
      rejects (closed, branch deleted). */
   function previewPath() {
     if (state.view === 'home') return '/#works';
+    if (state.view === 'clients') return '/#clients';
     if (state.view === 'project' && state.editing?.slug)
       return `/${state.editing.group}/${state.editing.slug}/`;
     if ((state.view === 'section' || state.view === 'section-edit') && state.editing)
@@ -2862,6 +3135,9 @@
     const need = (ok, text, go) => {
       if (!ok) out.push({ text, go });
     };
+    (state.clients || []).forEach((c, i) =>
+      need(String(c.name || '').trim(), `Client ${i + 1} needs a name`, () => showTab('clients')),
+    );
     Object.entries(state.sections).forEach(([key, sec]) => {
       const go = () => editSection(key);
       for (const f of ['eyebrow', 'title', 'lede'])
@@ -2942,102 +3218,46 @@
       uploads: state.uploads,
       banners: state.banners,
       bannerCopies: state.bannerCopies,
+      clients: state.clients,
+      clientLogos: Object.fromEntries(
+        Object.entries(state.clientLogos).filter(([f]) =>
+          state.clients.some((c) => c.logo === `/assets/clients/${f}`),
+        ),
+      ),
       message: $('#message').value,
     };
   }
-  const openTab = () => window.open('', '_blank');
   let waitTimer = null;
-  const sendTo = (tab, url) => {
+  let waitType = null;
+  function stopWaiting() {
     clearInterval(waitTimer);
+    clearTimeout(waitType);
+    clearInterval(waitType);
     waitTimer = null;
-    if (tab) tab.location.replace(url);
-    else window.location.assign(url);
+    waitType = null;
+  }
+  const openTab = () => {
+    waiting(null, 'Preparing your changes…');
+    return window.open('/admin/building-preview/', '_blank');
   };
-  // The tab that will show the preview, while it is being built: the mark,
-  // a moving bar, the time so far, and a line of what the studio might be up
-  // to, drawn from a shuffled list so no line comes round twice in a row.
-  const WAIT_LINES = [
-    'Preparing the clay…',
-    'Mixing the colours…',
-    'Sharpening the chisels…',
-    'Warming the kiln…',
-    'Polishing the bronze…',
-    'Measuring twice…',
-    'Setting the stones…',
-    'Hanging the frames…',
-    'Dusting the gallery…',
-    'Lighting the lamps…',
-    'Rolling out the carpet…',
-    'Tuning the scaffolding…',
-    'Sweeping the workshop floor…',
-    'Sketching the outline…',
-    'Carving the details…',
-    'Letting the plaster set…',
-  ];
+  const sendTo = (tab, url) => {
+    stopWaiting();
+    if (!tab) return window.location.assign(url);
+    // The building page may already have moved itself to the preview, which
+    // is on another origin; reading its location then throws. Leave it be.
+    try {
+      if (tab.location.pathname !== '/admin/building-preview/') return;
+    } catch {
+      return;
+    }
+    tab.location.replace(url);
+  };
+  // The preview tab opens on the admin's own "building the preview" page,
+  // which reads the current step from here; nothing is written into it.
   const waiting = (tab, text) => {
-    if (!tab) return;
-    clearInterval(waitTimer);
-    const origin = window.location.origin;
-    tab.document.open();
-    tab.document.write(`<!doctype html><html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Building the preview</title>
-<style>
-html,body{height:100%;margin:0}
-body{display:grid;place-items:center;background:#f5f1ea;color:#1a1816;font:300 16px/1.6 "DM Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-.card{width:min(440px,calc(100% - 48px));text-align:center}
-.mark{width:120px;aspect-ratio:2856/1479;margin:0 auto 28px;background:#1a1816;-webkit-mask:url(${origin}/assets/img/logo.svg) no-repeat center/contain;mask:url(${origin}/assets/img/logo.svg) no-repeat center/contain}
-h1{font:400 1.6rem/1.2 Georgia,serif;margin:0 0 10px}
-p{margin:0 0 22px;color:#6d665c}
-.bar{height:3px;background:#e6e0d6;overflow:hidden;border-radius:2px}
-.bar i{display:block;height:100%;width:40%;background:linear-gradient(90deg,#b08d3f,#d6b35a,#b08d3f);animation:slide 1.3s ease-in-out infinite}
-@keyframes slide{from{transform:translateX(-120%)}to{transform:translateX(300%)}}
-.line{margin:18px 0 6px;min-height:1.6em;color:#1a1816;transition:opacity .3s}
-.time{font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#a99c7d;font-variant-numeric:tabular-nums}
-@media(prefers-reduced-motion:reduce){.bar i{animation:none;width:100%}}
-</style></head><body><div class="card"><div class="mark"></div>
-<h1>Building the preview</h1><p id="text"></p>
-<div class="bar"><i></i></div><div class="line" id="line"></div><div class="time" id="time">0:00</div>
-</div></body></html>`);
-    tab.document.close();
-    const doc = tab.document;
-    doc.getElementById('text').textContent = text;
-    const started = Date.now();
-    let queue = [];
-    let last = '';
-    const next = () => {
-      if (!queue.length) {
-        queue = WAIT_LINES.slice();
-        for (let i = queue.length - 1; i > 0; i -= 1) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [queue[i], queue[j]] = [queue[j], queue[i]];
-        }
-        if (queue[0] === last) queue.push(queue.shift());
-      }
-      last = queue.shift();
-      return last;
-    };
-    const line = doc.getElementById('line');
-    const time = doc.getElementById('time');
-    line.textContent = next();
-    let ticks = 0;
-    waitTimer = setInterval(() => {
-      if (tab.closed || !tab.document.getElementById('time')) {
-        clearInterval(waitTimer);
-        waitTimer = null;
-        return;
-      }
-      const s = Math.floor((Date.now() - started) / 1000);
-      time.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-      ticks += 1;
-      if (ticks % 3 === 0) {
-        line.style.opacity = '0';
-        setTimeout(() => {
-          line.textContent = next();
-          line.style.opacity = '1';
-        }, 300);
-      }
-    }, 1000);
+    window.__previewMessage = text;
   };
+
   const sleep = (ms) => new Promise((ok) => setTimeout(ok, ms));
 
   async function demoPreviewUrl(tab) {
@@ -3048,19 +3268,33 @@ p{margin:0 0 22px;color:#6d665c}
     const r = await api('/preview', { method: 'POST', body: JSON.stringify(payload()) });
     return r.url.replace(/\/$/, '') + previewPath();
   }
+  const PREVIEW_FALLBACK_MS = 150000;
   async function cloudflarePreviewUrl(pending, tab) {
     waiting(
       tab,
       'Your proposed change is being built. The preview opens here as soon as it is ready, usually within two to three minutes.',
     );
+    // The building page polls too and opens the preview itself, so it does
+    // not depend on this tab, which the browser may pause while it is hidden.
+    window.__previewReadyUrl = null;
+    window.__previewJob = { branch: pending.branch, commit: pending.commit, path: previewPath() };
     const q = `branch=${encodeURIComponent(pending.branch)}&commit=${encodeURIComponent(pending.commit)}`;
-    for (let i = 0; i < 40; i += 1) {
-      const r = await api(`/preview-ready?${q}`);
-      if (r.ready && r.url) return r.url.replace(/\/$/, '') + previewPath();
-      if (r.failed) return null;
-      await sleep(10000);
+    const began = Date.now();
+    try {
+      for (let i = 0; i < 40; i += 1) {
+        if (window.__previewReadyUrl) return window.__previewReadyUrl;
+        const r = await api(`/preview-ready?${q}`);
+        if (r.ready && r.url) return r.url.replace(/\/$/, '') + previewPath();
+        if (r.failed) return null;
+        // Build status unreadable: open the known address after a build's usual length.
+        if (r.unknown && r.url && Date.now() - began >= PREVIEW_FALLBACK_MS)
+          return r.url.replace(/\/$/, '') + previewPath();
+        await sleep(10000);
+      }
+      return window.__previewReadyUrl || null;
+    } finally {
+      window.__previewJob = null;
     }
-    return null;
   }
 
   /* Look only: the top-bar button. */
@@ -3112,12 +3346,20 @@ p{margin:0 0 22px;color:#6d665c}
     onAccept,
     rejectLabel,
     onReject,
+    keepLabel,
+    onKeep,
   }) {
     const note = el('p', { class: 'signin-error', role: 'alert' });
     const accept = el('button', { class: 'btn', type: 'button' }, acceptLabel);
     const reject = el('button', { class: 'btn btn-ghost', type: 'button' }, rejectLabel);
-    accept.addEventListener('click', decide(accept, [reject], onAccept, note));
-    reject.addEventListener('click', decide(reject, [accept], onReject, note));
+    const keep = keepLabel
+      ? el('button', { class: 'btn btn-ghost', type: 'button' }, keepLabel)
+      : null;
+    const all = [accept, reject, keep].filter(Boolean);
+    const rest = (b) => all.filter((x) => x !== b);
+    accept.addEventListener('click', decide(accept, rest(accept), onAccept, note));
+    reject.addEventListener('click', decide(reject, rest(reject), onReject, note));
+    if (keep) keep.addEventListener('click', decide(keep, rest(keep), onKeep, note));
     $('#result-body').replaceChildren(
       el('h2', {}, title),
       el('p', {}, text),
@@ -3132,7 +3374,7 @@ p{margin:0 0 22px;color:#6d665c}
             ),
           )
         : null,
-      el('div', { class: 'signin-form' }, accept, reject),
+      el('div', { class: 'signin-form' }, accept, keep, reject),
       note,
     );
     $('#result-close').hidden = true;
@@ -3163,6 +3405,137 @@ p{margin:0 0 22px;color:#6d665c}
     $('#result-close').textContent = 'Close';
     $('#result-close').onclick = () => $('#result').close();
   }
+  /* After Accept: the dialog stays, with a clock and a moving bar, while the
+     pull request merges and staging rebuilds; Close and the cross are held
+     until the page is live (or something needs attention), then a link
+     opens the published page. */
+  // The publish in progress is kept in this browser, so a refresh reopens the
+  // same dialog with the clock still counting from the original Accept.
+  const PUB_KEY = 'admin-publishing';
+  let publishingOpen = false;
+  const pubStore = {
+    get() {
+      try {
+        return JSON.parse(localStorage.getItem(PUB_KEY) || 'null');
+      } catch {
+        return null;
+      }
+    },
+    set(v) {
+      try {
+        localStorage.setItem(PUB_KEY, JSON.stringify(v));
+      } catch {
+        /* storage unavailable: the dialog still works until a refresh */
+      }
+    },
+    clear() {
+      try {
+        localStorage.removeItem(PUB_KEY);
+      } catch {
+        /* nothing stored */
+      }
+    },
+  };
+  function resumePublishing() {
+    const job = pubStore.get();
+    if (!job || publishingOpen) return;
+    if (job.owner !== state.email || Date.now() - job.started > 15 * 60000) return pubStore.clear();
+    publishingDialog(job.r, job.path, job.started);
+  }
+  function publishingDialog(r, path, resumedFrom) {
+    const started = resumedFrom || Date.now();
+    if (!resumedFrom) pubStore.set({ r, path, started, owner: state.email });
+    publishingOpen = true;
+    const elapsed = () => {
+      const s = Math.floor((Date.now() - started) / 1000);
+      return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    };
+    const clock = el('span', { class: 'pub-clock' }, elapsed());
+    const status = el(
+      'p',
+      { class: 'pub-status' },
+      r.merged ? 'Merged. Building staging…' : 'Waiting for the checks to pass before it merges…',
+    );
+    const bar = el('div', { class: 'pub-bar', 'aria-hidden': 'true' }, el('i'));
+    const link = el('p', { class: 'pub-link', hidden: '' });
+    const close = $('#result-close');
+    const x = $('#result-x');
+    const lock = (on) => {
+      state.dialogLocked = on;
+      close.disabled = on;
+      x.disabled = on;
+    };
+    $('#result-body').replaceChildren(
+      el('h2', {}, 'Publishing to staging'),
+      el(
+        'p',
+        {},
+        `Accepted by ${r.name ? `${r.name} (${r.email})` : r.email} on ${when(r.at)}, recorded on pull request #${r.number}.`,
+      ),
+      bar,
+      el('div', { class: 'pub-row' }, status, clock),
+      link,
+    );
+    close.hidden = false;
+    close.textContent = 'Close';
+    close.onclick = () => closeDialog();
+    x.hidden = false;
+    lock(true);
+    if (!$('#result').open) $('#result').showModal();
+    const tick = setInterval(() => {
+      clock.textContent = elapsed();
+    }, 1000);
+    const finish = (text, url, ok) => {
+      pubStore.clear();
+      publishingOpen = false;
+      clearInterval(tick);
+      clearTimeout(poll);
+      status.textContent = text;
+      bar.classList.add(ok ? 'done' : 'stopped');
+      if (url) {
+        link.replaceChildren(
+          el(
+            'a',
+            { class: 'btn', href: url, target: '_blank', rel: 'noopener' },
+            ok ? 'Open the published page ↗' : 'Open staging ↗',
+          ),
+          el('small', { class: 'muted' }, url),
+        );
+        link.hidden = false;
+      }
+      lock(false);
+    };
+    const url = `${window.location.origin}${path}`;
+    let poll = null;
+    const check = async () => {
+      if (Date.now() - started > 10 * 60000)
+        return finish(
+          'Still building after ten minutes. It will appear on staging when the build finishes.',
+          url,
+          false,
+        );
+      try {
+        const p = await api(`/published/${r.number}`);
+        if (p.state === 'live')
+          return finish(`Live on staging, ${elapsed()} after accepting.`, url, true);
+        if (p.state === 'closed')
+          return finish(
+            'The pull request was closed without merging, so nothing was published.',
+            null,
+            false,
+          );
+        status.textContent =
+          p.state === 'merging'
+            ? 'Waiting for the checks to pass before it merges…'
+            : 'Merged. Building staging…';
+      } catch {
+        /* a missed poll is retried */
+      }
+      poll = setTimeout(check, 8000);
+    };
+    poll = setTimeout(check, resumedFrom ? 0 : 4000);
+  }
+
   function doneDialog(title, lines) {
     $('#result-close').hidden = false;
     $('#result-close').disabled = false;
@@ -3265,7 +3638,7 @@ p{margin:0 0 22px;color:#6d665c}
   async function signOut(reason) {
     stopSessionClock();
     try {
-      sessionStorage.removeItem('admin-name');
+      localStorage.removeItem(WHO_KEY);
     } catch {
       /* nothing stored */
     }
@@ -3386,7 +3759,11 @@ p{margin:0 0 22px;color:#6d665c}
       // builds it, the editor looks, and only Accept opens and merges a pull
       // request. Reject drops the branch and nothing else ever existed.
       btn.textContent = 'Proposing…';
-      const proposed = await api('/save', { method: 'POST', body: JSON.stringify(payload()) });
+      // After Keep editing, the same proposal is updated rather than a new one made.
+      const proposed = await api('/save', {
+        method: 'POST',
+        body: JSON.stringify({ ...payload(), branch: state.pending?.branch }),
+      });
       state.pending = proposed;
       btn.textContent = 'Waiting for Cloudflare…';
       const previewUrl = await cloudflarePreviewUrl(proposed, tab);
@@ -3395,7 +3772,7 @@ p{margin:0 0 22px;color:#6d665c}
       decisionDialog({
         title: previewUrl ? 'Does the preview look right?' : 'Preview not ready yet',
         text: previewUrl
-          ? 'The preview opened in a new tab exactly as staging will show it. Accept to publish it; reject to discard it. Nothing is recorded until you accept.'
+          ? 'The preview opened in a new tab exactly as staging will show it. Accept to publish it, keep editing to change it and preview again, or reject to discard it. Nothing is published until you accept.'
           : 'Cloudflare has not finished building the preview. Keep editing and try again in a minute, or reject to discard the proposal.',
         previewUrl,
         acceptLabel: 'Accept & publish',
@@ -3411,17 +3788,15 @@ p{margin:0 0 22px;color:#6d665c}
               }),
             });
             state.pending = null;
-            doneDialog('Accepted', [
-              `Accepted by ${r.email} at ${r.at}, recorded on pull request #${r.number}.`,
-              r.merged
-                ? 'Merged. Staging rebuilds in three or four minutes.'
-                : 'It merges itself as soon as the checks pass; staging rebuilds after that.',
-            ]);
+            const livePath = previewPath();
+            publishingDialog(r, livePath);
             await load();
           } catch (e) {
             note.textContent = e.message;
           }
         },
+        keepLabel: 'Keep editing',
+        onKeep: () => closeDialog(),
         rejectLabel: 'Reject',
         onReject: async (note) => {
           try {
@@ -3431,7 +3806,7 @@ p{margin:0 0 22px;color:#6d665c}
             });
             state.pending = null;
             doneDialog('Rejected', [
-              `Rejected by ${r.email} at ${r.at}. The proposal is discarded and nothing was published.`,
+              `Rejected by ${r.email} on ${when(r.at)}. The proposal is discarded and nothing was published.`,
               'Your edits are still here to change and propose again.',
             ]);
           } catch (e) {
@@ -3450,30 +3825,181 @@ p{margin:0 0 22px;color:#6d665c}
 
   /* ---------- boot ---------- */
   /* ---------- skeleton while the content loads ---------- */
+  /* The first-load skeleton takes the shape of the tab in the address. */
+  /* The loading state of each tab drawn in that tab's own layout: the same
+     heading, buttons, rows, boxes and columns, as grey shapes. */
   function skeleton() {
-    const line = (w) => el('span', { class: 'skel skel-line', style: `width:${w}` });
-    const card = (h) =>
-      el(
-        'div',
-        { class: 'skel-card' },
-        el('span', { class: 'skel skel-thumb', style: `height:${h}px` }),
-        line('70%'),
-        line('40%'),
+    readPlace();
+    const tab = state.tab;
+    for (const t of TABS) document.body.classList.toggle(`tab-${t}`, tab === t);
+    const line = (w, h = 12, css = '') =>
+      el('span', { class: 'skel skel-line', style: `width:${w};height:${h}px;${css}` });
+    const box = (w, h, css = '') =>
+      el('span', { class: 'skel-box', style: `width:${w};height:${h}px;${css}` });
+    const btn = (w, dark) =>
+      el('span', {
+        class: dark ? 'skel skel-btn-dark' : 'skel-box',
+        style: `width:${w}px;height:45px`,
+      });
+    const row = (css, ...kids) => el('div', { class: 'skel-flex', style: css }, ...kids);
+    const head = (title, lede, extra) => [
+      line('90px', 10, 'margin:0 0 18px'),
+      el('span', { class: 'skel skel-title', style: `width:${title}` }),
+      row(
+        'justify-content:space-between;align-items:center',
+        line(lede, 12, 'margin:0'),
+        extra || '',
+      ),
+    ];
+    $('#session').replaceChildren(line('92px', 10, 'margin:0'));
+    $('#who').replaceChildren(line('260px', 10, 'margin:0'));
+    let body;
+    if (tab === 'home')
+      body = [
+        ...head('100px', '82%'),
+        row('margin:40px 0 28px;gap:10px', btn(136), btn(130, true)),
+        ...[120, 90, 80, 150, 140].map((w) =>
+          el(
+            'div',
+            { class: 'skel-work' },
+            el('span', { class: 'skel skel-sq' }),
+            row(
+              'align-items:center;gap:16px',
+              line('14px', 10, 'margin:0'),
+              el('span', { class: 'skel-lines' }, line(`${w}px`, 16), line(`${w + 40}px`, 10)),
+            ),
+          ),
+        ),
+      ];
+    else if (tab === 'clients')
+      body = [
+        ...head('110px', '80%'),
+        row('margin:40px 0 28px;gap:10px;justify-content:flex-end', btn(140, true)),
+        ...[150, 120, 180, 100, 140].map((w) =>
+          el(
+            'div',
+            { class: 'client-row' },
+            el('span', { class: 'skel', style: 'width:72px;height:72px;border-radius:50%' }),
+            line('18px', 10, 'margin:0'),
+            el('span', {}, line('40px', 9), line(`${w}px`, 14)),
+            row('gap:6px', box('96px', 31), box('34px', 31), box('34px', 31), box('72px', 31)),
+          ),
+        ),
+      ];
+    else if (tab === 'users') {
+      const user = (w, dark) =>
+        el(
+          'div',
+          { class: 'skel-urow' },
+          line(`${w}px`, 12, 'margin:0'),
+          box('139px', 36),
+          dark ? line('50px', 12, 'margin:0') : box('133px', 36),
+          line('150px', 12, 'margin:0'),
+          dark ? el('span') : box('72px', 31, 'margin-left:auto'),
+        );
+      body = [
+        ...head('90px', '81%'),
+        el(
+          'div',
+          { class: 'skel-table', style: 'margin-top:40px' },
+          el(
+            'div',
+            { class: 'skel-urow' },
+            ...['40px', '34px', '96px', '50px'].map((w) => line(w, 9, 'margin:0')),
+          ),
+          user(150),
+          user(200, true),
+          user(130),
+          user(140),
+        ),
+        line('120px', 22, 'margin:44px 0 26px'),
+        row(
+          'gap:22px;align-items:flex-end',
+          el(
+            'div',
+            { style: 'width:349px' },
+            line('40px', 9),
+            box('100%', 40, 'border-width:0 0 1px'),
+          ),
+          el(
+            'div',
+            { style: 'width:349px' },
+            line('34px', 9),
+            box('100%', 40, 'border-width:0 0 1px'),
+          ),
+        ),
+        row('margin-top:16px', btn(79, true)),
+      ];
+    } else if (tab === 'log')
+      body = [
+        ...head('60px', '55%'),
+        el(
+          'div',
+          { class: 'skel-filter' },
+          ...['40px', '24px', '36px', '36px', '50px'].map((w) =>
+            el('div', {}, line(w, 9), box('100%', 34, 'border-width:0 0 1px')),
+          ),
+          el('div', {}, box('100%', 30), line('110px', 12, 'margin-top:26px')),
+        ),
+        ...[1, 2, 3, 4, 5].map((i) =>
+          el(
+            'div',
+            { class: 'skel-logrow' },
+            el('span', {}, line('130px'), line('30px')),
+            box('62px', 24),
+            el('span', {}, line('150px'), line('170px')),
+            el('span', {}, line(i % 2 ? '96%' : '40%'), i % 2 ? line('80%') : ''),
+          ),
+        ),
+      ];
+    else if (tab === 'insights')
+      body = [
+        ...head('130px', '52%', row('gap:20px', box('243px', 38), box('153px', 38))),
+        el(
+          'div',
+          { class: 'tiles', style: 'margin-top:28px' },
+          ...[0, 1, 2, 3].map(() =>
+            el(
+              'div',
+              { class: 'tile' },
+              line('40%', 10),
+              el('span', { class: 'skel skel-title', style: 'width:55%' }),
+            ),
+          ),
+        ),
+        el('span', { class: 'skel', style: 'display:block;height:260px;margin-top:20px' }),
+      ];
+    else {
+      $('#sections').replaceChildren(
+        ...[120, 150, 70, 60, 110].map((w, i) =>
+          el(
+            'div',
+            { class: `skel-row${i === 0 ? ' skel-row-on' : ''}` },
+            line(`${w}px`, 14),
+            line('10px', 10),
+          ),
+        ),
       );
-    $('#sections').replaceChildren(
-      ...[72, 58, 64, 48, 66].map((w) =>
-        el('div', { class: 'skel-row' }, line(`${w}%`), line('14px')),
-      ),
-    );
+      body = [
+        ...head('280px', '72%'),
+        row('margin:40px 0 28px;gap:10px', btn(105), btn(137, true)),
+        el(
+          'div',
+          { class: 'grid' },
+          ...[400, 400, 400, 300, 360, 260].map((h) =>
+            el(
+              'div',
+              { class: 'skel-card' },
+              el('span', { class: 'skel skel-thumb', style: `height:${h}px` }),
+              line('70%'),
+              line('40%'),
+            ),
+          ),
+        ),
+      ];
+    }
     $('#main').replaceChildren(
-      el(
-        'div',
-        { class: 'skel-page', 'aria-hidden': 'true' },
-        line('120px'),
-        el('span', { class: 'skel skel-title' }),
-        line('60%'),
-        el('div', { class: 'grid' }, ...[260, 180, 220, 300, 200, 240].map(card)),
-      ),
+      el('div', { class: 'skel-page', 'aria-hidden': 'true' }, ...body),
       el('p', { class: 'sr-only', role: 'status' }, 'Loading…'),
     );
   }
@@ -3496,6 +4022,9 @@ p{margin:0 0 22px;color:#6d665c}
       home: data.home || { works: [] },
       projectFiles: new Set(data.projectFiles),
       bannerFiles: new Set(data.bannerFiles),
+      clients: data.clients || [],
+      clientFiles: new Set(data.clientFiles || []),
+      clientLogos: {},
       uploads: {},
       banners: {},
       bannerCopies: {},
@@ -3506,10 +4035,11 @@ p{margin:0 0 22px;color:#6d665c}
     state.adminFetchedAt = Date.now();
     readPlace();
     $('#who').textContent = `${data.email} · ${data.role || 'admin'}`;
+    state.sessionEnds = Number(data.sessionEnds) || 0;
     if (data.sessionEnds) startSessionClock(Number(data.sessionEnds));
     document.body.classList.toggle('role-admin', data.role !== 'superadmin');
     document.body.classList.toggle('role-superadmin', data.role === 'superadmin');
-    if (data.role !== 'superadmin' && ['home', 'log', 'users'].includes(state.tab))
+    if (data.role !== 'superadmin' && ['home', 'clients', 'log', 'users'].includes(state.tab))
       state.tab = 'projects';
     $('#base-note').textContent =
       `Editing the ${data.base} branch. Nothing is recorded until you preview and accept; accepting opens and merges a pull request, and staging updates after that.`;
@@ -3519,6 +4049,7 @@ p{margin:0 0 22px;color:#6d665c}
     // The page is drawn behind the prompt, so the skeleton never lingers.
     if (!sessionName()) await askWhoIsHere();
     $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
+    if (!state.demo) resumePublishing();
   }
 
   $('#result-x').addEventListener('click', closeDialog);
@@ -3540,6 +4071,7 @@ p{margin:0 0 22px;color:#6d665c}
   $('#tab-users').addEventListener('click', () => showTab('users'));
   $('#tab-insights').addEventListener('click', () => showTab('insights'));
   $('#tab-projects').addEventListener('click', () => showTab('projects'));
+  $('#tab-clients').addEventListener('click', () => showTab('clients'));
   $('#new-project').addEventListener('click', newProjectAnywhere);
   $('#save').addEventListener('click', publish);
   $('#discard').addEventListener('click', () =>

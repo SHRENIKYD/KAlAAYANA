@@ -11,6 +11,7 @@ import {
   branchAlias,
 } from './github.js';
 import { syncAccessPolicy } from './policy.js';
+import { CLIENTS_JSON, CLIENT_DIR, validateClients, applyClients, sameClients } from './clients.js';
 import { fetchInsights } from './insights.js';
 import { verifyAccessJwt } from './access.js';
 import { makeEntry, parseLog, decodePhoto } from './logbook.js';
@@ -205,6 +206,11 @@ async function handleApi(request, env) {
           site: gh.file('src/data/site.json', base).then((r) => r.json()),
           projectFiles: gh.listDir('src/images/projects', base),
           bannerFiles: gh.listDir('src/images/sections', base),
+          clients: gh
+            .file(CLIENTS_JSON, base)
+            .then((r) => r.json())
+            .catch(() => []),
+          clientFiles: gh.listDir(CLIENT_DIR, base).catch(() => new Set()),
           log: textOr(gh, 'logs/admin-log.jsonl', base),
           prs: gh.call('GET', '/pulls?state=all&sort=created&direction=desc&per_page=30'),
         }
@@ -222,11 +228,13 @@ async function handleApi(request, env) {
   const logItem = (fields) => makeEntry({ email, name, ...fields });
 
   if (request.method === 'GET' && route === '/content') {
-    const [projects, site, projectFiles, bannerFiles] = await Promise.all([
+    const [projects, site, projectFiles, bannerFiles, clients, clientFiles] = await Promise.all([
       content.projects,
       content.site,
       content.projectFiles,
       content.bannerFiles,
+      content.clients,
+      content.clientFiles,
     ]);
     let log = null;
     let decisions = null;
@@ -260,6 +268,8 @@ async function handleApi(request, env) {
       home: site.home,
       projectFiles: [...projectFiles],
       bannerFiles: [...bannerFiles],
+      clients,
+      clientFiles: [...clientFiles],
     });
   }
 
@@ -321,8 +331,18 @@ async function handleApi(request, env) {
         build && build.status === 'completed' && build.conclusion !== 'success',
       );
       return json({ ready, failed, url: ready ? `https://${previewHost}` : null });
-    } catch {
-      return json({ ready: false, url: null });
+    } catch (e) {
+      // The GitHub token cannot read checks (it needs "Checks: Read-only").
+      // The preview address is known from the branch, so the admin waits a
+      // build's usual length and opens it.
+      return json({
+        ready: false,
+        unknown: true,
+        url: `https://${previewHost}`,
+        reason: /\b403\b/.test(e.message)
+          ? 'build status not readable with this token'
+          : 'build status not available yet',
+      });
     }
   }
 
@@ -339,14 +359,31 @@ async function handleApi(request, env) {
       gh.listDir('src/images/projects', base),
       gh.listDir('src/images/sections', base),
     ]);
-    let uploads, banners;
+    let uploads, banners, clientLogos;
     try {
       uploads = decodeUploads(payload.uploads);
       banners = decodeUploads(payload.banners);
+      clientLogos = decodeUploads(payload.clientLogos);
     } catch (e) {
       return json({ error: e.message }, 400);
     }
     const problems = validate({ ...payload, uploads, banners }, projectFiles, bannerFiles);
+    // The clients strip travels with the save when the editor sent it.
+    const withClients = Array.isArray(payload.clients);
+    const [clientsBefore, clientFiles] = withClients
+      ? await Promise.all([
+          gh
+            .file(CLIENTS_JSON, base)
+            .then((r) => r.json())
+            .catch(() => []),
+          gh.listDir(CLIENT_DIR, base).catch(() => new Set()),
+        ])
+      : [[], new Set()];
+    if (withClients) {
+      problems.push(...validateClients(payload.clients, clientLogos, clientFiles));
+      if (!superadmin && !sameClients(clientsBefore, payload.clients))
+        problems.push('Only a superadmin can change the clients.');
+    }
     if (!superadmin)
       problems.push(
         ...restrictForAdmin(
@@ -394,7 +431,35 @@ async function handleApi(request, env) {
           72,
         )}" · ${Object.keys(uploads).length} photograph(s) added, ${deletions.length} deleted, ${Object.keys(banners).length} banner(s) added`,
     });
+    const clientChange =
+      withClients && !problems.length
+        ? applyClients(clientsBefore, payload.clients, clientFiles)
+        : null;
+    const logoShas = Object.fromEntries(
+      await Promise.all(
+        Object.entries(clientLogos)
+          .filter(([f]) => clientChange?.used.has(f))
+          .map(async ([f, b]) => [f, await blobSha(b)]),
+      ),
+    );
     const entries = [
+      ...(clientChange
+        ? [
+            { path: CLIENTS_JSON, mode: '100644', type: 'blob', content: clientChange.json },
+            ...Object.entries(logoShas).map(([f, sha]) => ({
+              path: `${CLIENT_DIR}/${f}`,
+              mode: '100644',
+              type: 'blob',
+              sha,
+            })),
+            ...clientChange.deletions.map((f) => ({
+              path: `${CLIENT_DIR}/${f}`,
+              mode: '100644',
+              type: 'blob',
+              sha: null,
+            })),
+          ]
+        : []),
       ...treeEntries({
         projectsJson: JSON.stringify(payload.projects, null, 2) + '\n',
         siteJson: JSON.stringify(nextSite, null, 2) + '\n',
@@ -418,15 +483,23 @@ async function handleApi(request, env) {
       `- ${Object.keys(uploads).length} image(s) added, ${deletions.length} removed, ${Object.keys(banners).length} banner(s) added`,
     ].join('\n');
     try {
+      const again = /^content\/[a-z0-9]+$/.test(String(payload.branch || ''));
       const result = await commitToBranch(gh, {
         base,
-        branch: `content/${stamp}`,
+        branch: again ? payload.branch : `content/${stamp}`,
+        replace: again,
         message: `content: ${summary}\n\n${body}`,
         author,
         entries,
       });
       try {
-        await logCommit(gh, base, [saveItem], `log: proposed ${result.branch}`, author);
+        await logCommit(
+          gh,
+          base,
+          [saveItem],
+          `log: ${result.updated ? 'updated' : 'proposed'} ${result.branch}`,
+          author,
+        );
       } catch {
         /* the proposal is the branch itself */
       }
@@ -568,6 +641,30 @@ async function handleApi(request, env) {
     return new Response(r.body, {
       headers: { 'content-type': 'image/jpeg', 'cache-control': 'private, max-age=3600' },
     });
+  }
+
+  // After an accept: has the pull request merged, and does the staging build
+  // this Worker is serving already contain that merge? The deployed commit is
+  // read from this Worker's own version.json; GitHub compares the two.
+  const published = route.match(/^\/published\/(\d+)$/);
+  if (request.method === 'GET' && published) {
+    try {
+      const pr = await gh.call('GET', `/pulls/${published[1]}`);
+      if (pr.state === 'closed' && !pr.merged_at) return json({ state: 'closed' });
+      if (!pr.merged_at || !pr.merge_commit_sha) return json({ state: 'merging' });
+      const res = await env.ASSETS.fetch(new Request(`${url.origin}/version.json`));
+      const live = res.ok ? await res.json() : {};
+      const deployed = String(live.commit || '');
+      if (!/^[0-9a-f]{7,40}$/.test(deployed)) return json({ state: 'building' });
+      if (deployed === pr.merge_commit_sha) return json({ state: 'live', commit: deployed });
+      const cmp = await gh.call('GET', `/compare/${pr.merge_commit_sha}...${deployed}`);
+      return json({
+        state: ['identical', 'ahead'].includes(cmp.status) ? 'live' : 'building',
+        commit: deployed,
+      });
+    } catch (e) {
+      return json({ state: 'unknown', error: e.message });
+    }
   }
 
   // Accept opens the pull request and merges it; reject drops the branch.

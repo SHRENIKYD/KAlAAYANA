@@ -80,7 +80,7 @@ export function branchAlias(branch) {
 }
 
 /** One commit on a fresh branch and nothing else: no pull request until the editor accepts. */
-export async function commitToBranch(gh, { base, branch, message, author, entries }) {
+export async function commitToBranch(gh, { base, branch, message, author, entries, replace }) {
   const head = await gh.call('GET', `/git/ref/heads/${base}`);
   const baseSha = head.object.sha;
   const baseCommit = await gh.call('GET', `/git/commits/${baseSha}`);
@@ -95,6 +95,16 @@ export async function commitToBranch(gh, { base, branch, message, author, entrie
     author,
     committer: author,
   });
+  // Keep editing: the same proposal is moved to the new commit, so its
+  // preview address stays the same. A branch that is gone is made again.
+  if (replace) {
+    try {
+      await gh.call('PATCH', `/git/refs/heads/${branch}`, { sha: commit.sha, force: true });
+      return { branch, commit: commit.sha, updated: true };
+    } catch {
+      /* fall through and create it */
+    }
+  }
   await gh.call('POST', '/git/refs', { ref: `refs/heads/${branch}`, sha: commit.sha });
   return { branch, commit: commit.sha };
 }

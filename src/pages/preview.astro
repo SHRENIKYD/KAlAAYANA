@@ -5,7 +5,6 @@
  * the approach line alone. Read, not retyped.
  */
 import site from '../data/site.json';
-import PageSkeleton from '../components/PageSkeleton.astro';
 import { LIVE } from '../lib/live';
 import Seo from '../components/Seo.astro';
 import { Image } from 'astro:assets';
@@ -37,6 +36,9 @@ const story = site.story.map((paragraph) =>
     {!LIVE && <meta name="robots" content="noindex,nofollow" />}
     <script is:inline>
       document.documentElement.classList.add('skel-wait');
+      setTimeout(function () {
+        document.documentElement.classList.remove('skel-wait');
+      }, 4000);
     </script>
     <meta name="description" content={site.description} />
     <title>Kalaayana Studios | Sculpture, Murals &amp; Temple Architecture in Bengaluru</title>
@@ -69,7 +71,6 @@ const story = site.story.map((paragraph) =>
     )}
   </head>
   <body class="homepage site-shell">
-    <PageSkeleton kind="home" />
     <div class="cursor">
       <span>VIEW</span>
     </div>
