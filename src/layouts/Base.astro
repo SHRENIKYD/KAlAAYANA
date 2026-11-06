@@ -8,7 +8,6 @@ import site from '../data/site.json';
 import { LIVE } from '../lib/live';
 import Seo from '../components/Seo.astro';
 import PolicyLinks from '../components/PolicyLinks.astro';
-import PageSkeleton from '../components/PageSkeleton.astro';
 
 interface Props {
   title: string;
@@ -17,19 +16,9 @@ interface Props {
   indexable?: boolean;
   fonts: string;
   bodyClass?: string;
-  skeleton?: 'holding' | 'section' | 'project' | 'collectables' | 'policy';
 }
 
 const { title, description = site.description, indexable = LIVE, fonts, bodyClass } = Astro.props;
-const skeleton =
-  Astro.props.skeleton ??
-  (bodyClass?.includes('detail-page')
-    ? 'project'
-    : bodyClass?.includes('motion-inner')
-      ? 'section'
-      : bodyClass?.includes('policy-page')
-        ? 'policy'
-        : 'holding');
 ---
 
 <!doctype html>
@@ -40,6 +29,9 @@ const skeleton =
     <title>{title}</title>
     <script is:inline>
       document.documentElement.classList.add('skel-wait');
+      setTimeout(function () {
+        document.documentElement.classList.remove('skel-wait');
+      }, 4000);
     </script>
     <meta name="description" content={description} />
     {!indexable && <meta name="robots" content="noindex, nofollow" />}
@@ -62,7 +54,6 @@ const skeleton =
     )}
   </head>
   <body class:list={['site-shell', bodyClass]}>
-    <PageSkeleton kind={skeleton} />
     <slot />
     <div class="site-footer">
       <PolicyLinks />
