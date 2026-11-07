@@ -229,6 +229,22 @@ export function applyUserChange(users, { action, email, role, photo }, by) {
   }
   if (target === PERMANENT_SUPERADMIN && action !== 'invite')
     throw new Error(`${PERMANENT_SUPERADMIN} is the master account and cannot be changed`);
+  // Everyone manages only the people below them. The master account invites
+  // superadmins or admins and changes roles; a superadmin invites and removes
+  // admins only, never themselves.
+  const actor = roleOf(users, by);
+  if (actor !== MASTER) {
+    if (actor !== 'superadmin') throw new Error('Only a superadmin can manage users');
+    if (action === 'invite' && role !== 'admin')
+      throw new Error('A superadmin can only invite admins');
+    if (action === 'role') throw new Error('Only the master account can change roles');
+    if (action === 'remove') {
+      if (target === String(by || '').toLowerCase())
+        throw new Error('Only the master account can remove your access');
+      if (i >= 0 && list[i].role !== 'admin')
+        throw new Error('A superadmin can only remove admins');
+    }
+  }
   if (action === 'invite') {
     if (!ROLES.includes(role)) throw new Error('Choose a role');
     if (i >= 0) throw new Error(`${target} already has access`);

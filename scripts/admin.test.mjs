@@ -381,15 +381,19 @@ test('roles come from admin/users.json; admins may only add or update projects',
   assert.ok(bad.some((m) => m.includes('work banner')));
 });
 
-test('inviting, changing and removing users keeps at least one superadmin', () => {
-  const users = [{ email: 'boss@x.com', role: 'superadmin', invitedBy: null, invitedAt: null }];
+test('inviting, changing and removing users: master manages all, superadmins only admins', () => {
+  const M = PERMANENT_SUPERADMIN;
+  const users = [
+    { email: M, role: 'superadmin', invitedBy: null, invitedAt: null },
+    { email: 'boss@x.com', role: 'superadmin', invitedBy: null, invitedAt: null },
+  ];
   const invited = applyUserChange(
     users,
     { action: 'invite', email: 'New@x.com', role: 'admin' },
     'boss@x.com',
   );
-  assert.equal(invited[1].email, 'new@x.com');
-  assert.equal(invited[1].invitedBy, 'boss@x.com');
+  assert.equal(invited[2].email, 'new@x.com');
+  assert.equal(invited[2].invitedBy, 'boss@x.com');
   assert.throws(
     () =>
       applyUserChange(
@@ -404,20 +408,51 @@ test('inviting, changing and removing users keeps at least one superadmin', () =
       applyUserChange(invited, { action: 'invite', email: 'nope', role: 'admin' }, 'boss@x.com'),
     /valid email/,
   );
+  // A superadmin cannot give out the superadmin role or change roles.
+  assert.throws(
+    () =>
+      applyUserChange(
+        invited,
+        { action: 'invite', email: 's@x.com', role: 'superadmin' },
+        'boss@x.com',
+      ),
+    /only invite admins/,
+  );
+  assert.throws(
+    () =>
+      applyUserChange(
+        invited,
+        { action: 'role', email: 'new@x.com', role: 'superadmin' },
+        'boss@x.com',
+      ),
+    /Only the master account can change roles/,
+  );
+  // The master account can.
   const promoted = applyUserChange(
     invited,
     { action: 'role', email: 'new@x.com', role: 'superadmin' },
-    'boss@x.com',
+    M,
   );
-  assert.equal(promoted[1].role, 'superadmin');
-  assert.throws(
-    () => applyUserChange(users, { action: 'remove', email: 'boss@x.com' }, 'boss@x.com'),
-    /at least one superadmin/,
-  );
+  assert.equal(promoted[2].role, 'superadmin');
   assert.equal(
-    applyUserChange(promoted, { action: 'remove', email: 'boss@x.com' }, 'new@x.com').length,
-    1,
+    applyUserChange(invited, { action: 'invite', email: 's@x.com', role: 'superadmin' }, M)[3].role,
+    'superadmin',
   );
+  // A superadmin removes admins only, never another superadmin or themselves.
+  assert.equal(
+    applyUserChange(invited, { action: 'remove', email: 'new@x.com' }, 'boss@x.com').length,
+    2,
+  );
+  assert.throws(
+    () => applyUserChange(promoted, { action: 'remove', email: 'new@x.com' }, 'boss@x.com'),
+    /only remove admins/,
+  );
+  assert.throws(
+    () => applyUserChange(promoted, { action: 'remove', email: 'boss@x.com' }, 'boss@x.com'),
+    /Only the master account can remove your access/,
+  );
+  // The master account can remove a superadmin.
+  assert.equal(applyUserChange(promoted, { action: 'remove', email: 'new@x.com' }, M).length, 2);
 });
 
 test('contact@ is the master account and cannot be removed or demoted', () => {

@@ -12,6 +12,11 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ### Changed
 
+- Users: everyone manages only the people below them. The master account
+  invites superadmins or admins, changes roles and removes anyone else. A
+  superadmin invites and removes admins only, cannot change roles or remove
+  themselves, and does not see the master account in the list. The server
+  enforces all of it.
 - Admin log on phones: each entry stacks (date and type, then who, then the
   full details, then a larger sign-in photograph) instead of squeezing into two
   columns.

@@ -32,6 +32,9 @@ import { featuresOf, validateFeatures, sameFeatures, featureList } from '../work
 import { spawn } from 'node:child_process';
 
 const port = Number(process.argv[2] || 8788);
+// Superadmins see every editor except the master account (as on staging).
+const visibleTo = (me, list) =>
+  roleOf(users(), me) === MASTER ? list : list.filter((u) => u.email !== PERMANENT_SUPERADMIN);
 const dist = path.resolve('dist');
 const out = path.resolve('.admin-demo');
 const previewRoot = path.join(out, 'preview');
@@ -197,7 +200,7 @@ http
         role,
         photoRequired: photoRequiredFor(users(), me),
         canSetPhoto: role === MASTER,
-        users: superadmin ? users() : undefined,
+        users: superadmin ? visibleTo(me, users()) : undefined,
         log:
           superadmin && fs.existsSync('logs/admin-log.jsonl')
             ? parseLog(fs.readFileSync('logs/admin-log.jsonl', 'utf8'))
@@ -429,7 +432,7 @@ http
           details: `${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}${body.photo ? ` · photograph ${body.photo}` : ''}`,
         }),
       ]);
-      return json(res, { users: next });
+      return json(res, { users: visibleTo(me, next) });
     }
     if (req.method === 'POST' && url.pathname === '/admin/api/session') {
       let raw = '';

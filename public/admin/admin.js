@@ -1417,7 +1417,14 @@
       'select',
       { id: 'invite-role' },
       el('option', { value: 'admin' }, 'Admin — add and update projects'),
-      el('option', { value: 'superadmin' }, 'Superadmin — everything, including users and the log'),
+      // Only the master account can give out the superadmin role.
+      state.role === 'master'
+        ? el(
+            'option',
+            { value: 'superadmin' },
+            'Superadmin — everything, including users and the log',
+          )
+        : null,
     );
     const inviteBtn = el(
       'button',
@@ -1460,7 +1467,9 @@
           el(
             'p',
             { class: 'muted' },
-            'Who can sign in to the admin, and what they may do. Admins add and update projects. Superadmins can do everything else too: works, homepage, clients, the log and users. The master account (contact@kalaayanastudios.com) is fixed, is always photographed, and alone decides who else must be photographed at sign-in.',
+            state.role === 'master'
+              ? 'Who can sign in to the admin, and what they may do. Admins add and update projects. Superadmins can also change works, the homepage and clients, see the log, and invite or remove admins. As the master account you alone give out the superadmin role, change roles and decide who must be photographed at sign-in.'
+              : 'Who can sign in to the admin, and what they may do. Admins add and update projects. As a superadmin you can invite and remove admins; roles are changed by the master account.',
           ),
           busy ? el('p', { class: 'pending-note' }, state.usersBusy) : null,
           state.usersPending ? el('p', { class: 'pending-note' }, state.usersPending) : null,
@@ -1487,18 +1496,21 @@
           {},
           ...state.users.map((u) => {
             // The master account's role is fixed, so it is shown, not offered.
+            // Only the master account changes roles, and never its own.
             const sel =
               u.email === PERMANENT_SUPERADMIN_EMAIL
                 ? el('span', { class: 'role-fixed' }, 'Master')
-                : el(
-                    'select',
-                    {},
-                    ...['admin', 'superadmin'].map((r) => {
-                      const o = el('option', { value: r }, r);
-                      if (r === u.role) o.selected = true;
-                      return o;
-                    }),
-                  );
+                : state.role !== 'master'
+                  ? el('span', {}, u.role)
+                  : el(
+                      'select',
+                      {},
+                      ...['admin', 'superadmin'].map((r) => {
+                        const o = el('option', { value: r }, r);
+                        if (r === u.role) o.selected = true;
+                        return o;
+                      }),
+                    );
             if (sel.tagName === 'SELECT') {
               sel.disabled = busy;
               sel.addEventListener('change', () =>
@@ -1548,7 +1560,10 @@
               el(
                 'td',
                 {},
-                u.email === state.email || u.email === PERMANENT_SUPERADMIN_EMAIL
+                // Master removes anyone else; a superadmin removes admins only.
+                u.email === state.email ||
+                  u.email === PERMANENT_SUPERADMIN_EMAIL ||
+                  (state.role !== 'master' && u.role !== 'admin')
                   ? null
                   : el(
                       'button',

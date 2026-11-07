@@ -223,6 +223,9 @@ async function handleApi(request, env) {
   const role = roleOf(users, email);
   if (!role) return json({ error: `${email} is not an admin`, email }, 403);
   const superadmin = hasFullRights(role);
+  // Superadmins see every editor except the master account.
+  const visibleUsers = (list) =>
+    role === MASTER ? list : list.filter((u) => u.email !== PERMANENT_SUPERADMIN);
   const name = String(request.headers.get('x-admin-name') || '')
     .replace(/[\r\n\t]+/g, ' ')
     .trim()
@@ -262,7 +265,7 @@ async function handleApi(request, env) {
       role,
       photoRequired: photoRequiredFor(users, email),
       canSetPhoto: role === MASTER,
-      users: superadmin ? users : undefined,
+      users: superadmin ? visibleUsers(users) : undefined,
       log,
       decisions,
       base,
@@ -575,7 +578,7 @@ async function handleApi(request, env) {
         message: `admin: ${body.action} ${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}\n\nBy ${name ? `${name} (${email})` : email} from the content admin.`,
         author,
       });
-      return json({ users: next, access, ...r });
+      return json({ users: visibleUsers(next), access, ...r });
     } catch (e) {
       return json({ error: e.message }, 502);
     }
