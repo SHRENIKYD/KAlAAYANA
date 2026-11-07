@@ -1796,6 +1796,10 @@ select option {
   .log-list li > .log-photo {
     grid-area: photo;
   }
+  .log-list li > .log-photo img {
+    width: 88px;
+    height: 88px;
+  }
 }
 
 /* ---------- sign-in / not authorised ---------- */
