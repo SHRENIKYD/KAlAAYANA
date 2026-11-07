@@ -1108,5 +1108,18 @@
         "alt": "Test"
       }
     ]
+  },
+  {
+    "slug": "abcd",
+    "group": "installations",
+    "title": "Abcd",
+    "scale": "23",
+    "description": "Gfrted vdfr",
+    "images": [
+      {
+        "file": "abcd-1.jpg",
+        "alt": "Efgh"
+      }
+    ]
   }
 ]
