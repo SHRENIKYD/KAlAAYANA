@@ -147,6 +147,15 @@
       "bannerAlt": "An oversized burger sculpture installed inside a restaurant",
       "href": "/installations/",
       "bannerFocus": "50% 55%"
+    },
+    "sculpture": {
+      "eyebrow": "ENO ondh",
+      "title": "Sculpture",
+      "lede": "Nice",
+      "banner": "sculpture.png",
+      "bannerAlt": "Sculpture",
+      "href": "/sculpture/",
+      "bannerFocus": "50% 50%"
     }
   },
   "story": [
@@ -250,6 +259,19 @@
           "alt": "Oversized sculptural installation by Kalaayana",
           "focus": "50% 72%"
         }
+      },
+      {
+        "section": "sculpture",
+        "href": "/sculpture/",
+        "eyebrow": "ENO ondh",
+        "title": "Sculpture",
+        "link": "Discover collection",
+        "image": {
+          "from": "sections",
+          "file": "sculpture.png",
+          "alt": "Sculpture",
+          "focus": "50% 50%"
+        }
       }
     ]
   },
@@ -258,7 +280,7 @@
   },
   "features": {
     "watermarkPhotos": true,
-    "watermarkAdmin": true,
+    "watermarkAdmin": false,
     "blockPhotoSaving": true,
     "blankOnScreenshot": true,
     "loadingSkeletons": true

@@ -1041,5 +1041,26 @@
         "alt": "Test"
       }
     ]
+  },
+  {
+    "slug": "shankar",
+    "group": "sculpture",
+    "title": "Shankar ",
+    "scale": "17",
+    "description": "Memorial",
+    "images": [
+      {
+        "file": "shankar-2.png",
+        "alt": "Jgcychf"
+      },
+      {
+        "file": "shankar-1.jpg",
+        "alt": "Jgcjhchj"
+      },
+      {
+        "file": "shankar-1.png",
+        "alt": "Ghxjgcjgc"
+      }
+    ]
   }
 ]
