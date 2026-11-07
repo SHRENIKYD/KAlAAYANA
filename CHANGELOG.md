@@ -10,6 +10,11 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Changed
+
+- Menu and Home links scroll to their section without leaving "#home",
+  "#story" and the like in the address bar.
+
 ### Fixed
 
 - The preview-building page keeps its clock and the edit it is waiting for

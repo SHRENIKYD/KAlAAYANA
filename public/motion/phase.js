@@ -36,3 +36,33 @@ if (menuButton && menuPanel && menuClose) {
     }
   });
 }
+
+// Section links scroll to their section without leaving "#story" or "#home"
+// in the address bar; a link from another page lands on its section and the
+// "#..." is then removed the same way.
+const sectionFor = (hash) => {
+  if (!hash || hash.length < 2) return null;
+  try {
+    return document.getElementById(decodeURIComponent(hash.slice(1)));
+  } catch {
+    return null;
+  }
+};
+const dropHash = () => history.replaceState(history.state, '', location.pathname + location.search);
+document.addEventListener('click', (event) => {
+  if (event.defaultPrevented || event.button !== 0) return;
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const link = event.target.closest('a[href*="#"]');
+  if (!link || link.origin !== location.origin || link.pathname !== location.pathname) return;
+  const target = sectionFor(link.hash);
+  if (!target) return;
+  event.preventDefault();
+  target.scrollIntoView();
+  if (location.hash) dropHash();
+});
+if (sectionFor(location.hash)) {
+  window.addEventListener('load', () => {
+    sectionFor(location.hash)?.scrollIntoView();
+    dropHash();
+  });
+}
