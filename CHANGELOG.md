@@ -10,6 +10,20 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Added
+
+- Screenshot deterrence. Project, collectables and section photographs carry
+  a faint studio mark in the bottom-right corner, added at build time to every
+  size and format; artist portraits, story images and the holding-page hero
+  are left clean. Every served photograph is capped at 2000 px on its long
+  edge (some were served at full size, up to 5712 px), and a build step
+  removes unreferenced originals and fails if a served image exceeds the cap.
+  The files in `src/images` are unchanged.
+- Photographs can't be saved from the right-click or long-press menu or
+  dragged out; text, links and the keyboard behave as before.
+- The admin shows a faint repeating line with the signed-in editor's name,
+  email and date, so a screenshot of it shows who took it.
+
 ## [1.2.19] - 2026-11-06
 
 ### Changed

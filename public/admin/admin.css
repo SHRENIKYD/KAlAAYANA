@@ -1986,3 +1986,10 @@ body.signin .main {
   letter-spacing: 0.06em;
   color: var(--gold);
 }
+#admin-watermark {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background-repeat: repeat;
+}

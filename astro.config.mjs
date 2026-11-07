@@ -12,4 +12,8 @@ export default defineConfig({
   build: {
     format: 'directory',
   },
+  // Watermarks the studio's photographs and caps their size (see the file).
+  image: {
+    service: { entrypoint: './src/lib/image-service.mjs' },
+  },
 });

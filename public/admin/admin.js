@@ -3671,6 +3671,20 @@
     }
     window.location.replace('/admin/');
   }
+  /* A faint, repeating line naming the signed-in editor across the admin,
+     so a screenshot of it shows who took it. It never takes clicks. */
+  function paintWatermark(name, email) {
+    const label = [name, email, new Date().toISOString().slice(0, 10)].filter(Boolean).join(' · ');
+    const esc = label.replace(/[<>&"']/g, (c) => `&#${c.charCodeAt(0)};`);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="230"><text x="230" y="115" transform="rotate(-24 230 115)" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="14" fill="#1a1816" fill-opacity="0.07">${esc}</text></svg>`;
+    let mark = document.getElementById('admin-watermark');
+    if (!mark) {
+      mark = el('div', { id: 'admin-watermark', 'aria-hidden': 'true' });
+      document.body.appendChild(mark);
+    }
+    mark.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  }
+
   function startSessionClock(ends) {
     stopSessionClock();
     const out = $('#session');
@@ -4056,6 +4070,7 @@
     // The page is drawn behind the prompt, so the skeleton never lingers.
     if (!sessionName()) await askWhoIsHere();
     $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
+    paintWatermark(sessionName(), data.email);
     if (!state.demo) resumePublishing();
   }
 

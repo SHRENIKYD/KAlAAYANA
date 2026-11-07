@@ -27,12 +27,16 @@ export function banner(file: string): ImageMetadata {
   return found.default;
 }
 
-/** Responsive variants up to 4K, never larger than the original photograph. */
+/** The long edge every served photograph is capped at; matches src/lib/image-service.mjs. */
+export const MAX_EDGE = 2000;
+
+/** Responsive variants up to MAX_EDGE on the long edge, never larger than the original. */
 export function photoWidths(source: ImageMetadata): number[] {
-  const limit = Math.min(source.width, 3840);
-  return [
-    ...new Set([640, 960, 1600, 2200, 2880, 3840, limit].filter((width) => width <= limit)),
-  ].sort((a, b) => a - b);
+  const scale = Math.min(1, MAX_EDGE / Math.max(source.width, source.height));
+  const limit = Math.floor(source.width * scale);
+  return [...new Set([640, 960, 1400, limit].filter((width) => width <= limit))].sort(
+    (a, b) => a - b,
+  );
 }
 
 /** A homepage feature image: a project photograph or a section banner. */

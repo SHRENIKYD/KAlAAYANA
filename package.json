@@ -9,7 +9,7 @@
     "test:version": "node --test scripts/version.test.mjs",
     "version:next": "node scripts/bump-version.mjs",
     "dev": "astro dev",
-    "build": "astro build && python scripts/legacy_urls.py && python scripts/sitemap.py && python scripts/csp.py",
+    "build": "astro build && node scripts/cap-images.mjs && python scripts/legacy_urls.py && python scripts/sitemap.py && python scripts/csp.py",
     "build:staging": "npm run build && bash scripts/stamp.sh staging",
     "preview": "astro preview",
     "check": "python3 scripts/check.py",

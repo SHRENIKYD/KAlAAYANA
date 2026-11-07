@@ -1,0 +1,9 @@
+/* Photographs cannot be dragged out or saved from the long-press menu on
+   phones and tablets. Text and links behave as usual. */
+img,
+picture {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
