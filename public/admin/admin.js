@@ -43,6 +43,7 @@
       b: Object.keys(state.banners),
       c: state.bannerCopies,
       cl: state.clients,
+      pr: state.protection,
       cu: Object.keys(state.clientLogos || {}),
     });
   const slugify = (s) =>
@@ -1571,8 +1572,48 @@
       ),
       el('h2', { class: 'invite-heading' }, 'Invite someone'),
       form,
+      state.canSetPhoto ? watermarkSettings() : null,
     );
     renderSections();
+  }
+
+  /* Master only: the two watermark switches, saved like any other edit
+     (Preview & publish, then Accept), so turning them off is one change. */
+  function watermarkSettings() {
+    const row = (key, label, hint) => {
+      const box = el('input', { type: 'checkbox', id: `wm-${key}` });
+      box.checked = state.protection[key] !== false;
+      box.addEventListener('change', () => {
+        state.protection = { ...state.protection, [key]: box.checked };
+        markDirty();
+      });
+      return el(
+        'label',
+        { class: 'wm-row', for: `wm-${key}` },
+        box,
+        el('span', {}, el('b', {}, label), el('small', { class: 'muted' }, hint)),
+      );
+    };
+    return el(
+      'section',
+      { class: 'wm-settings' },
+      el('h2', { class: 'invite-heading' }, 'Watermarks'),
+      el(
+        'p',
+        { class: 'muted' },
+        'Switch either off and publish to remove it. The photographs on the site are rebuilt without the mark; nothing in the original files changes.',
+      ),
+      row(
+        'watermarkPhotos',
+        'Studio mark on photographs',
+        'The faint logo in the corner of project, collectables and section photographs on the site.',
+      ),
+      row(
+        'watermarkAdmin',
+        'Editor name across the admin',
+        "The faint repeating line with the signed-in editor's name, email and date.",
+      ),
+    );
   }
 
   /* ---------- sections sidebar ---------- */ /* ---------- sections sidebar ---------- */
@@ -3226,6 +3267,7 @@
       banners: state.banners,
       bannerCopies: state.bannerCopies,
       clients: state.clients,
+      protection: state.protection,
       clientLogos: Object.fromEntries(
         Object.entries(state.clientLogos).filter(([f]) =>
           state.clients.some((c) => c.logo === `/assets/clients/${f}`),
@@ -3673,7 +3715,12 @@
   }
   /* A faint, repeating line naming the signed-in editor across the admin,
      so a screenshot of it shows who took it. It never takes clicks. */
-  function paintWatermark(name, email) {
+  function paintWatermark(name, email, on = true) {
+    const existing = document.getElementById('admin-watermark');
+    if (!on) {
+      if (existing) existing.remove();
+      return;
+    }
     const label = [name, email, new Date().toISOString().slice(0, 10)].filter(Boolean).join(' · ');
     const esc = label.replace(/[<>&"']/g, (c) => `&#${c.charCodeAt(0)};`);
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="230"><text x="230" y="115" transform="rotate(-24 230 115)" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="14" fill="#1a1816" fill-opacity="0.07">${esc}</text></svg>`;
@@ -4044,6 +4091,8 @@
       projectFiles: new Set(data.projectFiles),
       bannerFiles: new Set(data.bannerFiles),
       clients: data.clients || [],
+      protection: { watermarkPhotos: true, watermarkAdmin: true, ...(data.protection || {}) },
+      savedProtection: { watermarkPhotos: true, watermarkAdmin: true, ...(data.protection || {}) },
       clientFiles: new Set(data.clientFiles || []),
       clientLogos: {},
       uploads: {},
@@ -4070,7 +4119,7 @@
     // The page is drawn behind the prompt, so the skeleton never lingers.
     if (!sessionName()) await askWhoIsHere();
     $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
-    paintWatermark(sessionName(), data.email);
+    paintWatermark(sessionName(), data.email, state.savedProtection.watermarkAdmin);
     if (!state.demo) resumePublishing();
   }
 

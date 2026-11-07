@@ -12,6 +12,7 @@ import {
 } from './github.js';
 import { syncAccessPolicy } from './policy.js';
 import { CLIENTS_JSON, CLIENT_DIR, validateClients, applyClients, sameClients } from './clients.js';
+import { protectionOf, validateProtection, sameProtection } from './protection.js';
 import { fetchInsights } from './insights.js';
 import { verifyAccessJwt } from './access.js';
 import { makeEntry, parseLog, decodePhoto } from './logbook.js';
@@ -268,6 +269,7 @@ async function handleApi(request, env) {
       projects,
       sections: site.sections,
       home: site.home,
+      protection: protectionOf(site),
       projectFiles: [...projectFiles],
       bannerFiles: [...bannerFiles],
       clients,
@@ -381,6 +383,13 @@ async function handleApi(request, env) {
           gh.listDir(CLIENT_DIR, base).catch(() => new Set()),
         ])
       : [[], new Set()];
+    // The watermark switches: only the master account may change them.
+    const withProtection = payload.protection !== undefined;
+    if (withProtection) {
+      problems.push(...validateProtection(payload.protection));
+      if (role !== MASTER && !sameProtection(site.protection, payload.protection))
+        problems.push('Only the master account can switch the watermarks on or off.');
+    }
     if (withClients) {
       problems.push(...validateClients(payload.clients, clientLogos, clientFiles));
       if (!superadmin && !sameClients(clientsBefore, payload.clients))
@@ -422,7 +431,12 @@ async function handleApi(request, env) {
       payload.home.works.filter((w) => w.image.from === 'projects').map((w) => w.image.file),
     );
 
-    const nextSite = { ...site, sections: payload.sections, home: payload.home };
+    const nextSite = {
+      ...site,
+      sections: payload.sections,
+      home: payload.home,
+      ...(withProtection ? { protection: protectionOf({ protection: payload.protection }) } : {}),
+    };
     const saveItem = logItem({
       category: 'content',
       action: 'proposed',

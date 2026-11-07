@@ -10,10 +10,15 @@
  *   holding-page hero are left clean.
  *
  * The files in src/images are never changed; only the built copies are.
+ *
+ * The mark is switched off with "protection.watermarkPhotos": false in
+ * src/data/site.json (the admin's Users tab has the switch for the master
+ * account); the size cap stays either way.
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import sharpService from 'astro/assets/services/sharp';
+import { protectionOf } from '../../worker/protection.js';
 
 export const MAX_EDGE = 2000;
 const UNMARKED = /(?:^|\/)(?:artist-|story-|hero-)[^/]*$/;
@@ -23,6 +28,7 @@ const MARGIN_SHARE = 0.025;
 let sharp;
 // The build bundles this file, so the mark is read from the project root.
 let logo;
+let markPhotos;
 const marked = new Map();
 
 const fileName = (src) =>
@@ -107,9 +113,13 @@ const service = {
       : { width: meta.width, height: meta.height };
     const transform = capped(transformOptions, source);
     const name = fileName(transformOptions.src);
-    const buffer = UNMARKED.test(name)
-      ? inputBuffer
-      : await withMark(inputBuffer, transformOptions.src);
+    markPhotos ??= protectionOf(
+      JSON.parse(readFileSync(resolve(process.cwd(), 'src/data/site.json'), 'utf8')),
+    ).watermarkPhotos;
+    const buffer =
+      !markPhotos || UNMARKED.test(name)
+        ? inputBuffer
+        : await withMark(inputBuffer, transformOptions.src);
     return sharpService.transform(buffer, transform, config, logger);
   },
 };

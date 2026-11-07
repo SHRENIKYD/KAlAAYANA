@@ -28,6 +28,7 @@ import {
   applyClients,
   sameClients,
 } from '../worker/clients.js';
+import { protectionOf, validateProtection, sameProtection } from '../worker/protection.js';
 import { spawn } from 'node:child_process';
 
 const port = Number(process.argv[2] || 8788);
@@ -112,6 +113,8 @@ function materialize(dir, payload, uploads, banners, projectFiles) {
     sections: payload.sections,
     home: payload.home,
   };
+  if (payload.protection !== undefined)
+    site.protection = protectionOf({ protection: payload.protection });
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(path.join(dir, 'images/projects'), { recursive: true });
   fs.mkdirSync(path.join(dir, 'images/sections'), { recursive: true });
@@ -208,6 +211,7 @@ http
         projects: readJson('src/data/projects.json'),
         sections: site.sections,
         home: site.home,
+        protection: protectionOf(site),
         projectFiles: [...listDir('src/images/projects')],
         bannerFiles: [...listDir('src/images/sections')],
         clients: readJson(CLIENTS_JSON),
@@ -247,6 +251,14 @@ http
         return json(res, { error: e.message }, 400);
       }
       const problems = validate({ ...payload, uploads, banners }, projectFiles, bannerFiles);
+      if (payload.protection !== undefined) {
+        problems.push(...validateProtection(payload.protection));
+        if (
+          roleOf(users(), signedIn(req)) !== MASTER &&
+          !sameProtection(readJson('src/data/site.json').protection, payload.protection)
+        )
+          problems.push('Only the master account can switch the watermarks on or off.');
+      }
       const clientFiles = new Set(fs.existsSync(CLIENT_DIR) ? fs.readdirSync(CLIENT_DIR) : []);
       const withClients = Array.isArray(payload.clients);
       if (withClients) {

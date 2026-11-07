@@ -1,5 +1,6 @@
 import test from 'node:test';
 import { validateClients, applyClients, sameClients } from '../worker/clients.js';
+import { protectionOf, validateProtection, sameProtection } from '../worker/protection.js';
 import assert from 'node:assert/strict';
 import {
   validate,
@@ -691,4 +692,20 @@ test('clients: names, logos and removed logo files', () => {
     ),
   );
   assert.ok(!sameClients(before, before.slice(0, 1)));
+});
+
+test('watermark switches: default on, booleans only, compared by value', () => {
+  assert.deepEqual(protectionOf({}), { watermarkPhotos: true, watermarkAdmin: true });
+  assert.deepEqual(protectionOf({ protection: { watermarkPhotos: false } }), {
+    watermarkPhotos: false,
+    watermarkAdmin: true,
+  });
+  assert.deepEqual(validateProtection({ watermarkPhotos: false, watermarkAdmin: true }), []);
+  assert.match(validateProtection({ watermarkPhotos: 'no', watermarkAdmin: true })[0], /on or off/);
+  assert.match(
+    validateProtection({ watermarkPhotos: true, watermarkAdmin: true, x: 1 })[0],
+    /Unknown/,
+  );
+  assert.ok(sameProtection(undefined, { watermarkPhotos: true, watermarkAdmin: true }));
+  assert.ok(!sameProtection(undefined, { watermarkPhotos: false, watermarkAdmin: true }));
 });

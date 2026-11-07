@@ -190,3 +190,21 @@ the last `develop` commit that carried it and published as a pre-release (not
 Latest), from its changelog section. Bump `VERSION` and write the changelog in
 the PR that should become the release. If the tag already
 exists the release step is skipped, so re-running is safe.
+
+## Watermarks
+
+Project, collectables and section photographs carry the studio mark, and the
+admin shows the signed-in editor's name across its pages. Both are switches in
+`src/data/site.json`:
+
+```json
+"protection": { "watermarkPhotos": true, "watermarkAdmin": true }
+```
+
+To turn either off, the master account opens the admin's Users tab, unticks it
+under **Watermarks**, and publishes (Preview & publish, then Accept). The same
+change can be made in the file through a pull request. Turning the photo mark
+off makes the build clear its image cache and rebuild every photograph without
+it; the files in `src/images` are never changed. The 2000 px size cap
+(`src/lib/image-service.mjs`, `scripts/cap-images.mjs`) and the blocked
+save/drag on photographs (`public/motion/protect.*`) are separate and stay on.

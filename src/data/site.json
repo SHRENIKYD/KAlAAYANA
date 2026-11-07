@@ -255,5 +255,9 @@
   },
   "analytics": {
     "cloudflareBeaconToken": "004d62eb1e864dd5a734cde37dc21400"
+  },
+  "protection": {
+    "watermarkPhotos": true,
+    "watermarkAdmin": true
   }
 }
