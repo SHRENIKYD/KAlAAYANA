@@ -1756,10 +1756,41 @@
     return zone;
   }
 
+  // The site never serves a photograph larger than 2000 px on its long edge,
+  // so a bigger one is scaled down here, in the same format, before upload.
+  const UPLOAD_EDGE = 2000;
+  async function shrink(file) {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = reject;
+        i.src = url;
+      });
+      const long = Math.max(img.naturalWidth, img.naturalHeight);
+      if (long <= UPLOAD_EDGE) return file;
+      const scale = UPLOAD_EDGE / long;
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * scale);
+      c.height = Math.round(img.naturalHeight * scale);
+      const g = c.getContext('2d');
+      g.imageSmoothingQuality = 'high';
+      g.drawImage(img, 0, 0, c.width, c.height);
+      const type = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+      const blob = await new Promise((resolve) => c.toBlob(resolve, type, 0.92));
+      return blob && blob.size < file.size ? blob : file;
+    } catch {
+      return file;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
   async function stageUpload(file, name, store) {
-    const b64 = await readFile(file);
-    store[name] = b64;
-    state.previews[name] = URL.createObjectURL(file);
+    const ready = await shrink(file);
+    store[name] = await readFile(ready);
+    state.previews[name] = URL.createObjectURL(ready);
   }
   const nextImageName = (slug, ext) => {
     const taken = new Set([

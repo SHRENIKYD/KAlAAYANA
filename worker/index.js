@@ -77,9 +77,14 @@ async function usersOf(gh, base, env) {
 function decodeUploads(map) {
   const out = {};
   for (const [file, b64] of Object.entries(map || {})) {
-    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-    if (bytes.length > MAX_IMAGE_BYTES) throw new Error(`${file} is larger than 20 MB`);
-    const type = imageType(bytes);
+    // Size and type from the base64 text itself: decoding every byte of a
+    // large photograph costs more CPU time than a request is allowed.
+    if (typeof b64 !== 'string' || !/^[A-Za-z0-9+/]*={0,2}$/.test(b64) || b64.length % 4)
+      throw new Error(`${file} is not a valid image upload`);
+    const size = (b64.length / 4) * 3 - (b64.endsWith('==') ? 2 : b64.endsWith('=') ? 1 : 0);
+    if (size > MAX_IMAGE_BYTES) throw new Error(`${file} is larger than 20 MB`);
+    const head = Uint8Array.from(atob(b64.slice(0, 16)), (c) => c.charCodeAt(0));
+    const type = imageType(head);
     if (!type || !file.endsWith('.' + type))
       throw new Error(`${file} is not a ${file.split('.').pop()} image`);
     out[file] = b64;
