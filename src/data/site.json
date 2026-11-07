@@ -257,10 +257,10 @@
     "cloudflareBeaconToken": "004d62eb1e864dd5a734cde37dc21400"
   },
   "features": {
-    "watermarkPhotos": true,
-    "watermarkAdmin": true,
-    "blockPhotoSaving": true,
-    "blankOnScreenshot": true,
+    "watermarkPhotos": false,
+    "watermarkAdmin": false,
+    "blockPhotoSaving": false,
+    "blankOnScreenshot": false,
     "loadingSkeletons": true
   }
 }
