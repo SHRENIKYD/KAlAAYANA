@@ -1,6 +1,6 @@
 import test from 'node:test';
 import { validateClients, applyClients, sameClients } from '../worker/clients.js';
-import { protectionOf, validateProtection, sameProtection } from '../worker/protection.js';
+import { featuresOf, validateFeatures, sameFeatures, FEATURES } from '../worker/features.js';
 import assert from 'node:assert/strict';
 import {
   validate,
@@ -694,18 +694,14 @@ test('clients: names, logos and removed logo files', () => {
   assert.ok(!sameClients(before, before.slice(0, 1)));
 });
 
-test('watermark switches: default on, booleans only, compared by value', () => {
-  assert.deepEqual(protectionOf({}), { watermarkPhotos: true, watermarkAdmin: true });
-  assert.deepEqual(protectionOf({ protection: { watermarkPhotos: false } }), {
-    watermarkPhotos: false,
-    watermarkAdmin: true,
-  });
-  assert.deepEqual(validateProtection({ watermarkPhotos: false, watermarkAdmin: true }), []);
-  assert.match(validateProtection({ watermarkPhotos: 'no', watermarkAdmin: true })[0], /on or off/);
-  assert.match(
-    validateProtection({ watermarkPhotos: true, watermarkAdmin: true, x: 1 })[0],
-    /Unknown/,
-  );
-  assert.ok(sameProtection(undefined, { watermarkPhotos: true, watermarkAdmin: true }));
-  assert.ok(!sameProtection(undefined, { watermarkPhotos: false, watermarkAdmin: true }));
+test('feature flags: defaults, booleans only, known keys, compared by value', () => {
+  const all = Object.fromEntries(FEATURES.map((f) => [f.key, f.default]));
+  assert.deepEqual(featuresOf({}), all);
+  assert.equal(featuresOf({ features: { watermarkPhotos: false } }).watermarkPhotos, false);
+  assert.equal(featuresOf({ features: { watermarkPhotos: 'no' } }).watermarkPhotos, true);
+  assert.deepEqual(validateFeatures({ watermarkPhotos: false, loadingSkeletons: true }), []);
+  assert.match(validateFeatures({ watermarkPhotos: 'no' })[0], /on or off/);
+  assert.match(validateFeatures({ somethingElse: true })[0], /Unknown feature flag/);
+  assert.ok(sameFeatures(undefined, all));
+  assert.ok(!sameFeatures(undefined, { ...all, blockPhotoSaving: false }));
 });

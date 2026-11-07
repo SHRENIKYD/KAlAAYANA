@@ -5,6 +5,7 @@
  * the approach line alone. Read, not retyped.
  */
 import site from '../data/site.json';
+import { featuresOf } from '../../worker/features.js';
 import { LIVE } from '../lib/live';
 import Seo from '../components/Seo.astro';
 import { Image } from 'astro:assets';
@@ -25,6 +26,7 @@ const tileStyle = (image: { focus?: string; fit?: string; background?: string; z
 const story = site.story.map((paragraph) =>
   paragraph.replace(/<(?!\/?(?:strong|em|b|i)\s*>)[^>]*>/gi, ''),
 );
+const features = featuresOf(site);
 ---
 
 <!doctype html>
@@ -34,12 +36,12 @@ const story = site.story.map((paragraph) =>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     {!LIVE && <meta name="robots" content="noindex,nofollow" />}
-    <script is:inline>
+    {features.loadingSkeletons && <script is:inline>
       document.documentElement.classList.add('skel-wait');
       setTimeout(function () {
         document.documentElement.classList.remove('skel-wait');
       }, 4000);
-    </script>
+    </script>}
     <meta name="description" content={site.description} />
     <title>Kalaayana Studios | Sculpture, Murals &amp; Temple Architecture in Bengaluru</title>
     <Seo
@@ -59,10 +61,18 @@ const story = site.story.map((paragraph) =>
     <link rel="stylesheet" href="/motion/contact.css" />
     <link rel="stylesheet" href="/motion/menu.css" />
     <link rel="stylesheet" href="/motion/page-spacing.css" />
-    <link rel="stylesheet" href="/motion/skeleton.css" />
-    <script src="/motion/skeleton.js" defer></script>
-    <link rel="stylesheet" href="/motion/protect.css" />
-    <script src="/motion/protect.js" defer></script>
+    {features.loadingSkeletons && (
+      <Fragment>
+        <link rel="stylesheet" href="/motion/skeleton.css" />
+        <script src="/motion/skeleton.js" defer></script>
+      </Fragment>
+    )}
+    {features.blockPhotoSaving && (
+      <Fragment>
+        <link rel="stylesheet" href="/motion/protect.css" />
+        <script src="/motion/protect.js" defer></script>
+      </Fragment>
+    )}
     {site.analytics?.cloudflareBeaconToken && (
       <script
         is:inline

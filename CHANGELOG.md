@@ -23,11 +23,12 @@ is a holding page. `1.0.0` marks the launch of the full site.
   dragged out; text, links and the keyboard behave as before.
 - The admin shows a faint repeating line with the signed-in editor's name,
   email and date, so a screenshot of it shows who took it.
-- Both watermarks have an on/off switch, kept in `src/data/site.json` under
-  `protection`. The master account flips them in the admin (Users tab,
-  Watermarks) and publishes like any other edit; switching the photo mark off
-  rebuilds every photograph without it. The size cap and the save blocking stay
-  either way.
+- Feature flags: on/off switches kept in `src/data/site.json` under
+  `features`, which the master account changes in the admin (Users tab,
+  Feature flags) and publishes like any other edit. Flags today: studio mark
+  on photographs, editor's name across the admin, blocking saving photographs,
+  and loading skeletons. Switching the photo mark off rebuilds every photograph
+  without it. The 2000 px size cap is not a flag and stays on.
 
 ## [1.2.19] - 2026-11-06
 

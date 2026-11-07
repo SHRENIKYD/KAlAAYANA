@@ -43,7 +43,7 @@
       b: Object.keys(state.banners),
       c: state.bannerCopies,
       cl: state.clients,
-      pr: state.protection,
+      ff: state.features,
       cu: Object.keys(state.clientLogos || {}),
     });
   const slugify = (s) =>
@@ -1572,24 +1572,25 @@
       ),
       el('h2', { class: 'invite-heading' }, 'Invite someone'),
       form,
-      state.canSetPhoto ? watermarkSettings() : null,
+      state.canSetPhoto ? featureFlags() : null,
     );
     renderSections();
   }
 
-  /* Master only: the two watermark switches, saved like any other edit
-     (Preview & publish, then Accept), so turning them off is one change. */
-  function watermarkSettings() {
-    const row = (key, label, hint) => {
-      const box = el('input', { type: 'checkbox', id: `wm-${key}` });
-      box.checked = state.protection[key] !== false;
+  /* Master only: the feature flags, each an on/off switch saved like any
+     other edit (Preview & publish, then Accept). The list comes from the
+     server, so a new flag needs no change here. */
+  function featureFlags() {
+    const row = ({ key, label, hint }) => {
+      const box = el('input', { type: 'checkbox', id: `ff-${key}` });
+      box.checked = state.features[key] !== false;
       box.addEventListener('change', () => {
-        state.protection = { ...state.protection, [key]: box.checked };
+        state.features = { ...state.features, [key]: box.checked };
         markDirty();
       });
       return el(
         'label',
-        { class: 'wm-row', for: `wm-${key}` },
+        { class: 'wm-row', for: `ff-${key}` },
         box,
         el('span', {}, el('b', {}, label), el('small', { class: 'muted' }, hint)),
       );
@@ -1597,22 +1598,13 @@
     return el(
       'section',
       { class: 'wm-settings' },
-      el('h2', { class: 'invite-heading' }, 'Watermarks'),
+      el('h2', { class: 'invite-heading' }, 'Feature flags'),
       el(
         'p',
         { class: 'muted' },
-        'Switch either off and publish to remove it. The photographs on the site are rebuilt without the mark; nothing in the original files changes.',
+        'Switch a feature off or on, then publish. The site is rebuilt with the change; the original photographs are never altered, so anything switched off comes back by switching it on again.',
       ),
-      row(
-        'watermarkPhotos',
-        'Studio mark on photographs',
-        'The faint logo in the corner of project, collectables and section photographs on the site.',
-      ),
-      row(
-        'watermarkAdmin',
-        'Editor name across the admin',
-        "The faint repeating line with the signed-in editor's name, email and date.",
-      ),
+      ...state.featureList.map(row),
     );
   }
 
@@ -3267,7 +3259,7 @@
       banners: state.banners,
       bannerCopies: state.bannerCopies,
       clients: state.clients,
-      protection: state.protection,
+      features: state.features,
       clientLogos: Object.fromEntries(
         Object.entries(state.clientLogos).filter(([f]) =>
           state.clients.some((c) => c.logo === `/assets/clients/${f}`),
@@ -4091,8 +4083,9 @@
       projectFiles: new Set(data.projectFiles),
       bannerFiles: new Set(data.bannerFiles),
       clients: data.clients || [],
-      protection: { watermarkPhotos: true, watermarkAdmin: true, ...(data.protection || {}) },
-      savedProtection: { watermarkPhotos: true, watermarkAdmin: true, ...(data.protection || {}) },
+      features: { ...(data.features || {}) },
+      savedFeatures: { ...(data.features || {}) },
+      featureList: data.featureList || [],
       clientFiles: new Set(data.clientFiles || []),
       clientLogos: {},
       uploads: {},
@@ -4119,7 +4112,7 @@
     // The page is drawn behind the prompt, so the skeleton never lingers.
     if (!sessionName()) await askWhoIsHere();
     $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
-    paintWatermark(sessionName(), data.email, state.savedProtection.watermarkAdmin);
+    paintWatermark(sessionName(), data.email, state.savedFeatures.watermarkAdmin !== false);
     if (!state.demo) resumePublishing();
   }
 

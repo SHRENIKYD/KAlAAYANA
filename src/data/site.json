@@ -256,8 +256,10 @@
   "analytics": {
     "cloudflareBeaconToken": "004d62eb1e864dd5a734cde37dc21400"
   },
-  "protection": {
+  "features": {
     "watermarkPhotos": true,
-    "watermarkAdmin": true
+    "watermarkAdmin": true,
+    "blockPhotoSaving": true,
+    "loadingSkeletons": true
   }
 }

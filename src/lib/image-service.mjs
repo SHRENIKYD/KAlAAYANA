@@ -11,14 +11,14 @@
  *
  * The files in src/images are never changed; only the built copies are.
  *
- * The mark is switched off with "protection.watermarkPhotos": false in
- * src/data/site.json (the admin's Users tab has the switch for the master
- * account); the size cap stays either way.
+ * The mark follows the "watermarkPhotos" feature flag in src/data/site.json
+ * (the master account switches it in the admin's Users tab, under Feature
+ * flags); the size cap stays either way.
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import sharpService from 'astro/assets/services/sharp';
-import { protectionOf } from '../../worker/protection.js';
+import { featuresOf } from '../../worker/features.js';
 
 export const MAX_EDGE = 2000;
 const UNMARKED = /(?:^|\/)(?:artist-|story-|hero-)[^/]*$/;
@@ -113,7 +113,7 @@ const service = {
       : { width: meta.width, height: meta.height };
     const transform = capped(transformOptions, source);
     const name = fileName(transformOptions.src);
-    markPhotos ??= protectionOf(
+    markPhotos ??= featuresOf(
       JSON.parse(readFileSync(resolve(process.cwd(), 'src/data/site.json'), 'utf8')),
     ).watermarkPhotos;
     const buffer =

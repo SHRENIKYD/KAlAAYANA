@@ -191,20 +191,35 @@ Latest), from its changelog section. Bump `VERSION` and write the changelog in
 the PR that should become the release. If the tag already
 exists the release step is skipped, so re-running is safe.
 
-## Watermarks
+## Feature flags
 
-Project, collectables and section photographs carry the studio mark, and the
-admin shows the signed-in editor's name across its pages. Both are switches in
-`src/data/site.json`:
+Some features can be switched off without a code change. They are flags in
+`src/data/site.json`, defined in `worker/features.js`:
 
 ```json
-"protection": { "watermarkPhotos": true, "watermarkAdmin": true }
+"features": {
+  "watermarkPhotos": true,
+  "watermarkAdmin": true,
+  "blockPhotoSaving": true,
+  "loadingSkeletons": true
+}
 ```
 
-To turn either off, the master account opens the admin's Users tab, unticks it
-under **Watermarks**, and publishes (Preview & publish, then Accept). The same
-change can be made in the file through a pull request. Turning the photo mark
-off makes the build clear its image cache and rebuild every photograph without
-it; the files in `src/images` are never changed. The 2000 px size cap
-(`src/lib/image-service.mjs`, `scripts/cap-images.mjs`) and the blocked
-save/drag on photographs (`public/motion/protect.*`) are separate and stay on.
+| Flag               | What it controls                                                 |
+| ------------------ | ---------------------------------------------------------------- |
+| `watermarkPhotos`  | The studio mark on project, collectables and section photographs |
+| `watermarkAdmin`   | The signed-in editor's name repeated faintly across the admin    |
+| `blockPhotoSaving` | No save, long-press menu or dragging on photographs              |
+| `loadingSkeletons` | Grey placeholder shapes while a page loads                       |
+
+The master account changes them in the admin's Users tab under **Feature
+flags**, then publishes (Preview & publish, then Accept). They can also be
+changed in the file through a pull request. A missing flag counts as on.
+Switching `watermarkPhotos` off clears the build's image cache and rebuilds
+every photograph without the mark; the files in `src/images` are never
+changed. The 2000 px size cap (`src/lib/image-service.mjs`,
+`scripts/cap-images.mjs`) is not a flag.
+
+To add a flag, add an entry to `FEATURES` in `worker/features.js` (key, label,
+hint, default) and read it with `featuresOf(site)` where the feature is
+built. The admin lists it automatically.

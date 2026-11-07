@@ -28,7 +28,7 @@ import {
   applyClients,
   sameClients,
 } from '../worker/clients.js';
-import { protectionOf, validateProtection, sameProtection } from '../worker/protection.js';
+import { featuresOf, validateFeatures, sameFeatures, featureList } from '../worker/features.js';
 import { spawn } from 'node:child_process';
 
 const port = Number(process.argv[2] || 8788);
@@ -113,8 +113,7 @@ function materialize(dir, payload, uploads, banners, projectFiles) {
     sections: payload.sections,
     home: payload.home,
   };
-  if (payload.protection !== undefined)
-    site.protection = protectionOf({ protection: payload.protection });
+  if (payload.features !== undefined) site.features = featuresOf({ features: payload.features });
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(path.join(dir, 'images/projects'), { recursive: true });
   fs.mkdirSync(path.join(dir, 'images/sections'), { recursive: true });
@@ -211,7 +210,8 @@ http
         projects: readJson('src/data/projects.json'),
         sections: site.sections,
         home: site.home,
-        protection: protectionOf(site),
+        features: featuresOf(site),
+        featureList: featureList(),
         projectFiles: [...listDir('src/images/projects')],
         bannerFiles: [...listDir('src/images/sections')],
         clients: readJson(CLIENTS_JSON),
@@ -251,13 +251,13 @@ http
         return json(res, { error: e.message }, 400);
       }
       const problems = validate({ ...payload, uploads, banners }, projectFiles, bannerFiles);
-      if (payload.protection !== undefined) {
-        problems.push(...validateProtection(payload.protection));
+      if (payload.features !== undefined) {
+        problems.push(...validateFeatures(payload.features));
         if (
           roleOf(users(), signedIn(req)) !== MASTER &&
-          !sameProtection(readJson('src/data/site.json').protection, payload.protection)
+          !sameFeatures(readJson('src/data/site.json').features, payload.features)
         )
-          problems.push('Only the master account can switch the watermarks on or off.');
+          problems.push('Only the master account can change feature flags.');
       }
       const clientFiles = new Set(fs.existsSync(CLIENT_DIR) ? fs.readdirSync(CLIENT_DIR) : []);
       const withClients = Array.isArray(payload.clients);
