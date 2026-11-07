@@ -10,6 +10,12 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Fixed
+
+- The preview-building page keeps its clock and the edit it is waiting for
+  across a refresh, and says plainly when Cloudflare's build progress can't be
+  read and the preview will open at about 2:30.
+
 ## [1.2.20] - 2026-11-07
 
 ### Changed

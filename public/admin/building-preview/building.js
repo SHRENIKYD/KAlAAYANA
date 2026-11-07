@@ -26,7 +26,34 @@
   var text = document.getElementById('text');
   var line = document.getElementById('line');
   var time = document.getElementById('time');
-  var started = Date.now();
+  // What this tab is waiting for, and since when, live in its own address
+  // (#t=…&b=…&c=…&p=…), so a refresh carries on instead of starting again.
+  var saved = {};
+  location.hash
+    .replace(/^#/, '')
+    .split('&')
+    .forEach(function (pair) {
+      var kv = pair.split('=');
+      if (kv[0]) saved[kv[0]] = decodeURIComponent(kv[1] || '');
+    });
+  var started = Number(saved.t) > 0 && Number(saved.t) <= Date.now() ? Number(saved.t) : Date.now();
+  var savedJob =
+    saved.b && saved.c ? { branch: saved.b, commit: saved.c, path: saved.p || '/' } : null;
+  function remember(job) {
+    var h =
+      '#t=' +
+      started +
+      (job
+        ? '&b=' +
+          encodeURIComponent(job.branch) +
+          '&c=' +
+          encodeURIComponent(job.commit) +
+          '&p=' +
+          encodeURIComponent(job.path || '/')
+        : '');
+    if (location.hash !== h) history.replaceState(null, '', h);
+  }
+  remember(savedJob);
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   function message() {
@@ -49,6 +76,7 @@
      even if the admin tab has been paused by the browser. */
   var failed = false;
   var FALLBACK_MS = 150000;
+  var toldUnknown = false;
   function poll() {
     var job = null;
     try {
@@ -56,6 +84,10 @@
     } catch (e) {
       job = null;
     }
+    if (job && job.branch && job.commit) {
+      savedJob = { branch: job.branch, commit: job.commit, path: job.path || '/' };
+      remember(savedJob);
+    } else job = savedJob;
     if (job && job.branch && job.commit && !failed) {
       var q =
         'branch=' + encodeURIComponent(job.branch) + '&commit=' + encodeURIComponent(job.commit);
@@ -75,6 +107,12 @@
             location.replace(url);
           } else if (r.unknown && r.url && Date.now() - started >= FALLBACK_MS) {
             location.replace(r.url.replace(/\/$/, '') + (job.path || '/'));
+          } else if (r.unknown && !toldUnknown) {
+            // The build's progress can't be read (the admin's GitHub key has
+            // no Checks permission), so say when the preview will open.
+            toldUnknown = true;
+            text.textContent =
+              "Cloudflare's build progress can't be read right now, so the preview opens at about 2:30, when the build is usually done.";
           } else if (r.failed) {
             failed = true;
             text.textContent =
