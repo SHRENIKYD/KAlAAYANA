@@ -705,3 +705,21 @@ test('feature flags: defaults, booleans only, known keys, compared by value', ()
   assert.ok(sameFeatures(undefined, all));
   assert.ok(!sameFeatures(undefined, { ...all, blockPhotoSaving: false }));
 });
+
+test('admins cannot remove a photograph already on the site', () => {
+  const base = {
+    sections: {},
+    home: {},
+    projects: [{ slug: 'a', images: [{ file: 'a-1.jpg' }, { file: 'a-2.jpg' }] }],
+  };
+  const keep = {
+    sections: {},
+    home: {},
+    projects: [
+      { slug: 'a', images: [{ file: 'a-2.jpg' }, { file: 'a-1.jpg' }, { file: 'a-3.jpg' }] },
+    ],
+  };
+  assert.deepEqual(restrictForAdmin(base, keep), []);
+  const drop = { sections: {}, home: {}, projects: [{ slug: 'a', images: [{ file: 'a-1.jpg' }] }] };
+  assert.match(restrictForAdmin(base, drop)[0], /remove a photograph \(a\/a-2.jpg\)/);
+});

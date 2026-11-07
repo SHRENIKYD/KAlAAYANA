@@ -174,7 +174,9 @@ export function roleOf(users, email) {
   return users.find((u) => u.email === target)?.role || null;
 }
 
-/** What an admin (not superadmin) may change: projects added or updated, nothing else. */
+/** What an admin (not superadmin) may change: projects added or updated, nothing
+    deleted. Removing a project or a photograph already on the site is for
+    superadmins and the master account. */
 export function restrictForAdmin(base, payload) {
   const bad = [];
   const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -183,6 +185,15 @@ export function restrictForAdmin(base, payload) {
   const after = new Set((payload.projects || []).map((p) => p.slug));
   for (const p of base.projects || [])
     if (!after.has(p.slug)) bad.push(`Only a superadmin can delete a project (${p.slug})`);
+  const byslug = new Map((payload.projects || []).map((p) => [p.slug, p]));
+  for (const p of base.projects || []) {
+    const now = byslug.get(p.slug);
+    if (!now) continue;
+    const kept = new Set((now.images || []).map((i) => i.file));
+    for (const img of p.images || [])
+      if (!kept.has(img.file))
+        bad.push(`Only a superadmin can remove a photograph (${p.slug}/${img.file})`);
+  }
   if (Object.keys(payload.banners || {}).length || Object.keys(payload.bannerCopies || {}).length)
     bad.push('Only a superadmin can change a work banner');
   return bad;

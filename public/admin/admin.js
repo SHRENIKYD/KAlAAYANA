@@ -1845,20 +1845,24 @@
                     },
                     'Set as cover',
                   ),
-              el(
-                'button',
-                {
-                  class: 'btn btn-danger btn-sm',
-                  type: 'button',
-                  onclick: () => {
-                    p.images.splice(i, 1);
-                    delete state.uploads[img.file];
-                    renderImages();
-                    markDirty();
-                  },
-                },
-                'Remove',
-              ),
+              // Admins add and update; removing a photograph already on the
+              // site is for superadmins and the master account.
+              fullRights() || img.file in state.uploads
+                ? el(
+                    'button',
+                    {
+                      class: 'btn btn-danger btn-sm',
+                      type: 'button',
+                      onclick: () => {
+                        p.images.splice(i, 1);
+                        delete state.uploads[img.file];
+                        renderImages();
+                        markDirty();
+                      },
+                    },
+                    'Remove',
+                  )
+                : null,
             ),
           ),
         ),

@@ -10,6 +10,13 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+### Changed
+
+- Admins add and update projects and photographs but cannot remove a
+  photograph already on the site, as they already could not delete a project;
+  the server refuses it and the admin hides the button. Superadmins and the
+  master account are unchanged.
+
 ### Added
 
 - Screenshot deterrence. Project, collectables and section photographs carry
