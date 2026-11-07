@@ -22,16 +22,16 @@ is a holding page. `1.0.0` marks the launch of the full site.
 - Admin log on phones: each entry stacks (date and type, then who, then the
   full details, then a larger sign-in photograph) instead of squeezing into two
   columns.
+- Admins add and update projects and photographs but cannot remove a
+  photograph already on the site, as they already could not delete a project;
+  the server refuses it and the admin hides the button. Superadmins and the
+  master account are unchanged.
 
 ### Removed
 
 - 16 unused photographs in `public/motion/assets` (old hero crops, section
   pictures and a wallpaper). Nothing referenced them, but they were published
   unmarked at full size; the site's photographs come from `src/images`.
-- Admins add and update projects and photographs but cannot remove a
-  photograph already on the site, as they already could not delete a project;
-  the server refuses it and the admin hides the button. Superadmins and the
-  master account are unchanged.
 
 ### Added
 
