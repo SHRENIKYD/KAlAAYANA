@@ -43,6 +43,7 @@
       b: Object.keys(state.banners),
       c: state.bannerCopies,
       cl: state.clients,
+      ff: state.features,
       cu: Object.keys(state.clientLogos || {}),
     });
   const slugify = (s) =>
@@ -1416,7 +1417,14 @@
       'select',
       { id: 'invite-role' },
       el('option', { value: 'admin' }, 'Admin — add and update projects'),
-      el('option', { value: 'superadmin' }, 'Superadmin — everything, including users and the log'),
+      // Only the master account can give out the superadmin role.
+      state.role === 'master'
+        ? el(
+            'option',
+            { value: 'superadmin' },
+            'Superadmin — everything, including users and the log',
+          )
+        : null,
     );
     const inviteBtn = el(
       'button',
@@ -1459,7 +1467,9 @@
           el(
             'p',
             { class: 'muted' },
-            'Who can sign in to the admin, and what they may do. Admins add and update projects. Superadmins can do everything else too: works, homepage, clients, the log and users. The master account (contact@kalaayanastudios.com) is fixed, is always photographed, and alone decides who else must be photographed at sign-in.',
+            state.role === 'master'
+              ? 'Who can sign in to the admin, and what they may do. Admins add and update projects. Superadmins can also change works, the homepage and clients, see the log, and invite or remove admins. As the master account you alone give out the superadmin role, change roles and decide who must be photographed at sign-in.'
+              : 'Who can sign in to the admin, and what they may do. Admins add and update projects. As a superadmin you can invite and remove admins; roles are changed by the master account.',
           ),
           busy ? el('p', { class: 'pending-note' }, state.usersBusy) : null,
           state.usersPending ? el('p', { class: 'pending-note' }, state.usersPending) : null,
@@ -1486,18 +1496,21 @@
           {},
           ...state.users.map((u) => {
             // The master account's role is fixed, so it is shown, not offered.
+            // Only the master account changes roles, and never its own.
             const sel =
               u.email === PERMANENT_SUPERADMIN_EMAIL
                 ? el('span', { class: 'role-fixed' }, 'Master')
-                : el(
-                    'select',
-                    {},
-                    ...['admin', 'superadmin'].map((r) => {
-                      const o = el('option', { value: r }, r);
-                      if (r === u.role) o.selected = true;
-                      return o;
-                    }),
-                  );
+                : state.role !== 'master'
+                  ? el('span', {}, u.role)
+                  : el(
+                      'select',
+                      {},
+                      ...['admin', 'superadmin'].map((r) => {
+                        const o = el('option', { value: r }, r);
+                        if (r === u.role) o.selected = true;
+                        return o;
+                      }),
+                    );
             if (sel.tagName === 'SELECT') {
               sel.disabled = busy;
               sel.addEventListener('change', () =>
@@ -1547,7 +1560,10 @@
               el(
                 'td',
                 {},
-                u.email === state.email || u.email === PERMANENT_SUPERADMIN_EMAIL
+                // Master removes anyone else; a superadmin removes admins only.
+                u.email === state.email ||
+                  u.email === PERMANENT_SUPERADMIN_EMAIL ||
+                  (state.role !== 'master' && u.role !== 'admin')
                   ? null
                   : el(
                       'button',
@@ -1571,8 +1587,40 @@
       ),
       el('h2', { class: 'invite-heading' }, 'Invite someone'),
       form,
+      state.canSetPhoto ? featureFlags() : null,
     );
     renderSections();
+  }
+
+  /* Master only: the feature flags, each an on/off switch saved like any
+     other edit (Preview & publish, then Accept). The list comes from the
+     server, so a new flag needs no change here. */
+  function featureFlags() {
+    const row = ({ key, label, hint }) => {
+      const box = el('input', { type: 'checkbox', id: `ff-${key}` });
+      box.checked = state.features[key] !== false;
+      box.addEventListener('change', () => {
+        state.features = { ...state.features, [key]: box.checked };
+        markDirty();
+      });
+      return el(
+        'label',
+        { class: 'wm-row', for: `ff-${key}` },
+        box,
+        el('span', {}, el('b', {}, label), el('small', { class: 'muted' }, hint)),
+      );
+    };
+    return el(
+      'section',
+      { class: 'wm-settings' },
+      el('h2', { class: 'invite-heading' }, 'Feature flags'),
+      el(
+        'p',
+        { class: 'muted' },
+        'Switch a feature off or on, then publish. The site is rebuilt with the change; the original photographs are never altered, so anything switched off comes back by switching it on again.',
+      ),
+      ...state.featureList.map(row),
+    );
   }
 
   /* ---------- sections sidebar ---------- */ /* ---------- sections sidebar ---------- */
@@ -1812,20 +1860,24 @@
                     },
                     'Set as cover',
                   ),
-              el(
-                'button',
-                {
-                  class: 'btn btn-danger btn-sm',
-                  type: 'button',
-                  onclick: () => {
-                    p.images.splice(i, 1);
-                    delete state.uploads[img.file];
-                    renderImages();
-                    markDirty();
-                  },
-                },
-                'Remove',
-              ),
+              // Admins add and update; removing a photograph already on the
+              // site is for superadmins and the master account.
+              fullRights() || img.file in state.uploads
+                ? el(
+                    'button',
+                    {
+                      class: 'btn btn-danger btn-sm',
+                      type: 'button',
+                      onclick: () => {
+                        p.images.splice(i, 1);
+                        delete state.uploads[img.file];
+                        renderImages();
+                        markDirty();
+                      },
+                    },
+                    'Remove',
+                  )
+                : null,
             ),
           ),
         ),
@@ -3226,6 +3278,7 @@
       banners: state.banners,
       bannerCopies: state.bannerCopies,
       clients: state.clients,
+      features: state.features,
       clientLogos: Object.fromEntries(
         Object.entries(state.clientLogos).filter(([f]) =>
           state.clients.some((c) => c.logo === `/assets/clients/${f}`),
@@ -3671,6 +3724,25 @@
     }
     window.location.replace('/admin/');
   }
+  /* A faint, repeating line naming the signed-in editor across the admin,
+     so a screenshot of it shows who took it. It never takes clicks. */
+  function paintWatermark(name, email, on = true) {
+    const existing = document.getElementById('admin-watermark');
+    if (!on) {
+      if (existing) existing.remove();
+      return;
+    }
+    const label = [name, email, new Date().toISOString().slice(0, 10)].filter(Boolean).join(' · ');
+    const esc = label.replace(/[<>&"']/g, (c) => `&#${c.charCodeAt(0)};`);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="460" height="230"><text x="230" y="115" transform="rotate(-24 230 115)" text-anchor="middle" font-family="DM Sans, system-ui, sans-serif" font-size="14" fill="#1a1816" fill-opacity="0.07">${esc}</text></svg>`;
+    let mark = document.getElementById('admin-watermark');
+    if (!mark) {
+      mark = el('div', { id: 'admin-watermark', 'aria-hidden': 'true' });
+      document.body.appendChild(mark);
+    }
+    mark.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  }
+
   function startSessionClock(ends) {
     stopSessionClock();
     const out = $('#session');
@@ -4030,6 +4102,9 @@
       projectFiles: new Set(data.projectFiles),
       bannerFiles: new Set(data.bannerFiles),
       clients: data.clients || [],
+      features: { ...(data.features || {}) },
+      savedFeatures: { ...(data.features || {}) },
+      featureList: data.featureList || [],
       clientFiles: new Set(data.clientFiles || []),
       clientLogos: {},
       uploads: {},
@@ -4056,6 +4131,13 @@
     // The page is drawn behind the prompt, so the skeleton never lingers.
     if (!sessionName()) await askWhoIsHere();
     $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
+    paintWatermark(sessionName(), data.email, state.savedFeatures.watermarkAdmin !== false);
+    if (state.savedFeatures.blankOnScreenshot !== false && !document.getElementById('capture-js')) {
+      // The same blanking as the site, on the screenshot keys.
+      document.head.appendChild(
+        el('script', { id: 'capture-js', src: '/motion/capture.js', defer: '' }),
+      );
+    }
     if (!state.demo) resumePublishing();
   }
 

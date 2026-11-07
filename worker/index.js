@@ -12,6 +12,7 @@ import {
 } from './github.js';
 import { syncAccessPolicy } from './policy.js';
 import { CLIENTS_JSON, CLIENT_DIR, validateClients, applyClients, sameClients } from './clients.js';
+import { featuresOf, validateFeatures, sameFeatures, featureList } from './features.js';
 import { fetchInsights } from './insights.js';
 import { verifyAccessJwt } from './access.js';
 import { makeEntry, parseLog, decodePhoto } from './logbook.js';
@@ -222,6 +223,9 @@ async function handleApi(request, env) {
   const role = roleOf(users, email);
   if (!role) return json({ error: `${email} is not an admin`, email }, 403);
   const superadmin = hasFullRights(role);
+  // Superadmins see every editor except the master account.
+  const visibleUsers = (list) =>
+    role === MASTER ? list : list.filter((u) => u.email !== PERMANENT_SUPERADMIN);
   const name = String(request.headers.get('x-admin-name') || '')
     .replace(/[\r\n\t]+/g, ' ')
     .trim()
@@ -261,13 +265,15 @@ async function handleApi(request, env) {
       role,
       photoRequired: photoRequiredFor(users, email),
       canSetPhoto: role === MASTER,
-      users: superadmin ? users : undefined,
+      users: superadmin ? visibleUsers(users) : undefined,
       log,
       decisions,
       base,
       projects,
       sections: site.sections,
       home: site.home,
+      features: featuresOf(site),
+      featureList: featureList(),
       projectFiles: [...projectFiles],
       bannerFiles: [...bannerFiles],
       clients,
@@ -381,6 +387,13 @@ async function handleApi(request, env) {
           gh.listDir(CLIENT_DIR, base).catch(() => new Set()),
         ])
       : [[], new Set()];
+    // Feature flags: only the master account may change them.
+    const withFeatures = payload.features !== undefined;
+    if (withFeatures) {
+      problems.push(...validateFeatures(payload.features));
+      if (role !== MASTER && !sameFeatures(site.features, payload.features))
+        problems.push('Only the master account can change feature flags.');
+    }
     if (withClients) {
       problems.push(...validateClients(payload.clients, clientLogos, clientFiles));
       if (!superadmin && !sameClients(clientsBefore, payload.clients))
@@ -422,7 +435,12 @@ async function handleApi(request, env) {
       payload.home.works.filter((w) => w.image.from === 'projects').map((w) => w.image.file),
     );
 
-    const nextSite = { ...site, sections: payload.sections, home: payload.home };
+    const nextSite = {
+      ...site,
+      sections: payload.sections,
+      home: payload.home,
+      ...(withFeatures ? { features: featuresOf({ features: payload.features }) } : {}),
+    };
     const saveItem = logItem({
       category: 'content',
       action: 'proposed',
@@ -560,7 +578,7 @@ async function handleApi(request, env) {
         message: `admin: ${body.action} ${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}\n\nBy ${name ? `${name} (${email})` : email} from the content admin.`,
         author,
       });
-      return json({ users: next, access, ...r });
+      return json({ users: visibleUsers(next), access, ...r });
     } catch (e) {
       return json({ error: e.message }, 502);
     }

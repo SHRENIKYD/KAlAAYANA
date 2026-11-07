@@ -5,6 +5,7 @@
  * own body. Presentation depends on this; it depends on no page.
  */
 import site from '../data/site.json';
+import { featuresOf } from '../../worker/features.js';
 import { LIVE } from '../lib/live';
 import Seo from '../components/Seo.astro';
 import PolicyLinks from '../components/PolicyLinks.astro';
@@ -19,6 +20,7 @@ interface Props {
 }
 
 const { title, description = site.description, indexable = LIVE, fonts, bodyClass } = Astro.props;
+const features = featuresOf(site);
 ---
 
 <!doctype html>
@@ -27,12 +29,12 @@ const { title, description = site.description, indexable = LIVE, fonts, bodyClas
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
-    <script is:inline>
+    {features.loadingSkeletons && <script is:inline>
       document.documentElement.classList.add('skel-wait');
       setTimeout(function () {
         document.documentElement.classList.remove('skel-wait');
       }, 4000);
-    </script>
+    </script>}
     <meta name="description" content={description} />
     {!indexable && <meta name="robots" content="noindex, nofollow" />}
     <Seo {title} {description} />
@@ -42,8 +44,19 @@ const { title, description = site.description, indexable = LIVE, fonts, bodyClas
     <link href={fonts} rel="stylesheet" />
     <slot name="head" />
     <link rel="stylesheet" href="/motion/page-spacing.css" />
-    <link rel="stylesheet" href="/motion/skeleton.css" />
-    <script src="/motion/skeleton.js" defer></script>
+    {features.loadingSkeletons && (
+      <Fragment>
+        <link rel="stylesheet" href="/motion/skeleton.css" />
+        <script src="/motion/skeleton.js" defer></script>
+      </Fragment>
+    )}
+    {features.blockPhotoSaving && (
+      <Fragment>
+        <link rel="stylesheet" href="/motion/protect.css" />
+        <script src="/motion/protect.js" defer></script>
+      </Fragment>
+    )}
+    {features.blankOnScreenshot && <script src="/motion/capture.js" defer></script>}
     {site.analytics?.cloudflareBeaconToken && (
       <script
         is:inline

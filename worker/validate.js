@@ -174,7 +174,9 @@ export function roleOf(users, email) {
   return users.find((u) => u.email === target)?.role || null;
 }
 
-/** What an admin (not superadmin) may change: projects added or updated, nothing else. */
+/** What an admin (not superadmin) may change: projects added or updated, nothing
+    deleted. Removing a project or a photograph already on the site is for
+    superadmins and the master account. */
 export function restrictForAdmin(base, payload) {
   const bad = [];
   const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -183,6 +185,15 @@ export function restrictForAdmin(base, payload) {
   const after = new Set((payload.projects || []).map((p) => p.slug));
   for (const p of base.projects || [])
     if (!after.has(p.slug)) bad.push(`Only a superadmin can delete a project (${p.slug})`);
+  const byslug = new Map((payload.projects || []).map((p) => [p.slug, p]));
+  for (const p of base.projects || []) {
+    const now = byslug.get(p.slug);
+    if (!now) continue;
+    const kept = new Set((now.images || []).map((i) => i.file));
+    for (const img of p.images || [])
+      if (!kept.has(img.file))
+        bad.push(`Only a superadmin can remove a photograph (${p.slug}/${img.file})`);
+  }
   if (Object.keys(payload.banners || {}).length || Object.keys(payload.bannerCopies || {}).length)
     bad.push('Only a superadmin can change a work banner');
   return bad;
@@ -218,6 +229,22 @@ export function applyUserChange(users, { action, email, role, photo }, by) {
   }
   if (target === PERMANENT_SUPERADMIN && action !== 'invite')
     throw new Error(`${PERMANENT_SUPERADMIN} is the master account and cannot be changed`);
+  // Everyone manages only the people below them. The master account invites
+  // superadmins or admins and changes roles; a superadmin invites and removes
+  // admins only, never themselves.
+  const actor = roleOf(users, by);
+  if (actor !== MASTER) {
+    if (actor !== 'superadmin') throw new Error('Only a superadmin can manage users');
+    if (action === 'invite' && role !== 'admin')
+      throw new Error('A superadmin can only invite admins');
+    if (action === 'role') throw new Error('Only the master account can change roles');
+    if (action === 'remove') {
+      if (target === String(by || '').toLowerCase())
+        throw new Error('Only the master account can remove your access');
+      if (i >= 0 && list[i].role !== 'admin')
+        throw new Error('A superadmin can only remove admins');
+    }
+  }
   if (action === 'invite') {
     if (!ROLES.includes(role)) throw new Error('Choose a role');
     if (i >= 0) throw new Error(`${target} already has access`);

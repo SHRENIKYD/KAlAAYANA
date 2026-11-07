@@ -28,9 +28,13 @@ import {
   applyClients,
   sameClients,
 } from '../worker/clients.js';
+import { featuresOf, validateFeatures, sameFeatures, featureList } from '../worker/features.js';
 import { spawn } from 'node:child_process';
 
 const port = Number(process.argv[2] || 8788);
+// Superadmins see every editor except the master account (as on staging).
+const visibleTo = (me, list) =>
+  roleOf(users(), me) === MASTER ? list : list.filter((u) => u.email !== PERMANENT_SUPERADMIN);
 const dist = path.resolve('dist');
 const out = path.resolve('.admin-demo');
 const previewRoot = path.join(out, 'preview');
@@ -112,6 +116,7 @@ function materialize(dir, payload, uploads, banners, projectFiles) {
     sections: payload.sections,
     home: payload.home,
   };
+  if (payload.features !== undefined) site.features = featuresOf({ features: payload.features });
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(path.join(dir, 'images/projects'), { recursive: true });
   fs.mkdirSync(path.join(dir, 'images/sections'), { recursive: true });
@@ -195,7 +200,7 @@ http
         role,
         photoRequired: photoRequiredFor(users(), me),
         canSetPhoto: role === MASTER,
-        users: superadmin ? users() : undefined,
+        users: superadmin ? visibleTo(me, users()) : undefined,
         log:
           superadmin && fs.existsSync('logs/admin-log.jsonl')
             ? parseLog(fs.readFileSync('logs/admin-log.jsonl', 'utf8'))
@@ -208,6 +213,8 @@ http
         projects: readJson('src/data/projects.json'),
         sections: site.sections,
         home: site.home,
+        features: featuresOf(site),
+        featureList: featureList(),
         projectFiles: [...listDir('src/images/projects')],
         bannerFiles: [...listDir('src/images/sections')],
         clients: readJson(CLIENTS_JSON),
@@ -247,6 +254,14 @@ http
         return json(res, { error: e.message }, 400);
       }
       const problems = validate({ ...payload, uploads, banners }, projectFiles, bannerFiles);
+      if (payload.features !== undefined) {
+        problems.push(...validateFeatures(payload.features));
+        if (
+          roleOf(users(), signedIn(req)) !== MASTER &&
+          !sameFeatures(readJson('src/data/site.json').features, payload.features)
+        )
+          problems.push('Only the master account can change feature flags.');
+      }
       const clientFiles = new Set(fs.existsSync(CLIENT_DIR) ? fs.readdirSync(CLIENT_DIR) : []);
       const withClients = Array.isArray(payload.clients);
       if (withClients) {
@@ -417,7 +432,7 @@ http
           details: `${String(body.email).toLowerCase()}${body.role ? ` as ${body.role}` : ''}${body.photo ? ` · photograph ${body.photo}` : ''}`,
         }),
       ]);
-      return json(res, { users: next });
+      return json(res, { users: visibleTo(me, next) });
     }
     if (req.method === 'POST' && url.pathname === '/admin/api/session') {
       let raw = '';

@@ -10,6 +10,53 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.20] - 2026-11-07
+
+### Changed
+
+- Users: everyone manages only the people below them. The master account
+  invites superadmins or admins, changes roles and removes anyone else. A
+  superadmin invites and removes admins only, cannot change roles or remove
+  themselves, and does not see the master account in the list. The server
+  enforces all of it.
+- Admin log on phones: each entry stacks (date and type, then who, then the
+  full details, then a larger sign-in photograph) instead of squeezing into two
+  columns.
+
+### Removed
+
+- 16 unused photographs in `public/motion/assets` (old hero crops, section
+  pictures and a wallpaper). Nothing referenced them, but they were published
+  unmarked at full size; the site's photographs come from `src/images`.
+- Admins add and update projects and photographs but cannot remove a
+  photograph already on the site, as they already could not delete a project;
+  the server refuses it and the admin hides the button. Superadmins and the
+  master account are unchanged.
+
+### Added
+
+- Screenshot deterrence. Project, collectables and section photographs carry
+  a faint studio mark in the bottom-right corner, added at build time to every
+  size and format; artist portraits, story images and the holding-page hero
+  are left clean. Every served photograph is capped at 2000 px on its long
+  edge (some were served at full size, up to 5712 px), and a build step
+  removes unreferenced originals and fails if a served image exceeds the cap.
+  The files in `src/images` are unchanged.
+- Photographs can't be saved from the right-click or long-press menu or
+  dragged out; text, links and the keyboard behave as before.
+- On computers, the site and the admin go blank when the screenshot keys are
+  pressed (Print Screen, Win+Shift+S, Cmd+Shift+3/4/5), and Print Screen's
+  copied picture is cleared. Phones, tablets and screenshot tools started
+  another way cannot be detected by a web page.
+- The admin shows a faint repeating line with the signed-in editor's name,
+  email and date, so a screenshot of it shows who took it.
+- Feature flags: on/off switches kept in `src/data/site.json` under
+  `features`, which the master account changes in the admin (Users tab,
+  Feature flags) and publishes like any other edit. Flags today: studio mark
+  on photographs, editor's name across the admin, blocking saving photographs,
+  blanking the screen on screenshot keys, and loading skeletons. Switching the photo mark off rebuilds every photograph
+  without it. The 2000 px size cap is not a flag and stays on.
+
 ## [1.2.19] - 2026-11-06
 
 ### Changed
