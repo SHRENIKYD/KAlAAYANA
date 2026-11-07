@@ -21,13 +21,17 @@ is a holding page. `1.0.0` marks the launch of the full site.
   The files in `src/images` are unchanged.
 - Photographs can't be saved from the right-click or long-press menu or
   dragged out; text, links and the keyboard behave as before.
+- On computers, the site and the admin go blank when the screenshot keys are
+  pressed (Print Screen, Win+Shift+S, Cmd+Shift+3/4/5), and Print Screen's
+  copied picture is cleared. Phones, tablets and screenshot tools started
+  another way cannot be detected by a web page.
 - The admin shows a faint repeating line with the signed-in editor's name,
   email and date, so a screenshot of it shows who took it.
 - Feature flags: on/off switches kept in `src/data/site.json` under
   `features`, which the master account changes in the admin (Users tab,
   Feature flags) and publishes like any other edit. Flags today: studio mark
   on photographs, editor's name across the admin, blocking saving photographs,
-  and loading skeletons. Switching the photo mark off rebuilds every photograph
+  blanking the screen on screenshot keys, and loading skeletons. Switching the photo mark off rebuilds every photograph
   without it. The 2000 px size cap is not a flag and stays on.
 
 ## [1.2.19] - 2026-11-06

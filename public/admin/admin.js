@@ -4113,6 +4113,12 @@
     if (!sessionName()) await askWhoIsHere();
     $('#who').textContent = `${sessionName()} · ${data.email} · ${data.role || 'admin'}`;
     paintWatermark(sessionName(), data.email, state.savedFeatures.watermarkAdmin !== false);
+    if (state.savedFeatures.blankOnScreenshot !== false && !document.getElementById('capture-js')) {
+      // The same blanking as the site, on the screenshot keys.
+      document.head.appendChild(
+        el('script', { id: 'capture-js', src: '/motion/capture.js', defer: '' }),
+      );
+    }
     if (!state.demo) resumePublishing();
   }
 

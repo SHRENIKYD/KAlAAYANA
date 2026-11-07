@@ -260,6 +260,7 @@
     "watermarkPhotos": true,
     "watermarkAdmin": true,
     "blockPhotoSaving": true,
+    "blankOnScreenshot": true,
     "loadingSkeletons": true
   }
 }

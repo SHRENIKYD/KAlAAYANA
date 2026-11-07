@@ -56,6 +56,7 @@ const features = featuresOf(site);
         <script src="/motion/protect.js" defer></script>
       </Fragment>
     )}
+    {features.blankOnScreenshot && <script src="/motion/capture.js" defer></script>}
     {site.analytics?.cloudflareBeaconToken && (
       <script
         is:inline

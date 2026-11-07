@@ -201,16 +201,18 @@ Some features can be switched off without a code change. They are flags in
   "watermarkPhotos": true,
   "watermarkAdmin": true,
   "blockPhotoSaving": true,
+  "blankOnScreenshot": true,
   "loadingSkeletons": true
 }
 ```
 
-| Flag               | What it controls                                                 |
-| ------------------ | ---------------------------------------------------------------- |
-| `watermarkPhotos`  | The studio mark on project, collectables and section photographs |
-| `watermarkAdmin`   | The signed-in editor's name repeated faintly across the admin    |
-| `blockPhotoSaving` | No save, long-press menu or dragging on photographs              |
-| `loadingSkeletons` | Grey placeholder shapes while a page loads                       |
+| Flag                | What it controls                                                         |
+| ------------------- | ------------------------------------------------------------------------ |
+| `watermarkPhotos`   | The studio mark on project, collectables and section photographs         |
+| `watermarkAdmin`    | The signed-in editor's name repeated faintly across the admin            |
+| `blockPhotoSaving`  | No save, long-press menu or dragging on photographs                      |
+| `blankOnScreenshot` | The page goes blank on the screenshot keys on computers (site and admin) |
+| `loadingSkeletons`  | Grey placeholder shapes while a page loads                               |
 
 The master account changes them in the admin's Users tab under **Feature
 flags**, then publishes (Preview & publish, then Accept). They can also be

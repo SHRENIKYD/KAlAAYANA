@@ -22,6 +22,12 @@ export const FEATURES = [
     default: true,
   },
   {
+    key: 'blankOnScreenshot',
+    label: 'Blank the screen on screenshot keys',
+    hint: 'On computers, the page goes blank when the screenshot keys are pressed (Print Screen, Win+Shift+S, Cmd+Shift+3/4/5). Phones and tablets cannot be detected.',
+    default: true,
+  },
+  {
     key: 'loadingSkeletons',
     label: 'Loading skeletons',
     hint: 'Grey placeholder shapes while a page loads, in place of the text and photographs.',
