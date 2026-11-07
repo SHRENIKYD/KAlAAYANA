@@ -156,6 +156,15 @@
       "bannerAlt": "Sculpture",
       "href": "/sculpture/",
       "bannerFocus": "50% 50%"
+    },
+    "test": {
+      "eyebrow": "Test",
+      "title": "Test",
+      "lede": "Test",
+      "banner": "test.png",
+      "bannerAlt": "Test",
+      "href": "/test/",
+      "bannerFocus": "50% 50%"
     }
   },
   "story": [
@@ -270,6 +279,19 @@
           "from": "sections",
           "file": "sculpture.png",
           "alt": "Sculpture",
+          "focus": "50% 50%"
+        }
+      },
+      {
+        "section": "test",
+        "href": "/test/",
+        "eyebrow": "Test",
+        "title": "Test",
+        "link": "Discover collection",
+        "image": {
+          "from": "sections",
+          "file": "test.png",
+          "alt": "Test",
           "focus": "50% 50%"
         }
       }
