@@ -17,10 +17,6 @@ is a holding page. `1.0.0` marks the launch of the full site.
   read and the preview will open at about 2:30.
 - A section banner uploaded as a PNG no longer breaks the build and preview;
   banners, like project photographs, can now be JPG or PNG.
-- Saving edits with large phone photographs no longer fails with HTTP 503:
-  the admin scales photographs down to the 2000 px the site serves before
-  uploading, and the Worker checks an upload's size and type without decoding
-  the whole file.
 
 ## [1.2.20] - 2026-11-07
 
