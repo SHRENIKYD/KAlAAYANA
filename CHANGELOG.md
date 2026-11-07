@@ -10,6 +10,8 @@ is a holding page. `1.0.0` marks the launch of the full site.
 
 ## [Unreleased]
 
+## [1.2.20] - 2026-11-07
+
 ### Changed
 
 - Users: everyone manages only the people below them. The master account
