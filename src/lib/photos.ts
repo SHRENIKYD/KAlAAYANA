@@ -17,7 +17,7 @@ export function photo(file: string): ImageMetadata {
   return found.default;
 }
 
-const banners = import.meta.glob<{ default: ImageMetadata }>('../images/sections/*.jpg', {
+const banners = import.meta.glob<{ default: ImageMetadata }>('../images/sections/*.{jpg,png}', {
   eager: true,
 });
 
